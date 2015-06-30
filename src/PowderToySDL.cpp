@@ -1,5 +1,6 @@
 #ifdef USE_SDL
 
+#include "Config.h"
 #include <map>
 #include <string>
 #include <time.h>
@@ -728,7 +729,7 @@ void BlueScreen(const char * detailMessage){
 	std::string errorTitle = "ERROR";
 	std::string errorDetails = "Details: " + std::string(detailMessage);
 	std::string errorHelp = "An unrecoverable fault has occured, please report the error by visiting the website below\n"
-		"http://" SERVER;
+		"http://", SERVER;
 	int currentY = 0, width, height;
 	int errorWidth = 0;
 	Graphics::textsize(errorHelp.c_str(), errorWidth, height);

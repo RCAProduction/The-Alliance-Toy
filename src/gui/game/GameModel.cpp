@@ -328,6 +328,11 @@ void GameModel::BuildMenus()
 	menuList[SC_TOOL]->AddTool(new PropertyTool());
 	menuList[SC_TOOL]->AddTool(new SignTool(this));
 	menuList[SC_TOOL]->AddTool(new SampleTool(this));
+	
+	//Add SC_STAT tools
+	menuList[SC_STAT]->AddTool(new FpsgTool(1, "FPSG", "FPS Graph.", 0, 255, 0, "DEFAULT_TOOL_FPSG"));
+	menuList[SC_STAT]->AddTool(new RealTool(1, "REAL", "Realistic Mode, sets all particles to original temperature. Toggle here or with 'm' key.", 255, 170, 35, "DEFAULT_TOOL_REAL"));
+	menuList[SC_STAT]->AddTool(new InfoTool(1, "INFO", "Displays extra simulation info.", 255, 0, 255, "DEFAULT_TOOL_INFO"));
 
 	//Add decoration tools to menu
 	menuList[SC_DECO]->AddTool(new DecorationTool(DECO_ADD, "ADD", "Colour blending: Add.", 0, 0, 0, "DEFAULT_DECOR_ADD"));
@@ -825,6 +830,11 @@ void GameModel::SetPaused(bool pauseState)
 	sim->sys_pause = pauseState?1:0;
 	notifyPausedChanged();
 }
+
+/*bool GameModel::GetFPSG()
+{
+	return FPSGvar;
+}*/
 
 bool GameModel::GetPaused()
 {

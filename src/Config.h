@@ -28,7 +28,7 @@
 #endif
 //VersionInfoEnd
 
-//#define IGNORE_UPDATES //uncomment this for mods, to not get any update notifications
+#define IGNORE_UPDATES //uncomment this for mods, to not get any update notifications
 
 #define HIGH_QUALITY_RESAMPLE			//High quality image resampling, slower but much higher quality than my terribad linear interpolation
 
@@ -71,9 +71,14 @@
 #define MTOS_EXPAND(str) #str
 #define MTOS(str) MTOS_EXPAND(str)
 
-#define SERVER "powdertoy.co.uk"
+/*if(SERV1==true)
+{
+std::string SERVER = "powdertoy.co.uk"
+std::string SCRIPTSERVER = "powdertoy.co.uk"
+std::string STATICSERVER = "static.powdertoy.co.uk"
+}*/
+
 #define SCRIPTSERVER "powdertoy.co.uk"
-#define STATICSERVER "static.powdertoy.co.uk"
 
 #define LOCAL_SAVE_DIR "Saves"
 
@@ -99,12 +104,15 @@
 #define BARSIZE 0
 #else
 #define MENUSIZE 40
-#define BARSIZE 17
+#define BARSIZE 35
 #endif
+
+//612 and 384
 #define XRES	612
 #define YRES	384
 #define NPART XRES*YRES
 
+//306 and 192
 #define XCNTR   306
 #define YCNTR   192
 
@@ -183,3 +191,8 @@
 //#define REALHEAT
 
 #endif /* CONFIG_H */
+
+#include <string>
+
+extern std::string SERVER;
+extern std::string STATICSERVER;

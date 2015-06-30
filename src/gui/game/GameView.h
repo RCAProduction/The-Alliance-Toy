@@ -92,6 +92,7 @@ private:
 	ui::Button * simulationOptionButton;
 	ui::Button * displayModeButton;
 	ui::Button * pauseButton;
+	ui::Button * serverButton;
 	ui::Point currentMouse;
 
 	ui::Button * colourPicker;
@@ -141,6 +142,27 @@ public:
 	bool CtrlBehaviour(){ return ctrlBehaviour; }
 	bool ShiftBehaviour(){ return shiftBehaviour; }
 	bool AltBehaviour(){ return altBehaviour; }
+
+	int count;
+	int FPS1;
+	int FPS2;
+	int FPS3;
+	int FPS4;
+	int FPS5;
+	int TESTx;
+	int RMx;
+	int RMy;
+	int RMBx;
+	int RMBy;
+	int infoX;
+	int infoY;
+	int frameCount;
+	int cctype;
+
+	bool INFOvar;
+	bool FPSGvar;
+	bool REALvar;
+
 	void ExitPrompt();
 	SelectMode GetSelectMode() { return selectMode; }
 	void BeginStampSelection();

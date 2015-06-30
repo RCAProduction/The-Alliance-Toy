@@ -101,6 +101,7 @@ ColourPickerActivity::ColourPickerActivity(ui::Colour initialColour, ColourPicke
 	currentAlpha = initialColour.Alpha;
 	UpdateTextboxes(initialColour.Red, initialColour.Green, initialColour.Blue, initialColour.Alpha);
 }
+//int hudr = format::StringToNumber<int>(a->rValue->GetText());
 
 void ColourPickerActivity::UpdateTextboxes(int r, int g, int b, int a)
 {

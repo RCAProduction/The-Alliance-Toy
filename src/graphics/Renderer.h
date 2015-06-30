@@ -11,6 +11,7 @@
 #include "Graphics.h"
 #include "gui/interface/Point.h"
 #include "gui/game/RenderPreset.h"
+//#include "gui/game/GameView.h"
 
 class Simulation;
 

@@ -463,8 +463,8 @@ void GameSave::readOPS(char * data, int dataLength)
 		throw ParseException(ParseException::InvalidDimensions, "Incorrect CELL size");
 
 	//Too large/off screen
-	if(blockX+blockW > XRES/CELL || blockY+blockH > YRES/CELL)
-		throw ParseException(ParseException::InvalidDimensions, "Save too large");
+	//if(blockX+blockW > XRES/CELL || blockY+blockH > YRES/CELL)
+	//	throw ParseException(ParseException::InvalidDimensions, "Save too large");
 
 	setSize(blockW, blockH);
 
@@ -475,8 +475,8 @@ void GameSave::readOPS(char * data, int dataLength)
 	
 	//Check for overflows, don't load saves larger than 200MB
 	unsigned int toAlloc = bsonDataLen+1;
-	if(toAlloc > 209715200 || !toAlloc)
-		throw ParseException(ParseException::InvalidDimensions, "Save data too large, refusing");
+	//if(toAlloc > 209715200 || !toAlloc)
+	//	throw ParseException(ParseException::InvalidDimensions, "Save data too large, refusing");
 		
 	bsonData = (unsigned char*)malloc(toAlloc);
 	if(!bsonData)
@@ -1150,15 +1150,15 @@ void GameSave::readPSv(char * data, int dataLength)
 	if (by0 < 0)
 		by0 = 0;
 
-	if (c[5]!=CELL || bx0+bw>XRES/CELL || by0+bh>YRES/CELL)
-		throw ParseException(ParseException::InvalidDimensions, "Save too large");
+	//if (c[5]!=CELL || bx0+bw>XRES/CELL || by0+bh>YRES/CELL)
+	//	throw ParseException(ParseException::InvalidDimensions, "Save too large");
 	i = (unsigned)c[8];
 	i |= ((unsigned)c[9])<<8;
 	i |= ((unsigned)c[10])<<16;
 	i |= ((unsigned)c[11])<<24;
 	
-	if(i > 209715200 || !i)
-		throw ParseException(ParseException::InvalidDimensions, "Save data too large");
+	//if(i > 209715200 || !i)
+	//	throw ParseException(ParseException::InvalidDimensions, "Save data too large");
 	
 	d = (unsigned char *)malloc(i);
 	if (!d)

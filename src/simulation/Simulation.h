@@ -11,6 +11,14 @@
 #include "Particle.h"
 #include "Stickman.h"
 #include "WallType.h"
+
+#include "Config.h"
+#include "Elements.h"
+#include "SimulationData.h"
+#include "Sign.h"
+#include "Particle.h"
+#include "Stickman.h"
+#include "WallType.h"
 #include "GOLMenu.h"
 #include "MenuSection.h"
 #include "elements/Element.h"
@@ -33,6 +41,11 @@ class GameSave;
 class Simulation
 {
 public:
+
+	bool REALvar;
+	int count;
+
+	bool getSim;
 
 	Gravity * grav;
 	Air * air;

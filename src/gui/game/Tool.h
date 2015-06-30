@@ -178,4 +178,25 @@ public:
 	virtual void DrawFill(Simulation * sim, Brush * brush, ui::Point position);
 };
 
+class FpsgTool: public Tool
+{
+public:
+	FpsgTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL);
+
+};
+
+class RealTool: public Tool
+{
+public:
+	RealTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL);
+
+};
+
+class InfoTool: public Tool
+{
+public:
+	InfoTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL);
+
+};
+
 #endif /* TOOL_H_ */

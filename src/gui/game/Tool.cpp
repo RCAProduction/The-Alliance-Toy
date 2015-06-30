@@ -110,6 +110,21 @@ void WallTool::DrawFill(Simulation * sim, Brush * brush, ui::Point position) {
 		sim->FloodWalls(position.X, position.Y, toolID, -1);
 }
 
+FpsgTool::FpsgTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int)):
+	Tool(id, name, description, r, g, b, identifier, textureGen)
+{
+}
+
+RealTool::RealTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int)):
+	Tool(id, name, description, r, g, b, identifier, textureGen)
+{
+}
+
+InfoTool::InfoTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int)):
+	Tool(id, name, description, r, g, b, identifier, textureGen)
+{
+}
+
 WindTool::WindTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int)):
 	Tool(id, name, description, r, g, b, identifier, textureGen)
 {

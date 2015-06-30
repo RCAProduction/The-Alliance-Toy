@@ -1,5 +1,10 @@
 #include <sstream>
 #include <iomanip>
+#include <ctime>
+#include <stdio.h>      /* printf */
+#include <time.h>       /* time_t, struct tm, time, localtime, asctime */
+
+#include "graphics/Renderer.h"
 
 #include "Config.h"
 #include "gui/Style.h"
@@ -18,7 +23,8 @@
 #include "QuickOptions.h"
 #include "IntroText.h"
 #include "DecorationTool.h"
-
+#include "gui/colourpicker/ColourPickerActivity.h"
+#include "simulation/Simulation.h"
 
 class SplitButton;
 class SplitButtonAction
@@ -151,7 +157,10 @@ GameView::GameView():
 	ui::Window(ui::Point(0, 0), ui::Point(WINDOWW, WINDOWH)),
 	pointQueue(queue<ui::Point>()),
 	isMouseDown(false),
+	FPSGvar(false),
+	INFOvar(false),
 	ren(NULL),
+
 	activeBrush(NULL),
 	currentMouse(0, 0),
 	toolIndex(0),
@@ -195,7 +204,12 @@ GameView::GameView():
 	lastLogEntry(0.0f),
 	lastMenu(-1)
 {
-
+	FPS1=60;
+	FPS2=60;
+	FPS3=60;
+	FPS4=60;
+	FPS5=60;
+	frameCount = 0;
 	int currentX = 1;
 	//Set up UI
 	class SearchAction : public ui::ButtonAction
@@ -421,6 +435,22 @@ GameView::GameView():
 			v->c->OpenElementSearch();
 		}
 	};
+	
+	
+		class ServerAction : public ui::ButtonAction
+	{
+		//GameView * v;
+	public:
+		ServerAction(/*GameView * _v*/); //{ v = _v; }
+		void ActionCallback(ui::Button * sender)
+		{
+
+		}
+	};
+		serverButton = new ui::Button(ui::Point(Size.X-177, Size.Y-16), ui::Point(17, 15), "S", "Switch Servers");
+	serverButton->SetTogglable(true); 
+	AddComponent(serverButton);
+	
 	ui::Button * tempButton = new ui::Button(ui::Point(WINDOWW-16, WINDOWH-32), ui::Point(15, 15), "\xE5", "Search for elements");
 	tempButton->Appearance.Margin = ui::Border(0, 2, 3, 2);
 	tempButton->SetActionCallback(new ElementSearchAction(this));
@@ -1028,7 +1058,7 @@ void GameView::setToolButtonOffset(int offset)
 	{
 		ToolButton * button = *iter;
 		button->Position.X -= offset;
-		if(button->Position.X <= 0 || (button->Position.X+button->Size.X) > XRES-2) {
+		if(button->Position.X <= 0 || (button->Position.X+button->Size.X) > XRES+19) {
 			button->Visible = false;
 		} else {
 			button->Visible = true;
@@ -1513,6 +1543,9 @@ void GameView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		break;
 	case KEY_DELETE:
 		c->SetReplaceModeFlags(c->GetReplaceModeFlags()^SPECIFIC_DELETE);
+		break;
+	case 'm':
+		c->GetSimulation()->REALvar = !c->GetSimulation()->REALvar;
 		break;
 	}
 
@@ -2084,172 +2117,300 @@ void GameView::OnDraw()
 		g->fillrect(XRES-20-textWidth, 12, textWidth+8, 15, 0, 0, 0, 255*0.5);
 		g->drawtext(XRES-16-textWidth, 16, (const char*)sampleInfo.str().c_str(), 255, 50, 20, 255);
 	}
-	else if(showHud)
+	else if(showHud && introText < 51)
 	{
-		//Draw info about simulation under cursor
+
+//FPS Graph
+/*std::stringstream FPSstuff;
+FPSstuff << FPS1 << " " << FPS2 << " " << FPS3 << " " << FPS4 << " " << FPS5 << " " << ;
+g->drawtext(50, 50, FPSstuff.str(), 0, 255, 255, 255);*/
+
+int hudx = 612; //Set as the max X value for the screen (Ususally 612)
+
+RMx = 80;
+RMy = 29;
+RMBx = 77;
+RMBy = 27;
+
+//Changes Servers     (Size.X-177, Size.Y-16)
+if(serverButton->GetToggleState()==false){
+	SERVER = "powdertoy.co.uk";
+	STATICSERVER = "static.powdertoy.co.uk";
+	}
+if(serverButton->GetToggleState()==true){
+	SERVER = "thepowdertoy.net";
+	STATICSERVER = "static.thepowdertoy.net";
+	}
+
+if(FPSGvar==true)
+{
+count = count + 1;
+std::stringstream counting;
+if(count>=ui::Engine::Ref().GetFps())
+{
+count = 0;
+FPS5 = FPS4;
+FPS4 = FPS3;
+FPS3 = FPS2;
+FPS2 = FPS1;
+FPS1 = (floor(ui::Engine::Ref().GetFps()*100))/100;
+}
+g->fillrect(517, 298, 95, 86, 55, 55, 55, 200);
+//Draws axis
+g->draw_line(528, 371, 528, 301, 0, 255, 255, 255);
+g->draw_line(528, 371, 608, 371, 0, 255, 255, 255);
+//Draw Ticks
+g->addpixel(548, 370, 0, 255, 255, 255);
+g->addpixel(568, 370, 0, 255, 255, 255);
+g->addpixel(588, 370, 0, 255, 255, 255);
+g->addpixel(608, 370, 0, 255, 255, 255);
+
+g->addpixel(529, 301, 0, 255, 255, 255);
+g->addpixel(529, 311, 0, 255, 255, 255);
+g->addpixel(529, 321, 0, 255, 255, 255);
+g->addpixel(529, 331, 0, 255, 255, 255);
+g->addpixel(529, 341, 0, 255, 255, 255);
+g->addpixel(529, 351, 0, 255, 255, 255);
+g->addpixel(529, 361, 0, 255, 255, 255);
+
+g->drawtext(553, 374, "Seconds", 0, 255, 0, 255);
+
+g->drawtext(520, 321, "F", 0, 255, 0, 255);
+g->drawtext(520, 331, "P", 0, 255, 0, 255);
+g->drawtext(520, 341, "S", 0, 255, 0, 255);
+
+//Draws lines on graph
+g->draw_line(528, 371-FPS1, 548, 371-FPS2, 0, 255, 255, 255);
+g->draw_line(548, 371-FPS2, 568, 371-FPS3, 0, 255, 255, 255);
+g->draw_line(568, 371-FPS3, 588, 371-FPS4, 0, 255, 255, 255);
+g->draw_line(588, 371-FPS4, 608, 371-FPS5, 0, 255, 255, 255);
+}
+
+frameCount = frameCount + 1;
+
+if(INFOvar==true)
+{
+	if(FPSGvar==true)
+	{
+		infoX = hudx-158;
+		infoY = 298;
+	}
+	else
+	{
+		infoX = hudx-60;
+		infoY = 298;
+	}
+g->fillrect(infoX, infoY, 60, 86, 55, 55, 55, 200);
+g->drawtext(infoX+3, infoY+3, "P Iterater:", 0, 255, 0, 255);
+	if(sample.particle.type)
+	{
+		std::stringstream ID;
+		ID << sample.ParticleID;
+		g->drawtext(infoX+3, infoY+13, ID.str(), 0, 255, 255, 255);
+	}
+	else {g->drawtext(infoX+3, infoY+13, "No ELement", 0, 255, 255, 255);}
+std::stringstream frames;
+frames << frameCount;
+g->drawtext(infoX+3, infoY+23, "Frames:", 0, 255, 0, 255);
+g->drawtext(infoX+3, infoY+33, frames.str(), 0, 255, 255, 255);
+g->drawtext(infoX+3, infoY+43, "Element #:", 0, 255, 0, 255);
+	if (sample.particle.type)
+	{
+		std::stringstream infoptype;
+		infoptype << sample.particle.type;
+		g->drawtext(infoX+3, infoY+53, infoptype.str(), 0, 255, 255, 255);
+	}
+	else
+	{
+		g->drawtext(infoX+3, infoY+53, "No ELement", 0, 255, 255, 255);
+	}
+}
+		//HUD
+//Time
+  time_t rawtime;
+  struct tm * timeinfo;
+
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+
+//Behind HUD, so that values are easily visible when particles are behind it.
+g->fillrect(hudx-214, 13, 187, 12, 55, 55, 55, 200);
+g->fillrect(hudx-214, 27, 200, 12, 55, 55, 55, 200);
+g->fillrect(14, 13, 210, 12, 55, 55, 55, 200);
+
+g->drawtext(16, 15, asctime(timeinfo), 0, 255, 68, 255);
+
+std::stringstream parts;
+parts << "Parts:" << sample.NumParts;
+g->drawtext(160, 15, parts.str(), 0, 255, 255, 255);
+
+std::stringstream pres;
+pres << "Pres:" << (floor (sample.AirPressure*100))/100;
+g->drawtext(hudx-77, 15, pres.str(), 0, 255, 255, 255);
+
+std::stringstream life;
+life << "Life:" << sample.particle.life;
+g->drawtext(hudx-212, 30, life.str(), 0, 255, 255, 255);
+
+std::stringstream x;
+x << "X:" << sample.PositionX;
+g->drawtext(hudx-71, 30, x.str(), 0, 255, 255, 255);
+
+std::stringstream y;
+y << "Y:" << sample.PositionY;
+g->drawtext(hudx-42, 30, y.str(), 0, 255, 255, 255);
+
+if (showDebug)
+{
+g->fillrect(hudx-214, 41, 180, 12, 55, 55, 55, 200);
+g->fillrect(14, 27, 61, 12, 55, 55, 55, 200);
+
+std::stringstream extraInfo;
+if (c->GetReplaceModeFlags()&REPLACE_MODE)
+	extraInfo << "[REPLACE MODE] ";
+if (c->GetReplaceModeFlags()&SPECIFIC_DELETE)
+	extraInfo << "[SPECIFIC DELETE] ";
+if (ren->GetGridSize())
+	extraInfo << "[GRID: " << ren->GetGridSize() << "/9]";
+g->drawtext(16, 43, extraInfo.str(), 0, 255, 255, 255);
+
+std::stringstream fps;
+fps << "FPS:" << (floor(ui::Engine::Ref().GetFps()*100))/100;
+g->drawtext(16, 29, fps.str(), 0, 255, 255 ,255);
+
+std::stringstream tmp2;
+tmp2 << "Tmp2:" << sample.particle.tmp2;
+g->drawtext(hudx-212, 44, tmp2.str(), 0, 255, 255, 255);
+	
+std::stringstream vx;
+vx << "VX:" << (floor(sample.particle.vx*100))/100;
+g->drawtext(hudx-147, 44, vx.str(), 0, 255, 255, 255);
+
+std::stringstream vy;
+vy << "VY:" << (floor(sample.particle.vy*100))/100;
+g->drawtext(hudx-77, 44, vy.str(), 0, 255, 255, 255);
+}
+/*int redhud = hudr;
+std::stringstream rhud;
+rhud << redhud;
+g->drawtext(hudx-77, 60, rhud.str(), 255, 255, 255, 255);*/
+
+if (sample.particle.type)
+{
+	
+/*	else if (sample.particle.ctype)
+	{
+		std::stringstream ctype;
+		ctype << c->ElementResolve(sample.particle.ctype, sample.particle.type);
+		std::stringstream ptype;
+		ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << ctype.str();
+		g->drawtext(hudx-212, 15, ptype.str(), 0, 255, 255, 255);
+	}
+	else
+	{
+		std::stringstream ptype;
+		ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", ()" ;
+		g->drawtext(hudx-212, 15, ptype.str(), 0, 255, 255, 255);
+	}*/
+
+
+}
+
+
 		int wavelengthGfx = 0, alpha = 255;
 		if (toolTipPosition.Y < 120)
 			alpha = 255-toolTipPresence*3;
 		if (alpha < 50)
 			alpha = 50;
-		std::stringstream sampleInfo;
-		sampleInfo.precision(2);
+		std::stringstream ptype;
+		std::stringstream tmp;
 		if(sample.particle.type)
 		{
+			std::stringstream temp;
+			temp << "Temp:" << (floor (sample.particle.temp*100))/100-273.15;
+			g->drawtext(hudx-147, 15, temp.str(), 0, 255, 255, 255);
+
 			int ctype = sample.particle.ctype;
 			if (sample.particle.type == PT_PIPE || sample.particle.type == PT_PPIP)
 				ctype = sample.particle.tmp&0xFF;
 
 			if (sample.particle.type == PT_PHOT || sample.particle.type == PT_BIZR || sample.particle.type == PT_BIZRG || sample.particle.type == PT_BIZRS || sample.particle.type == PT_FILT || sample.particle.type == PT_BRAY)
 				wavelengthGfx = ctype;
-
-			if(showDebug)
+				if ((sample.particle.type == PT_PIPE || sample.particle.type == PT_PPIP) && c->IsValidElement(ctype))
+					ptype << c->ElementResolve((int)sample.particle.pavg[1], 0);
+			if (sample.particle.type==PT_LAVA && sample.particle.ctype)
 			{
-				if (sample.particle.type == PT_LAVA && c->IsValidElement(ctype))
-					sampleInfo << "Molten " << c->ElementResolve(ctype, -1);
-				else if ((sample.particle.type == PT_PIPE || sample.particle.type == PT_PPIP) && c->IsValidElement(ctype))
-					sampleInfo << c->ElementResolve(sample.particle.type, -1) << " with " << c->ElementResolve(ctype, (int)sample.particle.pavg[1]);
+				ptype << "Molten " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
+				g->drawtext(hudx-212, 15, ptype.str(), 0, 255, 255, 255);
+			}
 				else if (sample.particle.type == PT_LIFE)
-					sampleInfo << c->ElementResolve(sample.particle.type, sample.particle.ctype);
+					ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype);
 				else if (sample.particle.type == PT_FILT)
 				{
-					sampleInfo << c->ElementResolve(sample.particle.type, sample.particle.ctype);
-					const char* filtModes[] = {"set colour", "AND", "OR", "subtract colour", "red shift", "blue shift", "no effect", "XOR", "NOT", "old QRTZ scattering"};
+					ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype);
+					const char* filtModes[] = {"set", "AND", "OR", "subt", "red", "blue", "none", "XOR", "NOT", "scat"};
+					if (ctype>=1000)
+						{
+						if (ctype>=1000000)
+							{
+							ptype << ", " << ctype/1000000 << "m";
+							}
+						else
+							{
+							ptype << ", " << ctype/1000 << "k";
+							}
+						}
+					else
+						{
+						ptype << ", " << ctype;
+						}
 					if (sample.particle.tmp>=0 && sample.particle.tmp<=9)
-						sampleInfo << " (" << filtModes[sample.particle.tmp] << ")";
+						tmp << "Tmp:" << " (" << filtModes[sample.particle.tmp] << ")";
 					else
-						sampleInfo << " (unknown mode)";
+						tmp << "Tmp:" << " (unkn)";
 				}
 				else
 				{
-					sampleInfo << c->ElementResolve(sample.particle.type, sample.particle.ctype);
-					if (wavelengthGfx)
-						sampleInfo << " (" << ctype << ")";
-					else if (c->IsValidElement(ctype))
-						sampleInfo << " (" << c->ElementResolve(ctype, -1) << ")";
+				tmp << "Tmp:" << sample.particle.tmp;
+					if (ctype==0)
+						{
+						ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << "()";
+						}
 					else
-						sampleInfo << " ()";
-				}
-				sampleInfo << ", Temp: " << std::fixed << sample.particle.temp -273.15f << " C";
-				sampleInfo << ", Life: " << sample.particle.life;
-				sampleInfo << ", Tmp: " << sample.particle.tmp;
-				sampleInfo << ", Pressure: " << std::fixed << sample.AirPressure;
-			}
-			else
-			{
-				if (sample.particle.type == PT_LAVA && sample.particle.ctype > 0 && sample.particle.ctype < PT_NUM)
-					sampleInfo << "Molten " << c->ElementResolve(sample.particle.ctype, -1);
-				else if ((sample.particle.type == PT_PIPE || sample.particle.type == PT_PPIP) && ctype > 0 && ctype < PT_NUM)
-					sampleInfo << c->ElementResolve(sample.particle.type, -1) << " with " << c->ElementResolve(ctype, (int)sample.particle.pavg[1]);
-				else if (sample.particle.type == PT_LIFE)
-					sampleInfo << c->ElementResolve(sample.particle.type, sample.particle.ctype);
-				else
-					sampleInfo << c->ElementResolve(sample.particle.type, sample.particle.ctype);
-				sampleInfo << ", Temp: " << std::fixed << sample.particle.temp - 273.15f << " C";
-				sampleInfo << ", Pressure: " << std::fixed << sample.AirPressure;
-			}
-		}
-		else if (sample.WallType)
-		{
-			sampleInfo << c->WallName(sample.WallType);
-			sampleInfo << ", Pressure: " << std::fixed << sample.AirPressure;
-		}
-		else if (sample.isMouseInSim)
-		{
-			sampleInfo << "Empty, Pressure: " << std::fixed << sample.AirPressure;
-		}
-		else
-		{
-			sampleInfo << "Empty";
-		}
-
-		int textWidth = Graphics::textwidth((char*)sampleInfo.str().c_str());
-		g->fillrect(XRES-20-textWidth, 12, textWidth+8, 15, 0, 0, 0, alpha*0.5f);
-		g->drawtext(XRES-16-textWidth, 16, (const char*)sampleInfo.str().c_str(), 255, 255, 255, alpha*0.75f);
-
-#ifndef OGLI
-		if(wavelengthGfx)
-		{
-			int i, cr, cg, cb, j, h = 3, x = XRES-19-textWidth, y = 10;
-			int tmp;
-			g->fillrect(x, y, 30, h, 64, 64, 64, alpha); // coords -1 size +1 to work around bug in fillrect - TODO: fix fillrect
-			for (i = 0; i < 30; i++)
-			{
-				if ((wavelengthGfx >> i)&1)
-				{
-					// Need a spread of wavelengths to get a smooth spectrum, 5 bits seems to work reasonably well
-					if (i>2) tmp = 0x1F << (i-2);
-					else tmp = 0x1F >> (2-i);
-
-					cg = 0;
-					cb = 0;
-					cr = 0;
-
-					for (j=0; j<12; j++)
-					{
-						cr += (tmp >> (j+18)) & 1;
-						cb += (tmp >> j) & 1;
-					}
-					for (j=0; j<13; j++)
-						cg += (tmp >> (j+9)) & 1;
-
-					tmp = 624/(cr+cg+cb+1);
-					cr *= tmp;
-					cg *= tmp;
-					cb *= tmp;
-					for (j=0; j<h; j++)
-						g->blendpixel(x+29-i, y+j, cr>255?255:cr, cg>255?255:cg, cb>255?255:cb, alpha);
-				}
-			}
-		}
-#endif
-
-		if(showDebug)
-		{
-			sampleInfo.str(std::string());
-
-			if(sample.particle.type)
-			{
-				sampleInfo << "#" << sample.ParticleID << ", ";
-			}
-			sampleInfo << "X:" << sample.PositionX << " Y:" << sample.PositionY;
-			if (sample.Gravity)
-				sampleInfo << " GX: " << sample.GravityVelocityX << " GY: " << sample.GravityVelocityY;
-
-			textWidth = Graphics::textwidth((char*)sampleInfo.str().c_str());
-			g->fillrect(XRES-20-textWidth, 27, textWidth+8, 14, 0, 0, 0, alpha*0.5f);
-			g->drawtext(XRES-16-textWidth, 30, (const char*)sampleInfo.str().c_str(), 255, 255, 255, alpha*0.75f);
-		}
+						{
+						ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
+						}
+					if (wavelengthGfx && PT_PHOT)
+						ptype << ctype/4194304;
+						}
+g->drawtext(hudx-212, 15, ptype.str(), 0, 255, 255, 255);
+g->drawtext(hudx-147, 30, tmp.str(), 0, 255, 255, 255);
+}
+else if (sample.WallType)
+{
+	g->drawtext(400, 15, c->WallName(sample.WallType), 255, 255, 255, 255);
+	g->drawtext(465, 15, "Temp:()", 0, 255, 255, 75);
+	g->drawtext(hudx-147, 30, "Tmp:()", 0, 255, 255, 255);
+}
+else
+{
+	g->drawtext(hudx-212, 15, "Empty, ()", 0, 255, 255, 255);
+	g->drawtext(hudx-147, 15, "Temp:()", 0, 255, 255, 255);
+	g->drawtext(hudx-147, 30, "Tmp:()", 0, 255, 255, 255);
+}
+}
+if (showHud==false)
+	{
+	RMx = 3;
+	RMy = 2;
+	RMBx = 0;
+	RMBy = 0;
 	}
 
-	if(showHud && introText < 51)
+if(c->GetSimulation()->REALvar==true)
 	{
-		//FPS and some version info
-		std::stringstream fpsInfo;
-		fpsInfo.precision(2);
-#ifdef SNAPSHOT
-		fpsInfo << "Snapshot " << SNAPSHOT_ID << ", ";
-#elif defined(BETA)
-		fpsInfo << "Beta " << SAVE_VERSION << "." << MINOR_VERSION << "." << BUILD_NUM << ", ";
-#endif
-		fpsInfo << "FPS: " << std::fixed << ui::Engine::Ref().GetFps();
-#ifdef DEBUG
-		fpsInfo << " Delta: " << std::fixed << ui::Engine::Ref().GetDelta();
-#endif
-
-		if (showDebug)
-			fpsInfo << " Parts: " << sample.NumParts;
-		if (c->GetReplaceModeFlags()&REPLACE_MODE)
-			fpsInfo << " [REPLACE MODE]";
-		if (c->GetReplaceModeFlags()&SPECIFIC_DELETE)
-			fpsInfo << " [SPECIFIC DELETE]";
-		if (ren->GetGridSize())
-			fpsInfo << " [GRID: " << ren->GetGridSize() << "]";
-
-		int textWidth = Graphics::textwidth((char*)fpsInfo.str().c_str());
-		int alpha = 255-introText*5;
-		g->fillrect(12, 12, textWidth+8, 15, 0, 0, 0, alpha*0.5);
-		g->drawtext(16, 16, (const char*)fpsInfo.str().c_str(), 32, 216, 255, alpha*0.75);
+	g->fillrect(RMBx, RMBy, 92, 12, 55, 55, 55, 200);
+	g->drawtext(RMx, RMy, "Realistic Mode On", 255, 0, 0, 255);
 	}
 
 	//Tooltips

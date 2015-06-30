@@ -4705,6 +4705,14 @@ int Simulation::GetParticleType(std::string type)
 
 void Simulation::update_particles()//doesn't update the particles themselves, but some other things
 {
+count = count + 1;
+if(REALvar==true && count>=20)
+	{
+		count = 0;
+		for (int i = 0; i < parts_lastActiveIndex; i++) { parts[i].temp = elements[parts[i].type].Temperature; }
+		parts[1].temp = elements[1].Temperature;
+	}
+
 	int i, x, y, t;
 	int lastPartUsed = 0;
 	int lastPartUnused = -1;
@@ -4835,8 +4843,10 @@ Simulation::Simulation():
 	ISWIRE(0),
 	gravWallChanged(false),
 	replaceModeSelected(0),
-	replaceModeFlags(0)
+	replaceModeFlags(0),
+	REALvar(false)
 {
+	int count = 0;
     int tportal_rx[] = {-1, 0, 1, 1, 1, 0,-1,-1};
     int tportal_ry[] = {-1,-1,-1, 0, 1, 1, 1, 0};
     

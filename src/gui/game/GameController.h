@@ -70,6 +70,8 @@ public:
 	void Tick();
 	void Exit();
 
+	Simulation * GetSimulation();
+
 	void Install();
 
 	void HistoryRestore();

@@ -5,6 +5,14 @@
 #include "Activity.h"
 #include "gui/interface/Window.h"
 #include "gui/interface/Textbox.h"
+//#include "ColourPickerActivity.cpp"
+
+#ifndef MY_HUD_RED // must be unique name in the project
+#define MY_HUD_RED
+
+extern int hudr; // prototype declaration of the function in a.cpp
+
+#endif
 
 class ColourPickedCallback
 {

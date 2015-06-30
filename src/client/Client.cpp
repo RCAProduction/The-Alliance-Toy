@@ -10,6 +10,7 @@
 #include <deque>
 #include <fstream>
 #include <dirent.h>
+#include "Config.h"
 
 #ifdef MACOSX
 #include <mach-o/dyld.h>
@@ -158,7 +159,7 @@ void Client::Initialise(std::string proxyString)
 	stampsLib.close();
 
 	//Begin version check
-	versionCheckRequest = http_async_req_start(NULL, "http://" SERVER "/Startup.json", NULL, 0, 0);
+	versionCheckRequest = http_async_req_start(NULL, ("http://"+ SERVER+ "/Startup.json").c_str(), NULL, 0, 0);
 
 	if(authUser.ID)
 	{
@@ -924,7 +925,7 @@ RequestStatus Client::UploadSave(SaveInfo & save)
 		const char *const postDatas[] = { saveName, saveDescription, gameData, (char *)(save.GetPublished()?"Public":"Private") };
 		int postLengths[] = { save.GetName().length(), save.GetDescription().length(), gameDataLength, save.GetPublished()?6:7 };
 		//std::cout << postNames[0] << " " << postDatas[0] << " " << postLengths[0] << std::endl;
-		data = http_multipart_post("http://" SERVER "/Save.api", postNames, postDatas, postLengths, userid, NULL, session, &dataStatus, &dataLength);
+		data = http_multipart_post(("http://"+ SERVER+ "/Save.api").c_str(), postNames, postDatas, postLengths, userid, NULL, session, &dataStatus, &dataLength);
 
 		delete[] saveDescription;
 		delete[] saveName;
@@ -1151,7 +1152,7 @@ RequestStatus Client::ExecVote(int saveID, int direction)
 		const char *const postDatas[] = { id, directionText };
 		int postLengths[] = { saveIDText.length(), strlen(directionText) };
 		//std::cout << postNames[0] << " " << postDatas[0] << " " << postLengths[0] << std::endl;
-		data = http_multipart_post("http://" SERVER "/Vote.api", postNames, postDatas, postLengths, userid, NULL, session, &dataStatus, &dataLength);
+		data = http_multipart_post(("http://"+ SERVER+ "/Vote.api").c_str(), postNames, postDatas, postLengths, userid, NULL, session, &dataStatus, &dataLength);
 
 		delete[] id;
 		delete[] userid;
@@ -1264,7 +1265,7 @@ RequestBroker::Request * Client::SaveUserInfoAsync(UserInfo info)
 	std::map<std::string, std::string> postData;
 	postData.insert(std::pair<std::string, std::string>("Location", info.Location));
 	postData.insert(std::pair<std::string, std::string>("Biography", info.Biography));
-	return new APIRequest("http://" SERVER "/Profile.json", postData, new StatusParser());	
+	return new APIRequest(("http://"+ SERVER+ "/Profile.json").c_str(), postData, new StatusParser());	
 }
 
 RequestBroker::Request * Client::GetUserInfoAsync(std::string username)
@@ -1304,7 +1305,7 @@ RequestBroker::Request * Client::GetUserInfoAsync(std::string username)
 		}
 		virtual ~UserInfoParser() { }
 	};
-	return new APIRequest("http://" SERVER "/User.json?Name=" + username, new UserInfoParser());
+	return new APIRequest(("http://"+ SERVER+ "/User.json?Name=" + username).c_str(), new UserInfoParser());
 }
 
 LoginStatus Client::Login(std::string username, std::string password, User & user)
@@ -1331,7 +1332,7 @@ LoginStatus Client::Login(std::string username, std::string password, User & use
 	const char *const postNames[] = { "Username", "Hash", NULL };
 	const char *const postDatas[] = { (char*)username.c_str(), totalHash };
 	int postLengths[] = { username.length(), 32 };
-	data = http_multipart_post("http://" SERVER "/Login.json", postNames, postDatas, postLengths, NULL, NULL, NULL, &dataStatus, &dataLength);
+	data = http_multipart_post(("http://"+ SERVER+ "/Login.json").c_str(), postNames, postDatas, postLengths, NULL, NULL, NULL, &dataStatus, &dataLength);
 	if(dataStatus == 200 && data)
 	{
 		try

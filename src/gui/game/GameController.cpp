@@ -4,6 +4,13 @@
 #include "Format.h"
 #include "GameController.h"
 #include "GameModel.h"
+
+#include "simulation/Simulation.h"
+#include "GameView.h"
+#include "graphics/Graphics.h"
+#include "simulation/SaveRenderer.h"
+#include "simulation/SimulationData.h"
+
 #include "client/SaveInfo.h"
 #include "client/GameSave.h"
 #include "gui/search/SearchController.h"
@@ -1020,9 +1027,10 @@ Tool * GameController::GetActiveTool(int selection)
 {
 	return gameModel->GetActiveTool(selection);
 }
-
+int var1;
 void GameController::SetActiveTool(int toolSelection, Tool * tool)
 {
+
 	if (gameModel->GetActiveMenu() == SC_DECO && toolSelection == 2)
 		toolSelection = 0;
 	gameModel->SetActiveTool(toolSelection, tool);
@@ -1037,6 +1045,23 @@ void GameController::SetActiveTool(int toolSelection, Tool * tool)
 	}
 	if(tool->GetIdentifier() == "DEFAULT_UI_PROPERTY")
 		((PropertyTool *)tool)->OpenWindow(gameModel->GetSimulation());
+
+	if(tool->GetIdentifier() == "DEFAULT_TOOL_FPSG")
+		gameView->FPSGvar = !gameView->FPSGvar;
+
+	if(tool->GetIdentifier() == "DEFAULT_TOOL_REAL")
+		{
+		gameView->REALvar = !gameView->REALvar;
+		gameModel->GetSimulation()->REALvar = !gameModel->GetSimulation()->REALvar;
+		}	
+
+	if(tool->GetIdentifier()== "DEFAULT_TOOL_INFO")
+		gameView->INFOvar = !gameView->INFOvar;	
+}
+
+Simulation * GameController::GetSimulation()
+{
+	return gameModel->GetSimulation();
 }
 
 int GameController::GetReplaceModeFlags()
