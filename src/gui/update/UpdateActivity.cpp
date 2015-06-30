@@ -13,7 +13,7 @@
 class UpdateDownloadTask : public Task
 {
 public:
-	UpdateDownloadTask(std::string updateName, UpdateActivity * a) : updateName(updateName), a(a) {};
+	UpdateDownloadTask(std::string updateName, UpdateActivity * a) : a(a), updateName(updateName) {}
 private:
 	UpdateActivity * a;
 	std::string updateName;
@@ -42,8 +42,7 @@ private:
 		data = http_async_req_stop(request, &status, &dataLength);
 		if (status!=200)
 		{
-			if (data)
-				free(data);
+			free(data);
 			errorStream << "Server responded with Status " << status;
 			notifyError("Could not download update");
 			return false;
@@ -58,7 +57,7 @@ private:
 		notifyStatus("Unpacking update");
 		notifyProgress(-1);
 
-		int uncompressedLength;
+		unsigned int uncompressedLength;
 
 		if(dataLength<16)
 		{

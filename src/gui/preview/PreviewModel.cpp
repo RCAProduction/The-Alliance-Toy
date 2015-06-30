@@ -51,7 +51,7 @@ void PreviewModel::UpdateSave(int saveID, int saveDate)
 	this->tSaveID = saveID;
 	this->tSaveDate = saveDate;
 
-	if(save)
+	if (save)
 	{
 		delete save;
 		save = NULL;
@@ -61,9 +61,9 @@ void PreviewModel::UpdateSave(int saveID, int saveDate)
 		delete saveData;
 		saveData = NULL;
 	}
-	if(saveComments)
+	if (saveComments)
 	{
-		for(int i = 0; i < saveComments->size(); i++)
+		for (size_t i = 0; i < saveComments->size(); i++)
 			delete saveComments->at(i);
 		saveComments->clear();
 		delete saveComments;
@@ -75,7 +75,7 @@ void PreviewModel::UpdateSave(int saveID, int saveDate)
 	RequestBroker::Ref().Start(Client::Ref().GetSaveDataAsync(saveID, saveDate), this, 1);
 	RequestBroker::Ref().Start(Client::Ref().GetSaveAsync(saveID, saveDate), this, 2);
 
-	if(!GetDoOpen())
+	if (!GetDoOpen())
 	{
 		commentsLoaded = false;
 		RequestBroker::Ref().Start(Client::Ref().GetCommentsAsync(saveID, (commentsPageNumber-1)*20, 20), this, 3);
@@ -114,11 +114,12 @@ bool PreviewModel::GetCommentsLoaded()
 
 void PreviewModel::UpdateComments(int pageNumber)
 {
-	if(commentsLoaded){
+	if (commentsLoaded)
+	{
 		commentsLoaded = false;
-		if(saveComments)
+		if (saveComments)
 		{
-			for(int i = 0; i < saveComments->size(); i++)
+			for (size_t i = 0; i < saveComments->size(); i++)
 				delete saveComments->at(i);
 			saveComments->clear();
 			delete saveComments;
@@ -126,7 +127,7 @@ void PreviewModel::UpdateComments(int pageNumber)
 		}
 
 		commentsPageNumber = pageNumber;
-		if(!GetDoOpen())
+		if (!GetDoOpen())
 			RequestBroker::Ref().Start(Client::Ref().GetCommentsAsync(tSaveID, (commentsPageNumber-1)*20, 20), this, 3);
 
 		notifySaveCommentsChanged();
@@ -138,21 +139,19 @@ void PreviewModel::OnResponseReady(void * object, int identifier)
 {
 	if (identifier == 1)
 	{
-		if (saveData)
-			delete saveData;
+		delete saveData;
 		saveData = (std::vector<unsigned char>*)object;
 	}
 	if (identifier == 2)
 	{
-		if (save)
-			delete save;
+		delete save;
 		save = (SaveInfo*)object;
 	}
 	if (identifier == 3)
 	{
-		if(saveComments)
+		if (saveComments)
 		{
-			for (int i = 0; i < saveComments->size(); i++)
+			for (size_t i = 0; i < saveComments->size(); i++)
 				delete saveComments->at(i);
 			saveComments->clear();
 			delete saveComments;
@@ -164,7 +163,7 @@ void PreviewModel::OnResponseReady(void * object, int identifier)
 		notifySaveCommentsChanged();
 	}
 
-	if(identifier == 1 || identifier == 2)
+	if (identifier == 1 || identifier == 2)
 	{
 		if (save && saveData)
 		{
@@ -199,7 +198,7 @@ std::vector<SaveComment*> * PreviewModel::GetComments()
 
 void PreviewModel::notifySaveChanged()
 {
-	for(int i = 0; i < observers.size(); i++)
+	for (size_t i = 0; i < observers.size(); i++)
 	{
 		observers[i]->NotifySaveChanged(this);
 	}
@@ -207,7 +206,7 @@ void PreviewModel::notifySaveChanged()
 
 void PreviewModel::notifyCommentBoxEnabledChanged()
 {
-	for(int i = 0; i < observers.size(); i++)
+	for (size_t i = 0; i < observers.size(); i++)
 	{
 		observers[i]->NotifyCommentBoxEnabledChanged(this);
 	}
@@ -215,7 +214,7 @@ void PreviewModel::notifyCommentBoxEnabledChanged()
 
 void PreviewModel::notifyCommentsPageChanged()
 {
-	for(int i = 0; i < observers.size(); i++)
+	for (size_t i = 0; i < observers.size(); i++)
 	{
 		observers[i]->NotifyCommentsPageChanged(this);
 	}
@@ -223,7 +222,7 @@ void PreviewModel::notifyCommentsPageChanged()
 
 void PreviewModel::notifySaveCommentsChanged()
 {
-	for(int i = 0; i < observers.size(); i++)
+	for (size_t i = 0; i < observers.size(); i++)
 	{
 		observers[i]->NotifyCommentsChanged(this);
 	}
@@ -242,13 +241,11 @@ void PreviewModel::AddObserver(PreviewView * observer)
 PreviewModel::~PreviewModel()
 {
 	RequestBroker::Ref().DetachRequestListener(this);
-	if(save)
-		delete save;
-	if (saveData)
-		delete saveData;
-	if(saveComments)
+	delete save;
+	delete saveData;
+	if (saveComments)
 	{
-		for(int i = 0; i < saveComments->size(); i++)
+		for (size_t i = 0; i < saveComments->size(); i++)
 			delete saveComments->at(i);
 		saveComments->clear();
 		delete saveComments;

@@ -50,7 +50,7 @@ enum ChromeStyle
 		// Remove a component from state. NOTE: This WILL free component from memory.
 		void RemoveComponent(unsigned idx);
 
-		virtual void ToolTip(Component * sender, ui::Point mousePosition, std::string toolTip) {}
+		virtual void ToolTip(ui::Point senderPosition, std::string toolTip) {}
 
 		virtual void DoInitialized();
 		virtual void DoExit();
@@ -102,14 +102,14 @@ enum ChromeStyle
 		Component* focusedComponent_;
 		ChromeStyle chrome;
 
+#ifdef DEBUG
+		bool debugMode;
+#endif
 		//These controls allow a component to call the destruction of the Window inside an event (called by the Window)
 		void finalise();
 		bool halt;
 		bool destruct;
 		bool stop;
-#ifdef DEBUG
-		bool debugMode;
-#endif
 
 	};
 

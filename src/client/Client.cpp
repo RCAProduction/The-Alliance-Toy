@@ -68,10 +68,10 @@ void writeUserPreferences(const char * prefData);
 
 
 Client::Client():
-	authUser(0, ""),
-	updateAvailable(false),
+	messageOfTheDay(""),
 	versionCheckRequest(NULL),
-	messageOfTheDay("")
+	updateAvailable(false),
+	authUser(0, "")
 {
 	int i = 0;
 	for(i = 0; i < THUMB_CACHE_SIZE; i++)
@@ -127,7 +127,10 @@ Client::Client():
 #ifndef MACOSX
 		configFile.close();
 #endif
+		firstRun = false;
 	}
+	else
+		firstRun = true;
 }
 
 void Client::Initialise(std::string proxyString)
@@ -172,6 +175,11 @@ void Client::Initialise(std::string proxyString)
 		delete[] id;
 		delete[] session;
 	}
+}
+
+bool Client::IsFirstRun()
+{
+	return firstRun;
 }
 
 bool Client::DoInstallation()
@@ -336,16 +344,27 @@ bool Client::DoInstallation()
 	returnval = 1;
 	finalise:
 
-	if(iconname) free(iconname);
-	if(opencommand) free(opencommand);
-	if(protocolcommand) free(protocolcommand);
-	if(currentfilename) free(currentfilename);
+	free(iconname);
+	free(opencommand);
+	free(protocolcommand);
+	free(currentfilename);
 	
 	return returnval;
 #elif defined(LIN)
 	#include "icondoc.h"
 
-	char *currentfilename = exe_name();
+	std::string filename = exe_name(), pathname = filename.substr(0, filename.rfind('/'));
+	for (size_t i = 0; i < filename.size(); i++)
+	{
+		if (filename[i] == '\'')
+		{
+			filename.insert(i, "'\\'");
+			i += 3;
+		}
+	}
+	filename.insert(filename.size(), "'");
+	filename.insert(0, "'");
+
 	FILE *f;
 	const char *mimedata =
 "<?xml version=\"1.0\"?>\n"
@@ -368,16 +387,14 @@ bool Client::DoInstallation()
 "Name=Powder Toy\n"
 "Comment=Physics sandbox game\n"
 "MimeType=x-scheme-handler/ptsave;\n"
-"NoDisplay=true\n";
-	char *protocolfiledata = (char *)malloc(strlen(protocolfiledata_tmp)+strlen(currentfilename)+100);
-	strcpy(protocolfiledata, protocolfiledata_tmp);
-	strappend(protocolfiledata, "Exec=");
-	strappend(protocolfiledata, currentfilename);
-	strappend(protocolfiledata, " ptsave %u\n");
+"NoDisplay=true\n"
+"Categories=Game\n";
+	std::stringstream protocolfiledata;
+	protocolfiledata << protocolfiledata_tmp << "Exec=" << filename <<" ptsave %u\nPath=" << pathname << "\n";
 	f = fopen("powdertoy-tpt-ptsave.desktop", "wb");
 	if (!f)
 		return 0;
-	fwrite(protocolfiledata, 1, strlen(protocolfiledata), f);
+	fwrite(protocolfiledata.str().c_str(), 1, strlen(protocolfiledata.str().c_str()), f);
 	fclose(f);
 	system("xdg-desktop-menu install powdertoy-tpt-ptsave.desktop");
 
@@ -387,16 +404,14 @@ bool Client::DoInstallation()
 "Name=Powder Toy\n"
 "Comment=Physics sandbox game\n"
 "MimeType=application/vnd.powdertoy.save;\n"
-"NoDisplay=true\n";
-	char *desktopfiledata = (char *)malloc(strlen(desktopfiledata_tmp)+strlen(currentfilename)+100);
-	strcpy(desktopfiledata, desktopfiledata_tmp);
-	strappend(desktopfiledata, "Exec=");
-	strappend(desktopfiledata, currentfilename);
-	strappend(desktopfiledata, " open %f\n");
+"NoDisplay=true\n"
+"Categories=Game\n";
+	std::stringstream desktopfiledata;
+	desktopfiledata << desktopfiledata_tmp << "Exec=" << filename <<" open %f\nPath=" << pathname << "\n";
 	f = fopen("powdertoy-tpt.desktop", "wb");
 	if (!f)
 		return 0;
-	fwrite(desktopfiledata, 1, strlen(desktopfiledata), f);
+	fwrite(desktopfiledata.str().c_str(), 1, strlen(desktopfiledata.str().c_str()), f);
 	fclose(f);
 	system("xdg-mime install powdertoy-save.xml");
 	system("xdg-desktop-menu install powdertoy-tpt.desktop");
@@ -483,7 +498,7 @@ std::vector<std::string> Client::DirectorySearch(std::string directory, std::str
 #endif
 		return std::vector<std::string>();
 	}
-	while(directoryEntry = readdir(directoryHandle))
+	while ((directoryEntry = readdir(directoryHandle)))
 	{
 		std::string currentFileName = std::string(directoryEntry->d_name);
 		if(currentFileName.length()>4)
@@ -499,7 +514,7 @@ std::vector<std::string> Client::DirectorySearch(std::string directory, std::str
 		bool extensionMatch = !extensions.size();
 		for(std::vector<std::string>::iterator extIter = extensions.begin(), extEnd = extensions.end(); extIter != extEnd; ++extIter)
 		{
-			int filenameLength = filename.length()-(*extIter).length();
+			size_t filenameLength = filename.length()-(*extIter).length();
 			if(filename.find(*extIter, filenameLength) == filenameLength)
 			{
 				extensionMatch = true;
@@ -667,8 +682,7 @@ void Client::Tick()
 
 		if(status != 200)
 		{
-			if(data)
-				free(data);
+			free(data);
 		}
 		else if(data)
 		{
@@ -688,7 +702,7 @@ void Client::Tick()
 
 				//Notifications from server
 				json::Array notificationsArray = objDocument["Notifications"];
-				for(int j = 0; j < notificationsArray.Size(); j++)
+				for(size_t j = 0; j < notificationsArray.Size(); j++)
 				{
 					json::String notificationLink = notificationsArray[j]["Link"];
 					json::String notificationText = notificationsArray[j]["Text"];
@@ -706,31 +720,25 @@ void Client::Tick()
 #ifndef IGNORE_UPDATES
 				//Check for updates
 				json::Object versions = objDocument["Updates"];
-				
+#if not defined(BETA) && not defined(SNAPSHOT)
 				json::Object stableVersion = versions["Stable"];
-				json::Object betaVersion = versions["Beta"];
-				json::Object snapshotVersion = versions["Snapshot"];
-
 				json::Number stableMajor = stableVersion["Major"];
 				json::Number stableMinor = stableVersion["Minor"];
 				json::Number stableBuild = stableVersion["Build"];
 				json::String stableFile = stableVersion["File"];
-
-				json::Number betaMajor = betaVersion["Major"];
-				json::Number betaMinor = betaVersion["Minor"];
-				json::Number betaBuild = betaVersion["Build"];
-				json::String betaFile = betaVersion["File"];
-
-				json::Number snapshotSnapshot = snapshotVersion["Snapshot"];
-				json::String snapshotFile = snapshotVersion["File"];
-
 				if(stableMajor.Value()>SAVE_VERSION || (stableMinor.Value()>MINOR_VERSION && stableMajor.Value()==SAVE_VERSION) || stableBuild.Value()>BUILD_NUM)
 				{
 					updateAvailable = true;
 					updateInfo = UpdateInfo(stableMajor.Value(), stableMinor.Value(), stableBuild.Value(), stableFile.Value(), UpdateInfo::Stable);
 				}
+#endif
 
 #ifdef BETA
+				json::Object betaVersion = versions["Beta"];
+				json::Number betaMajor = betaVersion["Major"];
+				json::Number betaMinor = betaVersion["Minor"];
+				json::Number betaBuild = betaVersion["Build"];
+				json::String betaFile = betaVersion["File"];
 				if(betaMajor.Value()>SAVE_VERSION || (betaMinor.Value()>MINOR_VERSION && betaMajor.Value()==SAVE_VERSION) || betaBuild.Value()>BUILD_NUM)
 				{
 					updateAvailable = true;
@@ -739,6 +747,9 @@ void Client::Tick()
 #endif
 
 #ifdef SNAPSHOT
+				json::Object snapshotVersion = versions["Snapshot"];
+				json::Number snapshotSnapshot = snapshotVersion["Snapshot"];
+				json::String snapshotFile = snapshotVersion["File"];
 				if(snapshotSnapshot.Value() > SNAPSHOT_ID)
 				{
 					updateAvailable = true;
@@ -757,8 +768,7 @@ void Client::Tick()
 				//Do nothing
 			}
 
-			if(data)
-				free(data);
+			free(data);
 		}
 	}
 }
@@ -888,7 +898,7 @@ User Client::GetAuthUser()
 RequestStatus Client::UploadSave(SaveInfo & save)
 {
 	lastError = "";
-	int gameDataLength;
+	unsigned int gameDataLength;
 	char * gameData = NULL;
 	int dataStatus;
 	char * data;
@@ -923,7 +933,7 @@ RequestStatus Client::UploadSave(SaveInfo & save)
 
 		const char *const postNames[] = { "Name", "Description", "Data:save.bin", "Publish", NULL };
 		const char *const postDatas[] = { saveName, saveDescription, gameData, (char *)(save.GetPublished()?"Public":"Private") };
-		int postLengths[] = { save.GetName().length(), save.GetDescription().length(), gameDataLength, save.GetPublished()?6:7 };
+		size_t postLengths[] = { save.GetName().length(), save.GetDescription().length(), gameDataLength, (size_t)(save.GetPublished()?6:7) };
 		//std::cout << postNames[0] << " " << postDatas[0] << " " << postLengths[0] << std::endl;
 		data = http_multipart_post(("http://"+ SERVER+ "/Save.api").c_str(), postNames, postDatas, postLengths, userid, NULL, session, &dataStatus, &dataLength);
 
@@ -941,7 +951,7 @@ RequestStatus Client::UploadSave(SaveInfo & save)
 	{
 		if(strncmp((const char *)data, "OK", 2)!=0)
 		{
-			if(gameData) delete[] gameData;
+			delete[] gameData;
 			lastError = std::string((const char *)data);
 			free(data);
 			return RequestFailure;
@@ -962,14 +972,14 @@ RequestStatus Client::UploadSave(SaveInfo & save)
 			}
 		}
 		free(data);
-		if(gameData) delete[] gameData;
+		delete[] gameData;
 		return RequestOkay;
 	}
 	else if(data)
 	{
 		free(data);
 	}
-	if(gameData) delete[] gameData;
+	delete[] gameData;
 	return RequestFailure;
 }
 
@@ -990,11 +1000,11 @@ void Client::MoveStampToFront(std::string stampID)
 SaveFile * Client::GetStamp(std::string stampID)
 {
 	std::string stampFile = std::string(STAMPS_DIR PATH_SEP + stampID + ".stm");
+	SaveFile * file = new SaveFile(stampID);
 	if (!FileExists(stampFile))
 		stampFile = stampID;
-	if(FileExists(stampFile))
+	if (FileExists(stampFile))
 	{
-		SaveFile * file = new SaveFile(stampID);
 		try
 		{
 			GameSave * tempSave = new GameSave(ReadFile(stampFile));
@@ -1004,12 +1014,8 @@ SaveFile * Client::GetStamp(std::string stampID)
 		{
 			std::cerr << "Client: Invalid stamp file, " << stampID << " " << std::string(e.what()) << std::endl;
 		}
-		return file;
 	}
-	else
-	{
-		return NULL;
-	}
+	return file;
 }
 
 void Client::DeleteStamp(std::string stampID)
@@ -1050,7 +1056,7 @@ std::string Client::AddStamp(GameSave * saveData)
 
 	MakeDirectory(STAMPS_DIR);
 
-	int gameDataLength;
+	unsigned int gameDataLength;
 	char * gameData = saveData->Serialise(gameDataLength);
 
 	std::ofstream stampStream;
@@ -1090,7 +1096,7 @@ void Client::RescanStamps()
 	if (directory != NULL)
 	{
 		stampIDs.clear();
-		while (entry = readdir(directory))
+		while ((entry = readdir(directory)))
 		{
 			if(strncmp(entry->d_name, "..", 3) && strncmp(entry->d_name, ".", 2) && strstr(entry->d_name, ".stm") && strlen(entry->d_name) == 14)
 			{
@@ -1111,15 +1117,18 @@ int Client::GetStampsCount()
 
 std::vector<std::string> Client::GetStamps(int start, int count)
 {
-	if(start+count > stampIDs.size()) {
-		if(start > stampIDs.size())
+	int size = (int)stampIDs.size();
+	if (start+count > size)
+	{
+		if(start > size)
 			return std::vector<std::string>();
-		count = stampIDs.size()-start;
+		count = size-start;
 	}
 
 	std::vector<std::string> stampRange;
 	int index = 0;
-	for (std::list<std::string>::const_iterator iterator = stampIDs.begin(), end = stampIDs.end(); iterator != end; ++iterator, ++index) {
+	for (std::list<std::string>::const_iterator iterator = stampIDs.begin(), end = stampIDs.end(); iterator != end; ++iterator, ++index)
+	{
 		if(index>=start && index < start+count)
 			stampRange.push_back(*iterator);
 	}
@@ -1150,7 +1159,7 @@ RequestStatus Client::ExecVote(int saveID, int direction)
 
 		const char *const postNames[] = { "ID", "Action", NULL };
 		const char *const postDatas[] = { id, directionText };
-		int postLengths[] = { saveIDText.length(), strlen(directionText) };
+		size_t postLengths[] = { saveIDText.length(), strlen(directionText) };
 		//std::cout << postNames[0] << " " << postDatas[0] << " " << postLengths[0] << std::endl;
 		data = http_multipart_post(("http://"+ SERVER+ "/Vote.api").c_str(), postNames, postDatas, postLengths, userid, NULL, session, &dataStatus, &dataLength);
 
@@ -1331,8 +1340,10 @@ LoginStatus Client::Login(std::string username, std::string password, User & use
 	int dataStatus, dataLength;
 	const char *const postNames[] = { "Username", "Hash", NULL };
 	const char *const postDatas[] = { (char*)username.c_str(), totalHash };
-	int postLengths[] = { username.length(), 32 };
+
+	size_t postLengths[] = { username.length(), 32 };
 	data = http_multipart_post(("http://"+ SERVER+ "/Login.json").c_str(), postNames, postDatas, postLengths, NULL, NULL, NULL, &dataStatus, &dataLength);
+
 	if(dataStatus == 200 && data)
 	{
 		try
@@ -1351,7 +1362,7 @@ LoginStatus Client::Login(std::string username, std::string password, User & use
 				json::String userElevationTemp = objDocument["Elevation"];
 				
 				json::Array notificationsArray = objDocument["Notifications"];
-				for(int j = 0; j < notificationsArray.Size(); j++)
+				for (size_t j = 0; j < notificationsArray.Size(); j++)
 				{
 					json::String notificationLink = notificationsArray[j]["Link"];
 					json::String notificationText = notificationsArray[j]["Text"];
@@ -1390,8 +1401,7 @@ LoginStatus Client::Login(std::string username, std::string password, User & use
 	{
 		lastError = http_ret_text(dataStatus);
 	}
-	if(data)
-		free(data);
+	free(data);
 	return LoginError;
 }
 
@@ -1437,12 +1447,10 @@ RequestStatus Client::DeleteSave(int saveID)
 		lastError = http_ret_text(dataStatus);
 		goto failure;
 	}
-	if(data)
-		free(data);
+	free(data);
 	return RequestOkay;
 failure:
-	if(data)
-		free(data);
+	free(data);
 	return RequestFailure;
 }
 
@@ -1460,7 +1468,7 @@ RequestStatus Client::AddComment(int saveID, std::string comment)
 		
 		const char *const postNames[] = { "Comment", NULL };
 		const char *const postDatas[] = { (char*)(comment.c_str()) };
-		int postLengths[] = { comment.length() };
+		size_t postLengths[] = { comment.length() };
 		data = http_multipart_post((char *)urlStream.str().c_str(), postNames, postDatas, postLengths, (char *)(userIDStream.str().c_str()), NULL, (char *)(authUser.SessionID.c_str()), &dataStatus, &dataLength);
 	}
 	else
@@ -1497,12 +1505,10 @@ RequestStatus Client::AddComment(int saveID, std::string comment)
 		lastError = http_ret_text(dataStatus);
 		goto failure;
 	}
-	if(data)
-		free(data);
+	free(data);
 	return RequestOkay;
 failure:
-	if(data)
-		free(data);
+	free(data);
 	return RequestFailure;
 }
 
@@ -1553,12 +1559,10 @@ RequestStatus Client::FavouriteSave(int saveID, bool favourite)
 		lastError = http_ret_text(dataStatus);
 		goto failure;
 	}
-	if(data)
-		free(data);
+	free(data);
 	return RequestOkay;
 failure:
-	if(data)
-		free(data);
+	free(data);
 	return RequestFailure;
 }
 
@@ -1576,7 +1580,7 @@ RequestStatus Client::ReportSave(int saveID, std::string message)
 
 		const char *const postNames[] = { "Reason", NULL };
 		const char *const postDatas[] = { (char*)(message.c_str()) };
-		int postLengths[] = { message.length() };
+		size_t postLengths[] = { message.length() };
 		data = http_multipart_post((char *)urlStream.str().c_str(), postNames, postDatas, postLengths, (char *)(userIDStream.str().c_str()), NULL, (char *)(authUser.SessionID.c_str()), &dataStatus, &dataLength);
 	}
 	else
@@ -1611,12 +1615,10 @@ RequestStatus Client::ReportSave(int saveID, std::string message)
 		lastError = http_ret_text(dataStatus);
 		goto failure;
 	}
-	if(data)
-		free(data);
+	free(data);
 	return RequestOkay;
 failure:
-	if(data)
-		free(data);
+	free(data);
 	return RequestFailure;
 }
 
@@ -1665,13 +1667,40 @@ RequestStatus Client::UnpublishSave(int saveID)
 		lastError = http_ret_text(dataStatus);
 		goto failure;
 	}
-	if(data)
-		free(data);
+	free(data);
 	return RequestOkay;
 failure:
-	if(data)
-		free(data);
+	free(data);
 	return RequestFailure;
+}
+
+RequestStatus Client::PublishSave(int saveID)
+{
+	lastError = "";
+	std::stringstream urlStream;
+	int dataStatus;
+	urlStream << "http://" << SERVER << "/Browse/View.html?ID=" << saveID << "&Key=" << authUser.SessionKey;
+	if (authUser.ID)
+	{
+		std::stringstream userIDStream;
+		userIDStream << authUser.ID;
+		const char *const postNames[] = { "ActionPublish", NULL };
+		const char *const postDatas[] = { "" };
+		size_t postLengths[] = { 1 };
+		char *data = http_multipart_post(urlStream.str().c_str(), postNames, postDatas, postLengths, userIDStream.str().c_str(), NULL, authUser.SessionID.c_str(), &dataStatus, NULL);
+		free(data);
+	}
+	else
+	{
+		lastError = "Not authenticated";
+		return RequestFailure;
+	}
+	if (dataStatus != 302)
+	{
+		lastError = http_ret_text(dataStatus);
+		return RequestFailure;
+	}
+	return RequestOkay;
 }
 
 SaveInfo * Client::GetSave(int saveID, int saveDate)
@@ -1721,7 +1750,7 @@ SaveInfo * Client::GetSave(int saveID, int saveDate)
 			json::Array tagsArray = objDocument["Tags"];
 			std::list<std::string> tempTags;
 
-			for(int j = 0; j < tagsArray.Size(); j++)
+			for (size_t j = 0; j < tagsArray.Size(); j++)
 			{
 				json::String tempTag = tagsArray[j];
 				tempTags.push_back(tempTag.Value());
@@ -1755,7 +1784,7 @@ SaveInfo * Client::GetSave(int saveID, int saveDate)
 	}
 	else
 	{
-		if (data) free(data);
+		free(data);
 		lastError = http_ret_text(dataStatus);
 	}
 	return NULL;
@@ -1797,7 +1826,7 @@ RequestBroker::Request * Client::GetSaveAsync(int saveID, int saveDate)
 				json::Array tagsArray = objDocument["Tags"];
 				std::list<std::string> tempTags;
 
-				for(int j = 0; j < tagsArray.Size(); j++)
+				for (size_t j = 0; j < tagsArray.Size(); j++)
 				{
 					json::String tempTag = tagsArray[j];
 					tempTags.push_back(tempTag.Value());
@@ -1890,7 +1919,7 @@ RequestBroker::Request * Client::GetCommentsAsync(int saveID, int start, int cou
 				json::Array commentsArray;
 				json::Reader::Read(commentsArray, dataStream);
 
-				for(int j = 0; j < commentsArray.Size(); j++)
+				for (size_t j = 0; j < commentsArray.Size(); j++)
 				{
 					json::Number tempUserID = commentsArray[j]["UserID"];
 					json::String tempUsername = commentsArray[j]["Username"];
@@ -1943,7 +1972,7 @@ std::vector<SaveComment*> * Client::GetComments(int saveID, int start, int count
 			json::Array commentsArray;
 			json::Reader::Read(commentsArray, dataStream);
 
-			for(int j = 0; j < commentsArray.Size(); j++)
+			for (size_t j = 0; j < commentsArray.Size(); j++)
 			{
 				json::Number tempUserID = commentsArray[j]["UserID"];
 				json::String tempUsername = commentsArray[j]["Username"];
@@ -1968,8 +1997,7 @@ std::vector<SaveComment*> * Client::GetComments(int saveID, int start, int count
 	{
 		lastError = http_ret_text(dataStatus);
 	}
-	if(data)
-		free(data);
+	free(data);
 	return commentArray;
 }
 
@@ -2001,7 +2029,7 @@ std::vector<std::pair<std::string, int> > * Client::GetTags(int start, int count
 			json::Number tempCount = objDocument["TagTotal"];
 			resultCount = tempCount.Value();
 			json::Array tagsArray = objDocument["Tags"];
-			for(int j = 0; j < tagsArray.Size(); j++)
+			for (size_t j = 0; j < tagsArray.Size(); j++)
 			{
 				json::Number tagCount = tagsArray[j]["Count"];
 				json::String tag = tagsArray[j]["Tag"];
@@ -2017,8 +2045,7 @@ std::vector<std::pair<std::string, int> > * Client::GetTags(int start, int count
 	{
 		lastError = http_ret_text(dataStatus);
 	}
-	if(data)
-		free(data);
+	free(data);
 	return tagArray;
 }
 
@@ -2068,7 +2095,7 @@ std::vector<SaveInfo*> * Client::SearchSaves(int start, int count, std::string q
 			json::Number tempCount = objDocument["Count"];
 			resultCount = tempCount.Value();
 			json::Array savesArray = objDocument["Saves"];
-			for(int j = 0; j < savesArray.Size(); j++)
+			for (size_t j = 0; j < savesArray.Size(); j++)
 			{
 				json::Number tempID = savesArray[j]["ID"];
 				json::Number tempDate = savesArray[j]["Date"];
@@ -2100,8 +2127,7 @@ std::vector<SaveInfo*> * Client::SearchSaves(int start, int count, std::string q
 	{
 		lastError = http_ret_text(dataStatus);
 	}
-	if(data)
-		free(data);
+	free(data);
 	return saveArray;
 }
 
@@ -2273,7 +2299,7 @@ std::list<std::string> * Client::RemoveTag(int saveID, std::string tag)
 
 				tags = new std::list<std::string>();
 
-				for(int j = 0; j < tagsArray.Size(); j++)
+				for (size_t j = 0; j < tagsArray.Size(); j++)
 				{
 					json::String tempTag = tagsArray[j];
 					tags->push_back(tempTag.Value());
@@ -2289,8 +2315,7 @@ std::list<std::string> * Client::RemoveTag(int saveID, std::string tag)
 	{
 		lastError = http_ret_text(dataStatus);
 	}
-	if(data)
-		free(data);
+	free(data);
 	return tags;
 }
 
@@ -2334,7 +2359,7 @@ std::list<std::string> * Client::AddTag(int saveID, std::string tag)
 
 				tags = new std::list<std::string>();
 
-				for(int j = 0; j < tagsArray.Size(); j++)
+				for (size_t j = 0; j < tagsArray.Size(); j++)
 				{
 					json::String tempTag = tagsArray[j];
 					tags->push_back(tempTag.Value());
@@ -2350,8 +2375,7 @@ std::list<std::string> * Client::AddTag(int saveID, std::string tag)
 	{
 		lastError = http_ret_text(dataStatus);
 	}
-	if(data)
-		free(data);
+	free(data);
 	return tags;
 }
 

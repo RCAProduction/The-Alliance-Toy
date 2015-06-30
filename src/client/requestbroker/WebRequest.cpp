@@ -60,8 +60,7 @@ RequestBroker::ProcessResponse WebRequest::Process(RequestBroker & rb)
 //#ifdef DEBUG
 				std::cout << typeid(*this).name() << " Request for " << URL << " failed with status " << status << std::endl;
 //#endif	
-				if(data)
-					free(data);
+				free(data);
 
 				return RequestBroker::Failed;
 			}
@@ -103,7 +102,7 @@ RequestBroker::ProcessResponse WebRequest::Process(RequestBroker & rb)
 				std::strcpy(userName, format::NumberToString<int>(user.ID).c_str());
 				std::strcpy(userSession, user.SessionID.c_str());
 				HTTPContext = http_multipart_post_async((char*)URL.c_str(), postNames, postData, postLength, userName, NULL, userSession);
-				delete userSession;
+				delete[] userSession;
 			}
 			else
 			{
