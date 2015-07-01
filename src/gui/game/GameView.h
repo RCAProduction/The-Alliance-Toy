@@ -91,7 +91,6 @@ private:
 	ui::Button * displayModeButton;
 	ui::Button * pauseButton;
 	ui::Button * serverButton;
-	ui::Point currentMouse;
 
 	ui::Button * colourPicker;
 	vector<ToolButton*> colourPresets;
@@ -104,7 +103,7 @@ private:
 	SelectMode selectMode;
 	ui::Point selectPoint1;
 	ui::Point selectPoint2;
-
+	
 	ui::Point currentMouse;
 	ui::Point mousePosition;
 

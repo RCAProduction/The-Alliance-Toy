@@ -159,12 +159,6 @@ GameView::GameView():
 
 	FPSGvar(false),
 	INFOvar(false),
-	ren(NULL),
-
-	activeBrush(NULL),
-	currentMouse(0, 0),
-	toolIndex(0),
-
 	zoomEnabled(false),
 	zoomCursorFixed(false),
 	mouseInZoom(false),
@@ -457,7 +451,7 @@ GameView::GameView():
 
 		}
 	};
-		serverButton = new ui::Button(ui::Point(Size.X-177, Size.Y-16), ui::Point(17, 15), "S", "Switch Servers");
+		serverButton = new ui::Button(ui::Point(Size.X-177, Size.Y-16), ui::Point(17, 15), "S", "Switch Servers, normally on "+ SERVER);
 	serverButton->SetTogglable(true); 
 	AddComponent(serverButton);
 	

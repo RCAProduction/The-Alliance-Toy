@@ -4943,14 +4943,8 @@ Simulation::~Simulation()
 }
 
 Simulation::Simulation():
-	replaceModeSelected(0),
-	replaceModeFlags(0),
 	debug_currentParticle(0),
-	ISWIRE(0),
-	force_stacking_check(0),
-	emp_decor(0),
 	lightningRecreate(0),
-	gravWallChanged(false),
 	edgeMode(0),
 	gravityMode(0),
 	legacy_enable(0),
