@@ -56,19 +56,16 @@ int Element_VSPK::update(UPDATE_FUNC_ARGS)
 	if (parts[i].life<=0)
 	{
 
-		sim->part_change_type(i,x,y,ct);
+		sim->part_change_type(i,x,y,parts[i].ctype);
 
 		return 0;
 	}
 	
 	
-	
-		switch(ct)
-	{
-	case PT_VSPK:
-		sim->kill_part(i);
-		return 1;
-		}
+	if(parts[i].ctype==PT_VSPK){
+	sim->kill_part(i);
+	return 1;
+	}
 	
 	for (rx=-2; rx<3; rx++)
 		for (ry=-2; ry<3; ry++)
@@ -78,14 +75,14 @@ int Element_VSPK::update(UPDATE_FUNC_ARGS)
 				if (!r)
 					continue;
 				receiver = r&0xFF;
-				sender = ct;
+				sender = parts[i].ctype;
 
 
 				//if (parts[r>>8].life==0) {
 					parts[r>>8].life = 40;
-					//sim->part_change_type(r>>8,x+rx,y+ry,PT_VSPK);
+					sim->part_change_type(r>>8,x+rx,y+ry,PT_VSPK);
 					parts[i].life = 40;
-					parts[i].ctype = receiver;
+					parts[r>>8].ctype = receiver;
 
 				//}
 
