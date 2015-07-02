@@ -1,5 +1,5 @@
 #include "simulation/Elements.h"
-//#TPT-Directive ElementClass Element_ZRNT PT_ZRNT 180
+//#TPT-Directive ElementClass Element_ZRNT PT_ZRNT 179
 Element_ZRNT::Element_ZRNT()
 {
 	Identifier = "DEFAULT_PT_ZRNT";
