@@ -1,5 +1,5 @@
 #include "simulation/Elements.h"
-//#TPT-Directive ElementClass Element_VSPK PT_VSPK 181
+//#TPT-Directive ElementClass Element_VSPK PT_VSPK 180
 Element_VSPK::Element_VSPK()
 {
 	Identifier = "DEFAULT_PT_VSPK";
@@ -49,45 +49,51 @@ Element_VSPK::Element_VSPK()
 //#TPT-Directive ElementHeader Element_VSPK static int update(UPDATE_FUNC_ARGS)
 int Element_VSPK::update(UPDATE_FUNC_ARGS)
 {
-	int r, rx, ry, nearp, pavg, ct = parts[i].ctype, sender, receiver;
+int r, rx, ry, ct = parts[i].ctype, sender, receiver, count;
 
-	//parts[i].life = 40;
-
-	if (parts[i].life<=0)
+	if(ct==PT_NONE || ct==PT_VSPK)
 	{
-
-		sim->part_change_type(i,x,y,parts[i].ctype);
-
-		return 0;
+		sim->kill_part(i);
+		return 1;
 	}
 	
-	
-	if(parts[i].ctype==PT_VSPK){
-	sim->kill_part(i);
-	return 1;
+	if(parts[i].life<=0 || ct<=0)
+	{
+		parts[i].life = 4;
+		sim->part_change_type(i,x,y,ct);
+		return 1;
 	}
 	
-	for (rx=-2; rx<3; rx++)
-		for (ry=-2; ry<3; ry++)
+	for (rx=-1; rx<2; rx++)
+		for (ry=-1; ry<2; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
 			{
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
 				receiver = r&0xFF;
-				sender = parts[i].ctype;
+				sender = ct;
 
 
-				//if (parts[r>>8].life==0) {
-					parts[r>>8].life = 40;
-					sim->part_change_type(r>>8,x+rx,y+ry,PT_VSPK);
-					parts[i].life = 40;
+				if (parts[r>>8].life==0) {
+					count = parts[i].life - 1;
+					
+						parts[i].life = count;
+						parts[r>>8].life = count;
+					
+							sim->part_change_type(r>>8,x+rx,y+ry,PT_VSPK);
+					
+						parts[i].life = count;
+						
 					parts[r>>8].ctype = receiver;
 
-				//}
+				}
 
 			}
-	return 0;
+	
+	
+
+return 0;
 }
 
 
