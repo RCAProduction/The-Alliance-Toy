@@ -94,6 +94,16 @@ int Element_PHOT::update(UPDATE_FUNC_ARGS)
 					parts[i].vx += ((float)(rand()%1000-500))/1000.0f;
 					parts[i].vy += ((float)(rand()%1000-500))/1000.0f;
 				}
+				else if ((r&0xFF) == PT_HATT)
+				{
+					sim->part_change_type(r>>8,x+rx,y+ry,PT_PHOT);
+					sim->create_part(r>>8, x+rx, y+ry, PT_PHOT);
+					parts[i].temp = 10000;
+					parts[i].life++;
+					sim->pv[y/CELL][x/CELL] += 10.0f * CFDS;
+					parts[i].vx += ((float)(rand()%1000-500))/1000.0f;
+					parts[i].vy += ((float)(rand()%1000-500))/1000.0f;
+				}
 			}
 	return 0;
 }
