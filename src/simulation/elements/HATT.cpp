@@ -1,5 +1,5 @@
 #include "simulation/Elements.h"
-//#TPT-Directive ElementClass Element_HATT PT_HATT 182
+//#TPT-Directive ElementClass Element_HATT PT_HATT 181
 Element_HATT::Element_HATT()
 {
 	Identifier = "DEFAULT_PT_HATT";
@@ -26,7 +26,7 @@ Element_HATT::Element_HATT()
 	
 	Weight = 31;
 	
-	Temperature = R_TEMP-2.0f	+273.15f;
+	Temperature = R_TEMP-2.0f	+325.15f;
 	HeatConduct = 251;
 	Description = "Hattonite.";
 	
