@@ -42,18 +42,54 @@ Element_CBNF::Element_CBNF()
 	HighTemperature = NT;
 	HighTemperatureTransition = NT;
 	
-	Update = NULL;
+	Update = &Element_CBNF::update;
 	
 }
 
 //#TPT-Directive ElementHeader Element_CBNF static int update(UPDATE_FUNC_ARGS)
 int Element_CBNF::update(UPDATE_FUNC_ARGS)
 {
-sim->kill_part(i);
-/*if(sim->pv[y/CELL][x/CELL]>=2 || parts[i].temp>=300)
-{
-	sim->part_change_type(i,x,y,PT_CRBN);
-}*/
-return 0;
+	if(sim->pv[y/CELL][x/CELL]>=(223+-((float)(rand()%1000-500))/500.0f))
+	{
+		if((rand() % 10)>5)
+		{
+			sim->part_change_type(i,x,y,PT_BGLA);
+		}
+		else
+		{
+			sim->part_change_type(i,x,y,PT_CRBN);
+		}
+	}
+int r, rx, ry;
+	for (rx=-1; rx<2; rx++)
+		for (ry=-1; ry<2; ry++)
+			if (BOUNDS_CHECK) {
+				r = pmap[y+ry][x+rx];
+				if (!r)
+					continue;
+				if(parts[i].temp>=1000 && parts[r>>8].temp<=parts[i].temp-200)
+				{
+					parts[i].life = parts[i].life+50;
+					if(parts[i].life>=500)
+					{
+						if((rand() % 10)>8)
+						{
+							if(parts[i].temp>=2000)
+							{
+								sim->part_change_type(i,x,y,PT_BCOL);
+							}
+							else
+							{
+								sim->part_change_type(i,x,y,PT_BGLA);
+							}
+						}
+						else
+						{
+							sim->part_change_type(i,x,y,PT_CRBN);
+						}
+					}
+				}
+			}
+	return 0;
 }
 Element_CBNF::~Element_CBNF() {}
