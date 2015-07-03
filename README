@@ -1,8 +1,8 @@
-The Powder Toy - June 2014
+The Powder Toy - July 2015
 
-Get the latest version here: http://powdertoy.co.uk/Download.html
+Get the latest official version here: http://powdertoy.co.uk/Download.html
 
-To use online features such as saving, you need to register at: http://powdertoy.co.uk/Register.html
+To use online features such as saving, you need to register at: http://powdertoy.co.uk/Register.html and http://thepowdertoy.net
 
 
 Have you ever wanted to blow something up? Or maybe you always dreamt of operating an atomic power plant? Do you have a will to develop your own CPU? The Powder Toy lets you to do all of these, and even more!
@@ -30,6 +30,7 @@ Matthew "me4502"
 MaksProg
 jacob1
 mniip
+RCAProduction
 
 
 Instructions:
@@ -87,6 +88,7 @@ Shift + Mouse scroll     Change horizontal brush size
 Shift + R                Horizontal mirror for selected area when pasting stamps
 Ctrl + Shift + R         Vertical mirror for selected area when pasting stamps
 R                        Rotate selected area counterclockwise when pasting stamps
+M                        Turns on the "realistic mode" which resets the temperature of every part every 10 frames
 
 Only the left Ctrl, Shift, and Alt buttons are enabled to work, not the ones on the right
 
