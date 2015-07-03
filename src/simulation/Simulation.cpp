@@ -2715,7 +2715,17 @@ int Simulation::create_part(int p, int x, int y, int tv)
 		
 		if(type==PT_VSPK)
 		{
+			parts[index].life = 400;
 			return 1;
+		}
+		if(!(elements[type].Properties & PROP_CONDUCTS))
+		{
+			return 1;
+		}
+		if (p==-2 && ((elements[type].Properties & PROP_DRAWONCTYPE) || type==PT_CRAY))
+		{
+			parts[index].ctype = PT_VSPK;
+			return index;
 		}
 		
 		parts[index].type = PT_VSPK;
@@ -2723,8 +2733,8 @@ int Simulation::create_part(int p, int x, int y, int tv)
 		parts[index].ctype = type;
 		pmap[y][x] = (pmap[y][x]&~0xFF) | PT_VSPK;
 		
-		if (parts[index].temp+10.0f < 673.0f && !legacy_enable && (type==PT_METL || type == PT_BMTL || type == PT_BRMT || type == PT_PSCN || type == PT_NSCN || type == PT_ETRD || type == PT_NBLE || type == PT_IRON))
-			parts[index].temp = parts[index].temp+10.0f;
+		if (!legacy_enable && (type==PT_METL || type == PT_BMTL || type == PT_BRMT || type == PT_PSCN || type == PT_NSCN || type == PT_ETRD || type == PT_NBLE || type == PT_IRON))
+			parts[index].temp = parts[index].temp+50.0f;
 		return index;
 	}
 
@@ -4697,7 +4707,7 @@ if(REALvar==true && count>=20)
 	{
 		count = 0;
 		for (int i = 0; i < parts_lastActiveIndex; i++) { parts[i].temp = elements[parts[i].type].Temperature; }
-		parts[1].temp = elements[1].Temperature;
+		parts[1].temp = elements[1].Temperature;		
 	}
 
 	int i, x, y, t;
