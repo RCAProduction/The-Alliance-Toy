@@ -66,13 +66,14 @@ int Element_VSPK::update(UPDATE_FUNC_ARGS)
 
 		return 0;
 	}
-	//Some functions of VSPK based on ctype (what it is on)
+	//Kills VSPK id it has a ctype of itself.
 	switch(ct)
 	{
 	case PT_VSPK:
 		sim->kill_part(i);
 		return 1;
 	}
+	
 	for (rx=-2; rx<3; rx++)
 		for (ry=-2; ry<3; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
@@ -85,22 +86,28 @@ int Element_VSPK::update(UPDATE_FUNC_ARGS)
 				pavg = sim->parts_avg(r>>8, i,PT_INSL);
 				//receiver is the element VSPK is trying to conduct to
 				//sender is the element the VSPK is on
-				//First, some checks usually for (de)activation of elements
 
-
-				if (pavg == PT_INSL) continue; //Insulation blocks everything past here
+				if (pavg == PT_INSL || pavg == PT_CBNF) continue; //Insulation and CBNF blocks everything past here
 				if (!((sim->elements[receiver].Properties&PROP_CONDUCTS)||receiver==PT_INST||receiver==PT_QRTZ)) continue; //Stop non-conducting receivers, allow INST and QRTZ as special cases
 
 				if (parts[r>>8].life==0) {
 					parts[r>>8].life = parts[i].life - 1;
 					parts[r>>8].ctype = receiver;
 					sim->part_change_type(r>>8,x+rx,y+ry,PT_VSPK);
+				//return 0;
 					if (parts[r>>8].type!=PT_ZRNT)
-						parts[r>>8].temp = parts[r>>8].temp+10.0f;
+					{
+						parts[r>>8].temp = 4500;
+						parts[i].life = parts[i].life - 300;
+						parts[i].temp = 5000;
+						if(parts[i].ctype==PT_ZRNT)
+						{
+							parts[i].temp = 273.15;
+						}
+					}
 					if(parts[i].temp>=4500)
 						sim->part_change_type(i,x,y,ct);
-					//if(parts[i].x+1==PT_VSPK || parts[i].y+1==PT_VSPK)
-					//	parts[i].life = parts[i].life;
+					//if(
 				}
 			}
 	return 0;
