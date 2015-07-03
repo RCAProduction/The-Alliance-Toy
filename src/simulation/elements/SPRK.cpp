@@ -83,7 +83,7 @@ int Element_SPRK::update(UPDATE_FUNC_ARGS)
 		if (parts[i].life==1)
 		{
 			nearp = sim->nearest_part(i, PT_ETRD, -1);
-			if (nearp!=-1 && sim->parts_avg(i, nearp, PT_INSL)!=PT_INSL)
+			if (nearp!=-1 && sim->parts_avg(i, nearp, PT_INSL)!=PT_INSL && sim->parts_avg(i, nearp, PT_CBNF)!=PT_CBNF)
 			{
 				sim->CreateLine(x, y, (int)(parts[nearp].x+0.5f), (int)(parts[nearp].y+0.5f), PT_PLSM);
 				sim->part_change_type(i,x,y,ct);
@@ -181,7 +181,7 @@ int Element_SPRK::update(UPDATE_FUNC_ARGS)
 				switch (receiver)
 				{
 				case PT_SWCH:
-					if (pavg!=PT_INSL && parts[i].life<4)
+					if (pavg!=PT_INSL && pavg!=PT_CBNF && parts[i].life<4)
 					{
 						if(sender==PT_PSCN && parts[r>>8].life<10) {
 							parts[r>>8].life = 10;
@@ -194,7 +194,7 @@ int Element_SPRK::update(UPDATE_FUNC_ARGS)
 					}
 					break;
 				case PT_SPRK:
-					if (pavg!=PT_INSL && parts[i].life<4)
+					if (pavg!=PT_INSL && pavg!=PT_CBNF && parts[i].life<4)
 					{
 						if (parts[r>>8].ctype==PT_SWCH)
 						{
@@ -227,14 +227,14 @@ int Element_SPRK::update(UPDATE_FUNC_ARGS)
 					}
 					continue;
 				case PT_PPIP:
-					if (parts[i].life == 3 && pavg!=PT_INSL)
+					if (parts[i].life == 3 && pavg!=PT_INSL && pavg!=PT_CBNF)
 					{
 						if (sender == PT_NSCN || sender == PT_PSCN || sender == PT_INST)
 							Element_PPIP::flood_trigger(sim, x+rx, y+ry, sender);
 					}
 					continue;
 				case PT_NTCT: case PT_PTCT: case PT_INWR:
-					if (sender==PT_METL && pavg!=PT_INSL && parts[i].life<4)
+					if (sender==PT_METL && pavg!=PT_INSL && pavg!=PT_CBNF && parts[i].life<4)
 					{
 						parts[r>>8].temp = 473.0f;
 						if (receiver==PT_NTCT||receiver==PT_PTCT)
@@ -243,7 +243,7 @@ int Element_SPRK::update(UPDATE_FUNC_ARGS)
 					break;
 				}
 
-				if (pavg == PT_INSL) continue; //Insulation blocks everything past here
+				if (pavg == PT_INSL || pavg == PT_CBNF) continue; //Insulation blocks everything past here
 				if (!((sim->elements[receiver].Properties&PROP_CONDUCTS)||receiver==PT_INST||receiver==PT_QRTZ)) continue; //Stop non-conducting receivers, allow INST and QRTZ as special cases
 				if (abs(rx)+abs(ry)>=4 &&sender!=PT_SWCH&&receiver!=PT_SWCH) continue; //Only switch conducts really far
 				if (receiver==sender && receiver!=PT_INST && receiver!=PT_QRTZ) goto conduct; //Everything conducts to itself, except INST.
