@@ -49,23 +49,32 @@ Element_VSPK::Element_VSPK()
 //#TPT-Directive ElementHeader Element_VSPK static int update(UPDATE_FUNC_ARGS)
 int Element_VSPK::update(UPDATE_FUNC_ARGS)
 {
-int r, rx, ry, ct = parts[i].ctype, sender, receiver, count;
+	int r, rx, ry, nearp, pavg, ct = parts[i].ctype, sender, receiver;
+	Element_FIRE::update(UPDATE_FUNC_SUBCALL_ARGS);
 
-	if(ct==PT_NONE || ct==PT_VSPK)
+	if (parts[i].life<=0)
 	{
+		if (ct!=PT_ZRNT)
+		{
+			parts[i].temp = 5000;
+		}
+		if (ct<=0 || ct>=PT_NUM || !sim->elements[parts[i].ctype].Enabled)
+			sim->kill_part(i);
+		sim->part_change_type(i,x,y,ct);
+		parts[i].ctype = PT_NONE;
+		parts[i].life = 4;
+
+		return 0;
+	}
+	//Some functions of VSPK based on ctype (what it is on)
+	switch(ct)
+	{
+	case PT_VSPK:
 		sim->kill_part(i);
 		return 1;
 	}
-	
-	if(parts[i].life<=0 || ct<=0)
-	{
-		parts[i].life = 4;
-		sim->part_change_type(i,x,y,ct);
-		return 1;
-	}
-	
-	for (rx=-1; rx<2; rx++)
-		for (ry=-1; ry<2; ry++)
+	for (rx=-2; rx<3; rx++)
+		for (ry=-2; ry<3; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
 			{
 				r = pmap[y+ry][x+rx];
@@ -73,27 +82,28 @@ int r, rx, ry, ct = parts[i].ctype, sender, receiver, count;
 					continue;
 				receiver = r&0xFF;
 				sender = ct;
+				pavg = sim->parts_avg(r>>8, i,PT_INSL);
+				//receiver is the element VSPK is trying to conduct to
+				//sender is the element the VSPK is on
+				//First, some checks usually for (de)activation of elements
 
+
+				if (pavg == PT_INSL) continue; //Insulation blocks everything past here
+				if (!((sim->elements[receiver].Properties&PROP_CONDUCTS)||receiver==PT_INST||receiver==PT_QRTZ)) continue; //Stop non-conducting receivers, allow INST and QRTZ as special cases
 
 				if (parts[r>>8].life==0) {
-					count = parts[i].life - 1;
-					
-						parts[i].life = count;
-						parts[r>>8].life = count;
-					
-							sim->part_change_type(r>>8,x+rx,y+ry,PT_VSPK);
-					
-						parts[i].life = count;
-						
+					parts[r>>8].life = parts[i].life - 1;
 					parts[r>>8].ctype = receiver;
-
+					sim->part_change_type(r>>8,x+rx,y+ry,PT_VSPK);
+					if (parts[r>>8].type!=PT_ZRNT)
+						parts[r>>8].temp = parts[r>>8].temp+10.0f;
+					if(parts[i].temp>=4500)
+						sim->part_change_type(i,x,y,ct);
+					//if(parts[i].x+1==PT_VSPK || parts[i].y+1==PT_VSPK)
+					//	parts[i].life = parts[i].life;
 				}
-
 			}
-	
-	
-
-return 0;
+	return 0;
 }
 
 
