@@ -94,7 +94,7 @@ int Simulation::Load(int fullX, int fullY, GameSave * save)
 			continue;
 
 		if (tempPart.ctype > 0 && tempPart.ctype < PT_NUM)
-			if (tempPart.type == PT_CLNE || tempPart.type == PT_PCLN || tempPart.type == PT_BCLN || tempPart.type == PT_PBCN || tempPart.type == PT_STOR || tempPart.type == PT_CONV || tempPart.type == PT_STKM || tempPart.type == PT_STKM2 || tempPart.type == PT_FIGH || tempPart.type == PT_LAVA || tempPart.type == PT_SPRK || tempPart.type == PT_PSTN || tempPart.type == PT_CRAY || tempPart.type == PT_DTEC || tempPart.type == PT_DRAY)
+			if (tempPart.type == PT_CLNE || tempPart.type == PT_PCLN || tempPart.type == PT_BCLN || tempPart.type == PT_PBCN || tempPart.type == PT_STOR || tempPart.type == PT_CONV || tempPart.type == PT_STKM || tempPart.type == PT_STKM2 || tempPart.type == PT_FIGH || tempPart.type == PT_LAVA || tempPart.type == PT_SPRK || tempPart.type == PT_VSPK || tempPart.type == PT_PSTN || tempPart.type == PT_CRAY || tempPart.type == PT_DTEC || tempPart.type == PT_DRAY)
 			{
 				tempPart.ctype = partMap[tempPart.ctype];
 			}
@@ -1926,6 +1926,7 @@ void Simulation::init_can_move()
 
 		//spark shouldn't move
 		can_move[PT_SPRK][destinationType] = 0;
+		can_move[PT_VSPK][destinationType] = 0;
 	}
 	for (movingType = 1; movingType < PT_NUM; movingType++)
 	{
@@ -2373,6 +2374,23 @@ int Simulation::pn_junction_sprk(int x, int y, int pt)
 	return 1;
 }
 
+int Simulation::pn_junction_vspk(int x, int y, int pt)
+{
+	int r = pmap[y][x];
+	if ((r & 0xFF) != pt)
+		return 0;
+	r >>= 8;
+	if (parts[r].type != pt)
+		return 0;
+	if (parts[r].life != 0)
+		return 0;
+
+	parts[r].ctype = pt;
+	part_change_type(r,x,y,PT_VSPK);
+	parts[r].life = 40-0;
+	return 1;
+}
+
 void Simulation::photoelectric_effect(int nx, int ny)//create sparks from PHOT when hitting PSCN and NSCN
 {
 	unsigned r = pmap[ny][nx];
@@ -2688,6 +2706,26 @@ int Simulation::create_part(int p, int x, int y, int tv)
 				pv[y/CELL+1][x/CELL+1] += 0.03f;
 		}
 		return -1;
+	}
+	
+	if(t==PT_VSPK)
+	{
+		int type = pmap[y][x]&0xFF;
+		int index = pmap[y][x]>>8;
+		
+		if(type==PT_VSPK)
+		{
+			return 1;
+		}
+		
+		parts[index].type = PT_VSPK;
+		parts[index].life = 400;
+		parts[index].ctype = type;
+		pmap[y][x] = (pmap[y][x]&~0xFF) | PT_VSPK;
+		
+		if (parts[index].temp+10.0f < 673.0f && !legacy_enable && (type==PT_METL || type == PT_BMTL || type == PT_BRMT || type == PT_PSCN || type == PT_NSCN || type == PT_ETRD || type == PT_NBLE || type == PT_IRON))
+			parts[index].temp = parts[index].temp+10.0f;
+		return index;
 	}
 
 	if (t==PT_SPRK)
