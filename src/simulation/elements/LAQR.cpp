@@ -10,9 +10,9 @@ Element_LAQR::Element_LAQR()
 	Enabled = 1;
 	
 	Advection = 0.0f;
-	AirDrag = 0.09f * CFDS;
-	AirLoss = 0.90f;
-	Loss = 0.05f;
+	AirDrag = 0.01f * CFDS;
+	AirLoss = 0.01f;
+	Loss = 0.00f;
 	Collision = 0.0f;
 	Gravity = 0.1f;
 	Diffusion = 0.05f;
@@ -39,16 +39,29 @@ Element_LAQR::Element_LAQR()
 	HighPressureTransition = NT;
 	LowTemperature = ITL;
 	LowTemperatureTransition = NT;
-	HighTemperature = NT;
-	HighTemperatureTransition = NT;
+	HighTemperature = 1500.00f;
+	HighTemperatureTransition = PT_BGLA;
 	
-	Update = NULL;
+	Update = &Element_LAQR::update;
 	
 }
 
 //#TPT-Directive ElementHeader Element_LAQR static int update(UPDATE_FUNC_ARGS)
 int Element_LAQR::update(UPDATE_FUNC_ARGS)
 {
-return 0;
+int r, rx, ry;
+	for (rx=-1; rx<2; rx++)
+		for (ry=-1; ry<2; ry++)
+			if (BOUNDS_CHECK) {
+				r = pmap[y+ry][x+rx];
+				if (!r)
+					continue;
+				if(parts[r>>8].type==PT_CRBN && parts[i].temp>=600 && parts[r>>8].temp>=600 && sim->pv[y/CELL][x/CELL]>=15)
+				{
+					sim->part_change_type(r>>8,x,y,PT_CBNF);
+					sim->part_change_type(i,x,y,PT_CBNF);
+				}
+			}
+	return 0;
 }
 Element_LAQR::~Element_LAQR() {}
