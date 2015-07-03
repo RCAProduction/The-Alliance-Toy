@@ -31,7 +31,7 @@ Element_HATT::Element_HATT()
 	Description = "Hattonite.";
 	
 	State = ST_LIQUID;
-	Properties = TYPE_LIQUID|PROP_NEUTPASS;
+	Properties = TYPE_LIQUID;
 	
 	LowPressure = IPL;
 	LowPressureTransition = NT;
@@ -70,11 +70,11 @@ int Element_HATT::update(UPDATE_FUNC_ARGS)
 					{
 						// If neighbour life+1 fits in the free capacity for this particle, absorb neighbour
 						// Condition is written in this way so that large neighbour life values don't cause integer overflow
-						if (parts[r>>8].life <= maxlife - parts[i].life - 1)
+						/*if (parts[r>>8].life <= maxlife - parts[i].life - 1)
 						{
 							parts[i].life += parts[r>>8].life + 1;
 							sim->kill_part(r>>8);
-						}
+						}*/
 					}
 				}
 	}
