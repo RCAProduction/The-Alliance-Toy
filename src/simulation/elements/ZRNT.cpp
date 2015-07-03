@@ -24,7 +24,7 @@ Element_ZRNT::Element_ZRNT()
 	Meltable = 1;
 	Hardness = 1;
 	
-	Weight = 500;
+	Weight = 150;
 	
 	Temperature = R_TEMP+0.0f	+273.15f;
 	HeatConduct = 251;
