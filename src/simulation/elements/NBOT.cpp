@@ -50,11 +50,11 @@ Element_NBOT::Element_NBOT()
 int Element_NBOT::update(UPDATE_FUNC_ARGS)
 {
 
-int r, rx, ry, ct = parts[i].ctype;
+int r, rx, ry, ct = ct;
 
 if(ct==PT_NBOT)
 {
-	parts[i].ctype = PT_NONE;
+	ct = PT_NONE;
 }
 if(parts[i].temp>=1825.15)
 	sim->part_change_type(i,x,y,PT_BREC);
@@ -62,7 +62,6 @@ if(parts[i].life<=0 || parts[i].tmp2==0)
 {
 	parts[i].life = 0;
 	parts[i].tmp2 = 0;
-	parts[i].ctype = PT_NONE;
 }
 if(parts[i].life>=1 && parts[i].tmp2==-1) //Movement when active
 {
@@ -93,13 +92,13 @@ if(parts[i].life>=1 || parts[i].tmp2==-1) //If active remove life
 					parts[i].life = 255;
 					parts[i].tmp2 = -1; //Set bot as active
 				}
+				if(parts[r>>8].type==PT_NBOT && parts[r>>8].tmp2==-1 && parts[i].tmp2==0)
+				{
+					parts[i].tmp2 = -1;
+				}
 				if(parts[r>>8].type==PT_PHOT || parts[r>>8].type==PT_NEUT || parts[r>>8].type==PT_ELEC || parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_VSPK) //Charge bots from energy
-					if(parts[i].tmp2==-1)
-					{
-						parts[i].life = 255;
-						if(parts[r>>8].type!=PT_SPRK && parts[r>>8].type!=PT_VSPK)
-							sim->kill_part(r>>8); 
-					}
+					parts[i].life = 255;
+
 				if(parts[i].tmp==0 && parts[r>>8].type==ct) //Check for retrieve flag. It is the default, 0
 				{
 					parts[i].tmp = 11; //Set as full
@@ -109,7 +108,7 @@ if(parts[i].life>=1 || parts[i].tmp2==-1) //If active remove life
 				{
 					parts[i].vx = 0;
 					parts[i].vy = 0;
-					if(parts[i].ctype==PT_QRTZ || parts[i].ctype==PT_PQRT)
+					if(ct==PT_QRTZ || ct==PT_PQRT)
 					{
 						parts[i].tmp2 = 5;
 					}
@@ -117,8 +116,8 @@ if(parts[i].life>=1 || parts[i].tmp2==-1) //If active remove life
 					{
 						parts[i].tmp2 = 0;
 					}
-					sim->part_change_type(i,x,y,parts[i].ctype);
-					parts[i].ctype = PT_NONE;
+					sim->part_change_type(i,x,y,ct);
+					ct = PT_NONE;
 				}
 			}
 	return 0;
