@@ -54,10 +54,6 @@ int Element_VSPK::update(UPDATE_FUNC_ARGS)
 
 	if (parts[i].life<=0)
 	{
-		if (ct!=PT_ZRNT)
-		{
-			parts[i].temp = 5000;
-		}
 		if (ct<=0 || ct>=PT_NUM || !sim->elements[parts[i].ctype].Enabled)
 			sim->kill_part(i);
 		sim->part_change_type(i,x,y,ct);
@@ -66,7 +62,7 @@ int Element_VSPK::update(UPDATE_FUNC_ARGS)
 
 		return 0;
 	}
-	//Kills VSPK id it has a ctype of itself.
+	//Kills VSPK if it has a ctype of itself.
 	switch(ct)
 	{
 	case PT_VSPK:
@@ -94,20 +90,19 @@ int Element_VSPK::update(UPDATE_FUNC_ARGS)
 					parts[r>>8].life = parts[i].life - 1;
 					parts[r>>8].ctype = receiver;
 					sim->part_change_type(r>>8,x+rx,y+ry,PT_VSPK);
-				//return 0;
-					if (parts[r>>8].type!=PT_ZRNT)
+
+					if (parts[i].ctype!=PT_ZRNT && parts[r>>8].ctype!=PT_ZRNT && parts[r>>8].type!=PT_ZRNT)
 					{
 						parts[r>>8].temp = 4500;
 						parts[i].life = parts[i].life - 300;
 						parts[i].temp = 5000;
-						if(parts[i].ctype==PT_ZRNT)
+						if(parts[i].ctype==PT_ZRNT || parts[r>>8].type==PT_CBNF)
 						{
 							parts[i].temp = 273.15;
 						}
 					}
 					if(parts[i].temp>=4500)
 						sim->part_change_type(i,x,y,ct);
-					//if(
 				}
 			}
 	return 0;
