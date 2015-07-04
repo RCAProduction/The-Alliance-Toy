@@ -50,7 +50,7 @@ Element_NBOT::Element_NBOT()
 int Element_NBOT::update(UPDATE_FUNC_ARGS)
 {
 
-int r, rx, ry, ct = ct;
+int r, rx, ry, ct = parts[i].ctype;
 
 if(ct==PT_NBOT)
 {
@@ -63,7 +63,7 @@ if(parts[i].life<=0 || parts[i].tmp2==0)
 	parts[i].life = 0;
 	parts[i].tmp2 = 0;
 }
-if(parts[i].life>=1 && parts[i].tmp2==-1) //Movement when active
+if(parts[i].life>=1 && parts[i].tmp2==1) //Movement when active
 {
 	parts[i].vx = (rand() % 11)-5;
 	parts[i].vy = (rand() % 11)-5;
@@ -75,7 +75,7 @@ if(parts[i].tmp==1 && parts[i].life<=10 && parts[i].life>=1) //Explode flag
 	sim->part_change_type(i,x,y,PT_FIRW);
 }
 
-if(parts[i].life>=1 || parts[i].tmp2==-1) //If active remove life
+if(parts[i].life>=1 || parts[i].tmp2==1) //If active remove life
 {
 	parts[i].life = parts[i].life-1;
 }
@@ -90,11 +90,11 @@ if(parts[i].life>=1 || parts[i].tmp2==-1) //If active remove life
 				if(parts[r>>8].type==PT_SPRK && parts[r>>8].ctype==PT_PSCN || parts[r>>8].type==PT_VSPK && parts[r>>8].ctype==PT_PSCN)
 				{
 					parts[i].life = 255;
-					parts[i].tmp2 = -1; //Set bot as active
+					parts[i].tmp2 = 1; //Set bot as active
 				}
-				if(parts[r>>8].type==PT_NBOT && parts[r>>8].tmp2==-1 && parts[i].tmp2==0) //Soon will activate touching bots
+				if(parts[r>>8].type==PT_NBOT && parts[r>>8].tmp2==1 && parts[i].tmp2==0) //Soon will activate touching bots
 				{
-					parts[i].tmp2 = -1;
+					parts[i].tmp2 = 1;
 				}
 				if(parts[r>>8].type==PT_PHOT || parts[r>>8].type==PT_NEUT || parts[r>>8].type==PT_ELEC || parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_VSPK) //Charge bots from energy
 					parts[i].life = 255;
