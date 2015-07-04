@@ -56,6 +56,11 @@ int Element_NEUT::update(UPDATE_FUNC_ARGS)
 			if (BOUNDS_CHECK)
 			{
 				r = pmap[y+ry][x+rx];
+				if (parts[r>>8].type==PT_NBOT && parts[r>>8].life<=10000)
+				{
+					parts[r>>8].life = parts[r>>8].life + 500;
+					sim->kill_part(i);
+				}
 				switch (r&0xFF)
 				{
 				case PT_WATR:

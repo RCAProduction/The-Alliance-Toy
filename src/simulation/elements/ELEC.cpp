@@ -58,6 +58,11 @@ int Element_ELEC::update(UPDATE_FUNC_ARGS)
 					r = sim->photons[y+ry][x+rx];
 				if (!r)
 					continue;
+				if (parts[r>>8].type==PT_NBOT && parts[r>>8].life<=10000)
+				{
+					parts[r>>8].life = parts[r>>8].life + 500;
+					sim->kill_part(i);
+				}
 				rt = r&0xFF;
 				switch (rt)
 				{

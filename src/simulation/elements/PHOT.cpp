@@ -63,6 +63,11 @@ int Element_PHOT::update(UPDATE_FUNC_ARGS)
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
+				if (parts[r>>8].type==PT_NBOT && parts[r>>8].life<=10000)
+				{
+					parts[r>>8].life = parts[r>>8].life + 500;
+					sim->kill_part(i);
+				}
 				if ((r&0xFF)==PT_ISOZ || (r&0xFF)==PT_ISZS)
 				{
 					if (!(rand()%400))

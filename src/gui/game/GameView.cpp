@@ -2394,6 +2394,10 @@ if (sample.particle.type==PT_NBOT)
 		tmp2 << "Bot Inactive";
 	if (sample.particle.tmp2==1)
 		tmp2 << "Bot Active";
+	if (sample.particle.tmp2==2)
+		tmp2 << "Bot Active";
+	if (sample.particle.tmp2==3)
+		tmp2 << "Bot Active";
 }
 else
 {

@@ -58,12 +58,16 @@ if(ct==PT_NBOT)
 }
 if(parts[i].temp>=1825.15)
 	sim->part_change_type(i,x,y,PT_BREC);
+if(parts[i].tmp2==2)
+{
+	parts[i].life = 255;
+	parts[i].tmp2 = 3;
+}
 if(parts[i].life<=0 || parts[i].tmp2==0)
 {
-	parts[i].life = 0;
 	parts[i].tmp2 = 0;
 }
-if(parts[i].life>=1 && parts[i].tmp2==1) //Movement when active
+if(parts[i].life>=1 && parts[i].tmp2==1 || parts[i].life>=1 && parts[i].tmp2==3) //Movement when active
 {
 	parts[i].vx = (rand() % 11)-5;
 	parts[i].vy = (rand() % 11)-5;
@@ -74,11 +78,9 @@ if(parts[i].tmp==1 && parts[i].life<=10 && parts[i].life>=1) //Explode flag
 	parts[i].life = 1;
 	sim->part_change_type(i,x,y,PT_FIRW);
 }
-
-if(parts[i].life>=1 || parts[i].tmp2==1) //If active remove life
-{
-	parts[i].life = parts[i].life-1;
-}
+if(parts[i].life<=0)
+	parts[i].life = 0;
+	
 	for (rx=-1; rx<2; rx++)
 		for (ry=-1; ry<2; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
@@ -90,12 +92,13 @@ if(parts[i].life>=1 || parts[i].tmp2==1) //If active remove life
 				if(parts[r>>8].type==PT_SPRK && parts[r>>8].ctype==PT_PSCN || parts[r>>8].type==PT_VSPK && parts[r>>8].ctype==PT_PSCN)
 				{
 					parts[i].life = 255;
-					parts[i].tmp2 = 1; //Set bot as active
+					parts[i].tmp2 = 1; //Set bot as active from PSCN
 				}
-				if(parts[r>>8].type==PT_NBOT && parts[r>>8].tmp2==1 && parts[i].tmp2==0) //Soon will activate touching bots
+				if(parts[r>>8].type==PT_NBOT && parts[i].tmp2==1 && parts[r>>8].tmp2==0 || parts[r>>8].type==PT_NBOT && parts[i].tmp2==2 && parts[r>>8].tmp2==0) //Activates touching bots
 				{
-					parts[i].tmp2 = 1;
+					parts[r>>8].tmp2 = 2;
 				}
+					
 				if(parts[r>>8].type==PT_PHOT || parts[r>>8].type==PT_NEUT || parts[r>>8].type==PT_ELEC || parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_VSPK) //Charge bots from energy
 					parts[i].life = 255;
 
