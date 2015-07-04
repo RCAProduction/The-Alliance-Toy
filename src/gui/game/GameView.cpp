@@ -2388,7 +2388,17 @@ fps << "FPS:" << (floor(ui::Engine::Ref().GetFps()*100))/100;
 g->drawtext(16, 29, fps.str(), 0, 255, 255 ,255);
 
 std::stringstream tmp2;
+if (sample.particle.type==PT_NBOT)
+{
+	if (sample.particle.tmp2==0)
+		tmp2 << "Bot Inactive";
+	if (sample.particle.tmp2==-1)
+		tmp2 << "Bot Active";
+}
+else
+{
 tmp2 << "Tmp2:" << sample.particle.tmp2;
+}
 g->drawtext(hudx-212, 44, tmp2.str(), 0, 255, 255, 255);
 	
 std::stringstream vx;
@@ -2477,6 +2487,23 @@ if (sample.particle.type)
 						tmp << "Tmp:" << " (" << filtModes[sample.particle.tmp] << ")";
 					else
 						tmp << "Tmp:" << " (unkn)";
+				}
+				else if (sample.particle.type==PT_NBOT)
+				{
+					if (sample.particle.tmp==0)
+						tmp << "Retrieve(0)";
+					if (sample.particle.tmp==1)
+						tmp << "Explode(1)";
+					if (sample.particle.tmp==11)
+						tmp << "Part Stored";
+					if (ctype==0)
+					{
+						ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << "()";
+					}
+					else
+					{
+						ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
+					}
 				}
 				else
 				{
