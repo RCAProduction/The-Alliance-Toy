@@ -1,5 +1,5 @@
 #include "simulation/Elements.h"
-//#TPT-Directive ElementClass Element_NBOT PT_NBOT 186
+//#TPT-Directive ElementClass Element_NBOT PT_NBOT 185
 Element_NBOT::Element_NBOT()
 {
 	Identifier = "DEFAULT_PT_NBOT";
@@ -9,29 +9,29 @@ Element_NBOT::Element_NBOT()
 	MenuSection = SC_ALLY;
 	Enabled = 1;
 	
-	Advection = 0.8f;
-	AirDrag = 0.00f * CFDS;
-	AirLoss = 0.9f;
-	Loss = 0.70f;
+	Advection = 0.4f;
+	AirDrag = 0.04f * CFDS;
+	AirLoss = 0.94f;
+	Loss = 0.95f;
 	Collision = -0.1f;
-	Gravity = 0.0f;
-	Diffusion = 3.00f;
+	Gravity = 0.3f;
+	Diffusion = 0.00f;
 	HotAir = 0.000f	* CFDS;
-	Falldown = 0;
+	Falldown = 1;
 	
 	Flammable = 0;
 	Explosive = 0;
-	Meltable = 0;
-	Hardness = 30;
+	Meltable = 2;
+	Hardness = 2;
 	
-	Weight = 1;
+	Weight = 90;
 	
-	Temperature = R_TEMP +273.15f;
-	HeatConduct = 100;
-	Description = "Nanobot. TMP: 1 - GET";
+	Temperature = R_TEMP+0.0f	+273.15f;
+	HeatConduct = 211;
+	Description = "Nanobots. Perform work, enable with PSCN.";
 	
-	State = ST_GAS;
-	Properties = PROP_DRAWONCTYPE | PROP_LIFE_DEC;
+	State = ST_SOLID;
+	Properties = TYPE_PART|PROP_DRAWONCTYPE|PROP_LIFE_DEC;
 	
 	LowPressure = IPL;
 	LowPressureTransition = NT;
@@ -56,12 +56,26 @@ if(ct==PT_NBOT)
 {
 	parts[i].ctype = PT_NONE;
 }
-if(parts[i].life<=0 || parts[i].tmp2==0) //Check and set inactive bots
+if(parts[i].temp>=1825.15)
+	sim->part_change_type(i,x,y,PT_BREC);
+if(parts[i].life<=0 || parts[i].tmp2==0)
 {
-	parts[i].vx = 0;
-	parts[i].vy = 0;
-	parts[i].tmp2 = 0; //Set bot as inactive
+	parts[i].life = 0;
+	parts[i].tmp2 = 0;
+	parts[i].ctype = PT_NONE;
 }
+if(parts[i].life>=1 && parts[i].tmp2==-1) //Movement when active
+{
+	parts[i].vx = (rand() % 11)-5;
+	parts[i].vy = (rand() % 11)-5;
+}
+if(parts[i].tmp==1 && parts[i].life<=10 && parts[i].life>=1) //Explode flag
+{
+	parts[i].tmp = 1;
+	parts[i].life = 1;
+	sim->part_change_type(i,x,y,PT_FIRW);
+}
+
 if(parts[i].life>=1 || parts[i].tmp2==-1) //If active remove life
 {
 	parts[i].life = parts[i].life-1;
@@ -79,15 +93,32 @@ if(parts[i].life>=1 || parts[i].tmp2==-1) //If active remove life
 					parts[i].life = 255;
 					parts[i].tmp2 = -1; //Set bot as active
 				}
-				if(parts[i].tmp==1 && parts[r>>8].type==ct) //Check for get flag
+				if(parts[r>>8].type==PT_PHOT || parts[r>>8].type==PT_NEUT || parts[r>>8].type==PT_ELEC || parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_VSPK) //Charge bots from energy
+					if(parts[i].tmp2==-1)
+					{
+						parts[i].life = 255;
+						if(parts[r>>8].type!=PT_SPRK && parts[r>>8].type!=PT_VSPK)
+							sim->kill_part(r>>8); 
+					}
+				if(parts[i].tmp==0 && parts[r>>8].type==ct) //Check for retrieve flag. It is the default, 0
 				{
-					parts[i].tmp = parts[r>>8].type+4; //Add 4 so that flags aren't read as elements
+					parts[i].tmp = 11; //Set as full
 					sim->kill_part(r>>8);
 				}
-
-				if(parts[r>>8].type==PT_SPRK && parts[r>>8].ctype==PT_NSCN && parts[i].tmp>4 || parts[r>>8].type==PT_VSPK && parts[r>>8].ctype==PT_NSCN && parts[i].tmp>4) //If NSCN is sparked, drop element
+				if(parts[r>>8].type==PT_SPRK && parts[r>>8].ctype==PT_NSCN && parts[i].tmp>0 || parts[r>>8].type==PT_VSPK && parts[r>>8].ctype==PT_NSCN && parts[i].tmp>0) //If NSCN is sparked, drop element
 				{
-					sim->part_change_type(i,x,y,(parts[i].tmp-4));
+					parts[i].vx = 0;
+					parts[i].vy = 0;
+					if(parts[i].ctype==PT_QRTZ || parts[i].ctype==PT_PQRT)
+					{
+						parts[i].tmp2 = 5;
+					}
+					else
+					{
+						parts[i].tmp2 = 0;
+					}
+					sim->part_change_type(i,x,y,parts[i].ctype);
+					parts[i].ctype = PT_NONE;
 				}
 			}
 	return 0;
