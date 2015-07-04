@@ -43,6 +43,7 @@ Element_CBNF::Element_CBNF()
 	HighTemperatureTransition = NT;
 	
 	Update = &Element_CBNF::update;
+	Graphics = &Element_CBNF::graphics;
 	
 }
 
@@ -59,6 +60,10 @@ int Element_CBNF::update(UPDATE_FUNC_ARGS)
 		{
 			sim->part_change_type(i,x,y,PT_CRBN);
 		}
+	}
+	if(parts[i].tmp2<=0)
+	{
+		parts[i].tmp2 = (rand() % 3)+5;
 	}
 int r, rx, ry;
 	for (rx=-1; rx<2; rx++)
@@ -92,4 +97,15 @@ int r, rx, ry;
 			}
 	return 0;
 }
+//#TPT-Directive ElementHeader Element_CBNF static int graphics(GRAPHICS_FUNC_ARGS)
+int Element_CBNF::graphics(GRAPHICS_FUNC_ARGS)
+{
+	int z = cpart->tmp2 - 5;//speckles!
+	*colr += z * 16;
+	*colg += z * 16;
+	*colb += z * 16;
+	return 0;
+}
+
+
 Element_CBNF::~Element_CBNF() {}
