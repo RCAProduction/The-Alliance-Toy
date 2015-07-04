@@ -92,7 +92,7 @@ if(parts[i].life>=1 || parts[i].tmp2==-1) //If active remove life
 					parts[i].life = 255;
 					parts[i].tmp2 = -1; //Set bot as active
 				}
-				if(parts[r>>8].type==PT_NBOT && parts[r>>8].tmp2==-1 && parts[i].tmp2==0)
+				if(parts[r>>8].type==PT_NBOT && parts[r>>8].tmp2==-1 && parts[i].tmp2==0) //Soon will activate touching bots
 				{
 					parts[i].tmp2 = -1;
 				}
