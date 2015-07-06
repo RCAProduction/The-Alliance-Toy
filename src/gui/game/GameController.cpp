@@ -140,6 +140,7 @@ GameController::GameController():
 	HasDone(false)
 {
 	gameView = new GameView();
+	simulation = new Simulation();
 	gameModel = new GameModel();
 	gameModel->BuildQuickOptionMenu(this);
 
@@ -1091,10 +1092,12 @@ void GameController::SetActiveTool(int toolSelection, Tool * tool)
 		{
 		gameView->REALvar = !gameView->REALvar;
 		gameModel->GetSimulation()->REALvar = !gameModel->GetSimulation()->REALvar;
-		}	
-
-	if(tool->GetIdentifier()== "DEFAULT_TOOL_INFO")
-		gameView->INFOvar = !gameView->INFOvar;	
+		}
+	if(tool->GetIdentifier() == "DEFAULT_TOOL_INFO")
+		gameView->INFOvar = !gameView->INFOvar;
+		
+	if(tool->GetIdentifier()== "DEFAULT_TOOL_LINK")
+		simulation->LinkVar = !simulation->LinkVar;	
 }
 
 Simulation * GameController::GetSimulation()
