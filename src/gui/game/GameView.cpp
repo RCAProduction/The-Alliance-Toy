@@ -2398,6 +2398,8 @@ if (sample.particle.type==PT_NBOT)
 		tmp2 << "Bot Active";
 	if (sample.particle.tmp2==3)
 		tmp2 << "Bot Active";
+	if (sample.particle.tmp2==4)
+		tmp2 << "Bot Needs Charge";
 }
 else
 {
@@ -2498,7 +2500,15 @@ if (sample.particle.type)
 						tmp << "Retrieve(0)";
 					if (sample.particle.tmp==1)
 						tmp << "Explode(1)";
-					if (sample.particle.tmp==11)
+					if (sample.particle.tmp==2)
+						tmp << "Charge(2)";
+					if (sample.particle.tmp==3)
+						tmp << "Fight(3)";
+					if (sample.particle.tmp==4)
+						tmp << "Break(4)";
+					if (sample.particle.tmp==5)
+						tmp << "Replicate(5)";
+					if (sample.particle.tmp==256)
 						tmp << "Part Stored";
 					if (ctype==0)
 					{
