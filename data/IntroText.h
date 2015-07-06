@@ -1,5 +1,5 @@
 static const char *introTextData =
-	"\blRCA's Mod - Version " MTOS(SAVE_VERSION) "." MTOS(MINOR_VERSION) " - http://powdertoy.co.uk, irc.freenode.net #powder\n"
+	"\blRCA's Mod - Version 1.7 - RCAProductionmaster@gmail.com, irc.freenode.net #powder\n"
 	"\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\n"
 	"\n"
 	"\bgControl+C/V/X are Copy, Paste and cut respectively.\n"
