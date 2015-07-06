@@ -24,6 +24,7 @@ class DebugInfo;
 class Notification;
 class GameModel;
 class GameView;
+class Simulation;
 class CommandInterface;
 class ConsoleController;
 class GameController: public ClientListener
@@ -35,6 +36,7 @@ private:
 	PreviewController * activePreview;
 	GameView * gameView;
 	GameModel * gameModel;
+	Simulation * simulation;
 	SearchController * search;
 	RenderController * renderOptions;
 	LoginController * loginWindow;

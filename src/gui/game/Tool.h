@@ -195,4 +195,11 @@ public:
 
 };
 
+class LinkTool: public Tool
+{
+public:
+	LinkTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL);
+
+};
+
 #endif /* TOOL_H_ */

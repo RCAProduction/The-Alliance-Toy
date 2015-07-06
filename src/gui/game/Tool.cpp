@@ -125,6 +125,11 @@ InfoTool::InfoTool(int id, string name, string description, int r, int g, int b,
 {
 }
 
+LinkTool::LinkTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int)):
+	Tool(id, name, description, r, g, b, identifier, textureGen)
+{
+}
+
 WindTool::WindTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int)):
 	Tool(id, name, description, r, g, b, identifier, textureGen)
 {
