@@ -14,6 +14,8 @@ struct Particle
 	int flags;
 	int tmp;
 	int tmp2;
+	int tmp3;
+	int tmp4;
 	unsigned int dcolour;
 	/** Returns a list of properties, their type and offset within the structure that can be changed
 	 by higher-level processes referring to them by name such as Lua or the property tool **/
