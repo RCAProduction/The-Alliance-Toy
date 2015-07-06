@@ -2694,6 +2694,11 @@ int Simulation::create_part(int p, int x, int y, int tv)
 	if (t>=0 && t<PT_NUM && !elements[t].Enabled)
 		return -1;
 
+	if (LinkVar==true)
+	{
+		if(p==-2 && t>=1)
+			return 0;
+	}
 	if (tv == SPC_AIR)
 	{
 		pv[y/CELL][x/CELL] += 0.03f;
@@ -5008,7 +5013,8 @@ Simulation::Simulation():
 	gravWallChanged(false),
 	replaceModeSelected(0),
 	replaceModeFlags(0),
-	REALvar(false)
+	REALvar(false),
+	LinkVar(false)
 
 {
 	int count = 0;

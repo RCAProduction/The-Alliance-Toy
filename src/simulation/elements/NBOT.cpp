@@ -79,12 +79,47 @@ if(parts[i].life>=1 && parts[i].tmp2==4)
 	parts[i].tmp2 = 3;
 if(parts[i].life>=1 && parts[i].tmp2==1 || parts[i].life>=1 && parts[i].tmp2==3) //Movement when active
 {
-	if(parts[i].tmp==3)
+	if(parts[i].tmp==3 && parts[i].tmp3>=1)
+	{
+		if(parts[i].x>parts[i].tmp3)
+		{
+			parts[i].vx = (rand() % 21)-16;
+		}
+		else if(parts[i].x<parts[i].tmp3)
+		{
+			parts[i].vx = (rand() % 21)-4;
+		}
+		if(parts[i].y>parts[i].tmp4)
+		{
+			parts[i].vy = (rand() % 9)-7;
+		}
+		else if(parts[i].y<parts[i].tmp4)
+		{
+			parts[i].vy = (rand() % 9)-1;
+		}
+	}
+	else if(parts[i].tmp3>=1 && parts[i].x>parts[i].tmp3 && parts[i].tmp!=6)
+	{
+		parts[i].vx = (rand() % 11)-8;
+	}
+	else if(parts[i].tmp3>=1 && parts[i].x<parts[i].tmp3 && parts[i].tmp!=6)
+	{
+		parts[i].vx = (rand() % 11)-2;
+	}
+	if(parts[i].tmp4>=1 && parts[i].y>parts[i].tmp4 && parts[i].tmp!=6)
+	{
+		parts[i].vy = (rand() % 11)-8;
+	}
+	else if(parts[i].tmp4>=1 && parts[i].y<parts[i].tmp4 && parts[i].tmp!=6)
+	{
+		parts[i].vy = (rand() % 11)-2;
+	}
+	else if(parts[i].tmp==3 && parts[i].tmp3==0)
 	{
 		parts[i].vx = (rand() % 21)-10;
 		parts[i].vy = (rand() % 9)-4;
 	}
-	else
+	else if(parts[i].tmp3==0)
 	{
 		parts[i].vx = (rand() % 11)-5;
 		parts[i].vy = (rand() % 11)-5;
@@ -166,6 +201,39 @@ if(parts[i].life>2000 && parts[i].tmp!=2)
 					sim->part_change_type(r>>8,x,y,PT_NBOT);
 					parts[r>>8].tmp2 = 4;
 				}
+				if(parts[i].tmp==6 && parts[i].life>=1 && parts[r>>8].type==ct)
+				{
+						for (rx=-20; rx<21; rx++)
+							for (ry=-20; ry<21; ry++)
+								if (BOUNDS_CHECK && (rx || ry))
+								{
+									r = pmap[y+ry][x+rx];
+									if (!r)
+										continue;
+									if(parts[r>>8].type==PT_NBOT && parts[r>>8].tmp!=6)
+									{
+										parts[r>>8].tmp3 = parts[i].x;
+										parts[r>>8].tmp4 = parts[i].y;
+									}
+								}
+						return 0;
+				}
+				if(parts[i].tmp==6 && parts[i].life==0)
+				{
+						for (rx=-20; rx<21; rx++)
+							for (ry=-20; ry<21; ry++)
+								if (BOUNDS_CHECK && (rx || ry))
+								{
+									r = pmap[y+ry][x+rx];
+									if (!r)
+										continue;
+									
+									parts[r>>8].tmp3 = 0;
+									parts[r>>8].tmp4 = 0;
+
+								}
+						return 0;
+				}
 
 				if(parts[r>>8].type==PT_SPRK && parts[r>>8].ctype==PT_NSCN && parts[i].tmp==256 || parts[r>>8].type==PT_VSPK && parts[r>>8].ctype==PT_NSCN && parts[i].tmp==256) //If NSCN is sparked, drop element
 				{
@@ -184,7 +252,7 @@ if(parts[i].life>2000 && parts[i].tmp!=2)
 					sim->part_change_type(i,x,y,ct);
 					ct = PT_NONE;
 				}
-			}
+			}	
 	return 0;
 }
 

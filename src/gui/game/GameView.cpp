@@ -2310,28 +2310,37 @@ if(INFOvar==true)
 		infoY = 298;
 	}
 g->fillrect(infoX, infoY, 60, 86, 55, 55, 55, 200);
-g->drawtext(infoX+3, infoY+3, "P Iterater:", 0, 255, 0, 255);
-	if(sample.particle.type)
-	{
-		std::stringstream ID;
-		ID << sample.ParticleID;
-		g->drawtext(infoX+3, infoY+13, ID.str(), 0, 255, 255, 255);
-	}
-	else {g->drawtext(infoX+3, infoY+13, "No ELement", 0, 255, 255, 255);}
+
 std::stringstream frames;
 frames << frameCount;
 g->drawtext(infoX+3, infoY+23, "Frames:", 0, 255, 0, 255);
 g->drawtext(infoX+3, infoY+33, frames.str(), 0, 255, 255, 255);
-g->drawtext(infoX+3, infoY+43, "Element #:", 0, 255, 0, 255);
+g->drawtext(infoX+3, infoY+3, "Element #:", 0, 255, 0, 255);
 	if (sample.particle.type)
 	{
 		std::stringstream infoptype;
 		infoptype << sample.particle.type;
-		g->drawtext(infoX+3, infoY+53, infoptype.str(), 0, 255, 255, 255);
+		g->drawtext(infoX+3, infoY+13, infoptype.str(), 0, 255, 255, 255);
 	}
 	else
 	{
-		g->drawtext(infoX+3, infoY+53, "No ELement", 0, 255, 255, 255);
+		g->drawtext(infoX+3, infoY+13, "No ELement", 0, 255, 255, 255);
+	}
+g->drawtext(infoX+3, infoY+43, "Tmp3:", 0, 255, 0, 255);
+g->drawtext(infoX+3, infoY+63, "Tmp4:", 0, 255, 0, 255);
+std::stringstream tmp3;
+tmp3 << sample.particle.tmp3;
+std::stringstream tmp4;
+tmp4 << sample.particle.tmp4;
+	if (sample.particle.type)
+	{
+		g->drawtext(infoX+3, infoY+53, tmp3.str(), 0, 255, 255, 255);
+		g->drawtext(infoX+3, infoY+73, tmp4.str(), 0, 255, 255, 255);
+	}
+	else
+	{
+		g->drawtext(infoX+3, infoY+53, "N E", 0, 255, 255, 255);
+		g->drawtext(infoX+3, infoY+73, "N E", 0, 255, 255, 255);
 	}
 }
 		//HUD
@@ -2399,7 +2408,7 @@ if (sample.particle.type==PT_NBOT)
 	if (sample.particle.tmp2==3)
 		tmp2 << "Bot Active";
 	if (sample.particle.tmp2==4)
-		tmp2 << "Bot Needs Charge";
+		tmp2 << "Needs Charge";
 }
 else
 {
@@ -2508,6 +2517,8 @@ if (sample.particle.type)
 						tmp << "Break(4)";
 					if (sample.particle.tmp==5)
 						tmp << "Replicate(5)";
+					if (sample.particle.tmp==6)
+						tmp << "Beacon(6)";
 					if (sample.particle.tmp==256)
 						tmp << "Part Stored";
 					if (ctype==0)

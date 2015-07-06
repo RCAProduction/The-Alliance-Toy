@@ -176,6 +176,8 @@ public:
 	void UpdateSim();
 	void rotate_area(int area_x, int area_y, int area_w, int area_h, int invert);
 	void clear_area(int area_x, int area_y, int area_w, int area_h);
+	int set_joint(int x1, int x2, int y1, int y2, int elem1, int elem2, int distance);
+	bool LinkVar;
 
 	void SetEdgeMode(int newEdgeMode);
 
