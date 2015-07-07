@@ -64,7 +64,7 @@ int Element_AERO::update(UPDATE_FUNC_ARGS)
 					continue;
 				if (parts[i].temp - parts[r>>8].temp != 0)
 				{
-					give_temp = (parts[i].temp - parts[r>>8].temp) / 300;
+					give_temp = ((parts[i].temp - parts[r>>8].temp) / 300);
 					parts[i].temp = parts[i].temp - give_temp;
 					parts[r>>8].temp = parts[r>>8].temp + give_temp;
 				}
