@@ -206,18 +206,14 @@ if(parts[i].life>2000 && parts[i].tmp!=2)
 								{
 									t = pmap[y+ty][x+tx];
 									
-									if(!t && parts[r>>8].type==PT_NBOT && parts[i].tmp==257)
+									if(!t)
 									{
 										sim->create_part(-1,x+tx,y+ty,PT_NBOT);
-										parts[t>>8].tmp = parts[r>>8].tmp;
-										parts[t>>8].tmp2 = 4;
-										parts[t>>8].ctype = parts[r>>8].ctype;
-										parts[i].tmp = 5;
+										parts[t].tmp2 = 4;
+										parts[t].tmp = 1;
+										parts[i].tmp = 2;
 									}
-									else
-									{
-										continue;
-									}
+
 								}
 							return 0;
 					}
