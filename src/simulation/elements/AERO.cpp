@@ -79,11 +79,11 @@ int Element_AERO::update(UPDATE_FUNC_ARGS)
 int Element_AERO::graphics(GRAPHICS_FUNC_ARGS)
 
 {
-	*firea = 400;
+	*firea = 20;
 	*firer = *colr;
 	*fireg = *colg;
 	*fireb = *colb;
-	*pixel_mode |= PMODE_GLOW;
+	*pixel_mode |= FIRE_ADD;
 	return 1;
 }
 
