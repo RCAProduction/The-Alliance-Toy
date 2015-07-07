@@ -4,7 +4,7 @@ Element_AERO::Element_AERO()
 {
 	Identifier = "DEFAULT_PT_AERO";
 	Name = "AERO";
-	Colour = PIXPACK(0x8AA2A1);
+	Colour = PIXPACK(0x8AA2A1);//0x8AA2A1
 	MenuVisible = 1;
 	MenuSection = SC_ALLY;
 	Enabled = 1;
@@ -57,18 +57,18 @@ int Element_AERO::update(UPDATE_FUNC_ARGS)
 	}
 	for (rx = -1; rx < 2; rx++)
 		for (ry = -1; ry < 2; ry++)
-		if (BOUNDS_CHECK && (rx || ry))
-		{
-			r = pmap[y + ry][x + rx];
-			if (!r)
-				continue;
-			if (parts[i].temp - parts[r >> 8].temp != 0)
+			if (BOUNDS_CHECK && (rx || ry))
 			{
-				give_temp = (parts[i].temp - parts[r >> 8].temp) / 20;
-				parts[i].temp = parts[i].temp - give_temp;
-				parts[r >> 8].temp = parts[r >> 8].temp + give_temp;
+				r = pmap[y + ry][x + rx];
+				if (!r)
+					continue;
+				if (parts[i].temp - parts[r>>8].temp != 0)
+				{
+					give_temp = (parts[i].temp - parts[r>>8].temp) / 300;
+					parts[i].temp = parts[i].temp - give_temp;
+					parts[r>>8].temp = parts[r>>8].temp + give_temp;
+				}
 			}
-		}
 	return 0;
 }
 
@@ -79,11 +79,11 @@ int Element_AERO::update(UPDATE_FUNC_ARGS)
 int Element_AERO::graphics(GRAPHICS_FUNC_ARGS)
 
 {
-	*firea = 50;
-	*firer = *colr / 138;
-	*fireg = *colg / 162;
-	*fireb = *colb / 161;
-	*pixel_mode |= FIRE_ADD;
+	*firea = 400;
+	*firer = *colr;
+	*fireg = *colg;
+	*fireb = *colb;
+	*pixel_mode |= PMODE_GLOW;
 	return 1;
 }
 
