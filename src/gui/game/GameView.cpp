@@ -2521,6 +2521,8 @@ if (sample.particle.type)
 						tmp << "Beacon(6)";
 					if (sample.particle.tmp==256)
 						tmp << "Part Stored";
+					if (sample.particle.tmp==257)
+						tmp << "Full(5)";
 					if (ctype==0)
 					{
 						ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << "()";

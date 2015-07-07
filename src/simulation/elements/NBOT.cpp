@@ -50,7 +50,7 @@ Element_NBOT::Element_NBOT()
 int Element_NBOT::update(UPDATE_FUNC_ARGS)
 {
 
-int r, rx, ry, ct = parts[i].ctype, giveAmount;
+int r, rx, ry, ct = parts[i].ctype, giveAmount, t, tx, ty;
 
 if(ct==PT_NBOT)
 {
@@ -77,7 +77,7 @@ if(parts[i].life<=0 && parts[i].tmp2!=0)
 }
 if(parts[i].life>=1 && parts[i].tmp2==4)
 	parts[i].tmp2 = 3;
-if(parts[i].life>=1 && parts[i].tmp2==1 || parts[i].life>=1 && parts[i].tmp2==3) //Movement when active
+if((parts[i].life>=1 && parts[i].tmp2==1) || (parts[i].life>=1 && parts[i].tmp2==3)) //Movement when active
 {
 	if(parts[i].tmp==3 && parts[i].tmp3>=1)
 	{
@@ -160,12 +160,12 @@ if(parts[i].life>2000 && parts[i].tmp!=2)
 						parts[i].life = parts[i].life - giveAmount;
 					}
 				}
-				if(parts[r>>8].type==PT_SPRK && parts[r>>8].ctype==PT_PSCN || parts[r>>8].type==PT_VSPK && parts[r>>8].ctype==PT_PSCN)
+				if((parts[r>>8].type==PT_SPRK && parts[r>>8].ctype==PT_PSCN) || (parts[r>>8].type==PT_VSPK && parts[r>>8].ctype==PT_PSCN))
 				{
 					parts[i].life = 255;
 					parts[i].tmp2 = 1; //Set bot as active from PSCN
 				}
-				if(parts[r>>8].type==PT_NBOT && parts[i].tmp2==1 && parts[r>>8].tmp2==0 || parts[r>>8].type==PT_NBOT && parts[i].tmp2==2 && parts[r>>8].tmp2==0) //Activates touching bots
+				if((parts[r>>8].type==PT_NBOT && parts[i].tmp2==1 && parts[r>>8].tmp2==0) || (parts[r>>8].type==PT_NBOT && parts[i].tmp2==2 && parts[r>>8].tmp2==0)) //Activates touching bots
 				{
 					parts[r>>8].tmp2 = 2;
 				}
@@ -196,10 +196,36 @@ if(parts[i].life>2000 && parts[i].tmp!=2)
 					parts[i].vy = (rand() % 17)-8;
 					sim->part_change_type(i,x,y,PT_BREC);
 				}
-				if(parts[i].tmp==5 && parts[i].life>=1 && parts[r>>8].type==PT_BREC) //Replicate flag
+				if((parts[i].tmp==5 && parts[i].life>=1 && parts[r>>8].type==PT_BREC) || (parts[i].tmp==12 && parts[i].life>=1)) //Replicate flag
 				{
-					sim->part_change_type(r>>8,x,y,PT_NBOT);
-					parts[r>>8].tmp2 = 4;
+					if(parts[i].tmp==257 && parts[r>>8].type==PT_NBOT)
+					{
+						for (tx=-1; tx<2; tx++)
+							for (ty=-1; ty<2; ty++)
+								if (BOUNDS_CHECK && (tx || ty))
+								{
+									t = pmap[y+ty][x+tx];
+									
+									if(!t && parts[r>>8].type==PT_NBOT && parts[i].tmp==257)
+									{
+										sim->create_part(-1,x+tx,y+ty,PT_NBOT);
+										parts[t>>8].tmp = parts[r>>8].tmp;
+										parts[t>>8].tmp2 = 4;
+										parts[t>>8].ctype = parts[r>>8].ctype;
+										parts[i].tmp = 5;
+									}
+									else
+									{
+										continue;
+									}
+								}
+							return 0;
+					}
+					if(parts[i].tmp!=257)
+					{
+						parts[i].tmp = 257;
+						sim->kill_part(r>>8);
+					}
 				}
 				if(parts[i].tmp==6 && parts[i].life>=1 && parts[r>>8].type==ct)
 				{
@@ -235,7 +261,7 @@ if(parts[i].life>2000 && parts[i].tmp!=2)
 						return 0;
 				}
 
-				if(parts[r>>8].type==PT_SPRK && parts[r>>8].ctype==PT_NSCN && parts[i].tmp==256 || parts[r>>8].type==PT_VSPK && parts[r>>8].ctype==PT_NSCN && parts[i].tmp==256) //If NSCN is sparked, drop element
+				if((parts[r>>8].type==PT_SPRK && parts[r>>8].ctype==PT_NSCN && parts[i].tmp==256) || (parts[r>>8].type==PT_VSPK && parts[r>>8].ctype==PT_NSCN && parts[i].tmp==256)) //If NSCN is sparked, drop element
 				{
 					parts[i].vx = 0;
 					parts[i].vy = 0;
