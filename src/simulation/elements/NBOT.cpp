@@ -50,7 +50,7 @@ Element_NBOT::Element_NBOT()
 int Element_NBOT::update(UPDATE_FUNC_ARGS)
 {
 
-int r, rx, ry, ct = parts[i].ctype, giveAmount, t, tx, ty;
+int r, rx, ry, ct = parts[i].ctype, giveAmount, t, tx, ty, multiplyVal;
 
 if(ct==PT_NBOT)
 {
@@ -198,8 +198,9 @@ if(parts[i].life>2000 && parts[i].tmp!=2)
 				}
 				if((parts[i].tmp==5 && parts[i].life>=1 && parts[r>>8].type==PT_BREC) || (parts[i].tmp==12 && parts[i].life>=1)) //Replicate flag
 				{
-					if(parts[i].tmp==257 && parts[r>>8].type==PT_NBOT)
+					if(/*parts[i].tmp==257 && parts[r>>8].type==PT_NBOT*/1==1)
 					{
+						//parts[i].ctype = (parts[r>>8].tmp^10)+parts[r>>8].ctype;
 						for (tx=-1; tx<2; tx++)
 							for (ty=-1; ty<2; ty++)
 								if (BOUNDS_CHECK && (tx || ty))
@@ -209,9 +210,10 @@ if(parts[i].life>2000 && parts[i].tmp!=2)
 									if(!t)
 									{
 										sim->create_part(-1,x+tx,y+ty,PT_NBOT);
+										t = pmap[y+ty][x+tx];
 										parts[t].tmp2 = 4;
 										parts[t].tmp = 1;
-										parts[i].tmp = 2;
+										parts[i].tmp = 5;
 									}
 
 								}
