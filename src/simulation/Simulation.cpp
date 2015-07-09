@@ -14,6 +14,7 @@
 #include "Gravity.h"
 #include "elements/Element.h"
 #include "CoordStack.h"
+//#include "gui/game/GameView.h"
 
 //#include "graphics/Renderer.h"
 //#include "graphics/Graphics.h"
@@ -2696,11 +2697,13 @@ int Simulation::create_part(int p, int x, int y, int tv)
 
 	if (LinkVar==true)
 	{
-		if(p==-2 && t>=1)
+	int type = pmap[y][x]&0xFF;
+	int index = pmap[y][x]>>8;
+		if(p==-2)
 		{
-				parts[i].tmp = 1;
+			parts[index].tmp = 1;
 		}
-			return 0;
+		return 0;
 	}
 	if (tv == SPC_AIR)
 	{
