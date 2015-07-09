@@ -20,5 +20,6 @@ std::vector<StructProperty> Particle::GetProperties()
 	properties.push_back(StructProperty("dcolour", StructProperty::UInteger, offsetof(Particle, dcolour)));
 	properties.push_back(StructProperty("pavg0", StructProperty::Float, offsetof(Particle, pavg[0])));
 	properties.push_back(StructProperty("pavg1", StructProperty::Float, offsetof(Particle, pavg[1])));
+	properties.push_back(StructProperty("connector", StructProperty::Float, offsetof(Particle, pavg[99])));
 	return properties;
 }

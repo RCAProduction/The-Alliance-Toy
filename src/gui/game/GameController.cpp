@@ -1097,7 +1097,10 @@ void GameController::SetActiveTool(int toolSelection, Tool * tool)
 		gameView->INFOvar = !gameView->INFOvar;
 		
 	if(tool->GetIdentifier()== "DEFAULT_TOOL_LINK")
-		simulation->LinkVar = !simulation->LinkVar;	
+	{
+		simulation->LinkVar = !simulation->LinkVar;
+		gameView->LinkVar = !gameView->LinkVar;
+	}	
 }
 
 Simulation * GameController::GetSimulation()

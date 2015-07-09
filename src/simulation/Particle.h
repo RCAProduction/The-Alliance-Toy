@@ -11,6 +11,7 @@ struct Particle
 	float x, y, vx, vy;
 	float temp;
 	float pavg[2];
+	float connector[99];
 	int flags;
 	int tmp;
 	int tmp2;

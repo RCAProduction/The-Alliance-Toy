@@ -2390,6 +2390,8 @@ if (c->GetReplaceModeFlags()&SPECIFIC_DELETE)
 	extraInfo << "[SPECIFIC DELETE] ";
 if (ren->GetGridSize())
 	extraInfo << "[GRID: " << ren->GetGridSize() << "/9]";
+if (LinkVar==true)
+	extraInfo << "[LINK MODE]";
 g->drawtext(16, 43, extraInfo.str(), 0, 255, 255, 255);
 
 std::stringstream fps;

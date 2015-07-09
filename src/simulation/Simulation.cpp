@@ -2697,6 +2697,9 @@ int Simulation::create_part(int p, int x, int y, int tv)
 	if (LinkVar==true)
 	{
 		if(p==-2 && t>=1)
+		{
+				parts[i].tmp = 1;
+		}
 			return 0;
 	}
 	if (tv == SPC_AIR)

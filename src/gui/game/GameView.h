@@ -162,6 +162,7 @@ public:
 	bool INFOvar;
 	bool FPSGvar;
 	bool REALvar;
+	bool LinkVar;
 
 	void ExitPrompt();
 	SelectMode GetSelectMode() { return selectMode; }
