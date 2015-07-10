@@ -158,11 +158,13 @@ public:
 	int infoY;
 	int frameCount;
 	int cctype;
+	int zoomMove;
 
 	bool INFOvar;
 	bool FPSGvar;
 	bool REALvar;
 	bool LinkVar;
+	bool superDebug;
 
 	void ExitPrompt();
 	SelectMode GetSelectMode() { return selectMode; }
