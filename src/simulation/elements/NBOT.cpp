@@ -168,7 +168,7 @@ if (parts[i].life>2000 && parts[i].tmp!=2)
 				
 				if (parts[r>>8].life<parts[i].life && parts[r>>8].type==PT_NBOT && parts[i].tmp2>=1 && parts[i].tmp2<=4 && parts[r>>8].tmp2>=1 && parts[r>>8].tmp2<=4)
 				{
-					if (parts[i].life>255 && parts[i].tmp==2)
+					if (parts[i].life>255 && parts[i].tmp==2 && parts[r>>8].life<255)
 					{
 						giveAmount = 255 - parts[r>>8].life;
 						parts[r>>8].life = parts[r>>8].life + giveAmount;
@@ -182,8 +182,14 @@ if (parts[i].life>2000 && parts[i].tmp!=2)
 					}
 				}
 				
-				if (parts[i].tmp==0 && parts[i].pavg[0]>=100 && parts[r>>8].type==PT_NBOT && ((parts[r>>8].ctype!=0 && parts[r>>8].tmp==0) || parts[r>>8].tmp!=0)) //Allows blank NBOT to copy into other types
+				if (parts[i].tmp==0 && parts[i].pavg[0]>=100 && parts[i].ctype==0 && parts[r>>8].type==PT_NBOT && ((parts[r>>8].ctype!=0 && parts[r>>8].tmp==0) || parts[r>>8].tmp!=0)) //Allows blank NBOT to copy into other types
 				{
+					if (parts[r>>8].tmp==5)
+					{
+						if ((rand() % 100)>25)
+							continue;
+					}
+					
 					parts[i].tmp = parts[r>>8].tmp;
 					parts[i].tmp2 = parts[r>>8].tmp2;
 					parts[i].ctype = parts[r>>8].ctype;
