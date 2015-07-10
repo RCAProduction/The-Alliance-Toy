@@ -2362,6 +2362,10 @@ std::stringstream parts;
 parts << "Parts:" << sample.NumParts;
 g->drawtext(160, 15, parts.str(), 0, 255, 255, 255);
 
+/*std::stringstream pavg;
+pavg << sample.particle.pavg[0];
+g->drawtext(300, 15, pavg.str(), 255, 0, 255, 255);*/
+
 std::stringstream pres;
 pres << "Pres:" << (floor (sample.AirPressure*100))/100;
 g->drawtext(hudx-77, 15, pres.str(), 0, 255, 255, 255);
