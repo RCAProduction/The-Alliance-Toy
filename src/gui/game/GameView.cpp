@@ -159,6 +159,7 @@ GameView::GameView():
 
 	FPSGvar(false),
 	INFOvar(false),
+	superDebug(false),
 	zoomEnabled(false),
 	zoomCursorFixed(false),
 	mouseInZoom(false),
@@ -1484,6 +1485,19 @@ void GameView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		else
 			showHud = !showHud;
 		break;
+	case 'd':
+		if(ctrl)
+		{
+			if(shift)
+			{
+				superDebug = !superDebug;
+				if (superDebug==true)
+				{
+					showDebug = true;
+				}
+			}
+		}
+		break;
 	case 'b':
 		if(ctrl)
 			c->SetDecoration();
@@ -2344,133 +2358,135 @@ tmp4 << sample.particle.tmp4;
 	}
 }
 		//HUD
-//Time
-  time_t rawtime;
-  struct tm * timeinfo;
 
-  time ( &rawtime );
-  timeinfo = localtime ( &rawtime );
-
-//Behind HUD, so that values are easily visible when particles are behind it.
-g->fillrect(hudx-214, 13, 187, 12, 55, 55, 55, 200);
-g->fillrect(hudx-214, 27, 200, 12, 55, 55, 55, 200);
-g->fillrect(14, 13, 210, 12, 55, 55, 55, 200);
-
-g->drawtext(16, 15, asctime(timeinfo), 0, 255, 68, 255);
-
-std::stringstream parts;
-parts << "Parts:" << sample.NumParts;
-g->drawtext(160, 15, parts.str(), 0, 255, 255, 255);
-
-std::stringstream pavg;
-pavg << sample.particle.pavg[0];
-g->drawtext(300, 15, pavg.str(), 255, 0, 255, 255);
-
-std::stringstream pres;
-pres << "Pres:" << (floor (sample.AirPressure*100))/100;
-g->drawtext(hudx-77, 15, pres.str(), 0, 255, 255, 255);
-
-std::stringstream life;
-life << "Life:" << sample.particle.life;
-g->drawtext(hudx-212, 30, life.str(), 0, 255, 255, 255);
-
-std::stringstream x;
-x << "X:" << sample.PositionX;
-g->drawtext(hudx-71, 30, x.str(), 0, 255, 255, 255);
-
-std::stringstream y;
-y << "Y:" << sample.PositionY;
-g->drawtext(hudx-42, 30, y.str(), 0, 255, 255, 255);
-
-if (showDebug)
+if (zoomEnabled==true)
 {
-g->fillrect(hudx-214, 41, 180, 12, 55, 55, 55, 200);
-g->fillrect(14, 27, 61, 12, 55, 55, 55, 200);
-
-std::stringstream extraInfo;
-if (c->GetReplaceModeFlags()&REPLACE_MODE)
-	extraInfo << "[REPLACE MODE] ";
-if (c->GetReplaceModeFlags()&SPECIFIC_DELETE)
-	extraInfo << "[SPECIFIC DELETE] ";
-if (ren->GetGridSize())
-	extraInfo << "[GRID: " << ren->GetGridSize() << "/9]";
-if (LinkVar==true)
-	extraInfo << "[LINK MODE]";
-g->drawtext(16, 43, extraInfo.str(), 0, 255, 255, 255);
-
-std::stringstream fps;
-fps << "FPS:" << (floor(ui::Engine::Ref().GetFps()*100))/100;
-g->drawtext(16, 29, fps.str(), 0, 255, 255 ,255);
-
-std::stringstream tmp2;
-if (sample.particle.type==PT_NBOT)
-{
-	if (sample.particle.tmp2==0)
-		tmp2 << "Bot Inactive";
-	if (sample.particle.tmp2==1)
-		tmp2 << "Bot Active";
-	if (sample.particle.tmp2==2)
-		tmp2 << "Bot Active";
-	if (sample.particle.tmp2==3)
-		tmp2 << "Bot Active";
-	if (sample.particle.tmp2==4)
-		tmp2 << "Needs Charge";
+	zoomMove = 246;
 }
 else
 {
-tmp2 << "Tmp2:" << sample.particle.tmp2;
+	zoomMove = 0;
 }
-g->drawtext(hudx-212, 44, tmp2.str(), 0, 255, 255, 255);
-	
-std::stringstream vx;
-vx << "VX:" << (floor(sample.particle.vx*100))/100;
-g->drawtext(hudx-147, 44, vx.str(), 0, 255, 255, 255);
 
-std::stringstream vy;
-vy << "VY:" << (floor(sample.particle.vy*100))/100;
-g->drawtext(hudx-77, 44, vy.str(), 0, 255, 255, 255);
-}
-/*int redhud = hudr;
-std::stringstream rhud;
-rhud << redhud;
-g->drawtext(hudx-77, 60, rhud.str(), 255, 255, 255, 255);*/
-
-if (sample.particle.type)
+if (superDebug==true)
 {
-	
-/*	else if (sample.particle.ctype)
+
+}
+
+//Time
+time_t rawtime;
+struct tm * timeinfo;
+
+time ( &rawtime );
+timeinfo = localtime ( &rawtime );
+
+//Behind HUD, so that values are easily visible when particles are behind it.
+g->fillrect(hudx-214, zoomMove+13, 187, 12, 55, 55, 55, 200);
+g->fillrect(hudx-214, zoomMove+27, 200, 12, 55, 55, 55, 200);
+g->fillrect(14, zoomMove+13, 210, 12, 55, 55, 55, 200);
+
+g->drawtext(16, zoomMove+15, asctime(timeinfo), 0, 255, 68, 255);
+
+std::stringstream parts;
+parts << "Parts:" << sample.NumParts;
+g->drawtext(160, zoomMove+15, parts.str(), 0, 255, 255, 255);
+
+/*std::stringstream pavg;
+pavg << sample.particle.pavg[0];
+g->drawtext(300, 15, pavg.str(), 255, 0, 255, 255);*/
+
+std::stringstream pres;
+pres << "Pres:" << (floor (sample.AirPressure*100))/100;
+g->drawtext(hudx-77, zoomMove+15, pres.str(), 0, 255, 255, 255);
+
+std::stringstream life;
+life << "Life:" << sample.particle.life;
+g->drawtext(hudx-212, zoomMove+30, life.str(), 0, 255, 255, 255);
+
+std::stringstream x;
+x << "X:" << sample.PositionX;
+g->drawtext(hudx-71, zoomMove+30, x.str(), 0, 255, 255, 255);
+
+std::stringstream y;
+y << "Y:" << sample.PositionY;
+g->drawtext(hudx-42, zoomMove+30, y.str(), 0, 255, 255, 255);
+
+if (showDebug)
+{
+	g->fillrect(hudx-214, zoomMove+41, 180, 12, 55, 55, 55, 200);
+	g->fillrect(14, zoomMove+27, 61, 12, 55, 55, 55, 200);
+
+	std::stringstream extraInfo;
+	if (c->GetReplaceModeFlags()&REPLACE_MODE)
+		extraInfo << "[REPLACE MODE] ";
+		
+	if (c->GetReplaceModeFlags()&SPECIFIC_DELETE)
+		extraInfo << "[SPECIFIC DELETE] ";
+		
+	if (ren->GetGridSize())
+		extraInfo << "[GRID: " << ren->GetGridSize() << "/9]";
+		
+	if (LinkVar==true)
+		extraInfo << "[LINK MODE]";
+		
+	g->drawtext(16, zoomMove+43, extraInfo.str(), 0, 255, 255, 255);
+
+	std::stringstream fps;
+	fps << "FPS:" << (floor(ui::Engine::Ref().GetFps()*100))/100;
+	g->drawtext(16, zoomMove+29, fps.str(), 0, 255, 255 ,255);
+
+	std::stringstream tmp2;
+	if (sample.particle.type==PT_NBOT)
 	{
-		std::stringstream ctype;
-		ctype << c->ElementResolve(sample.particle.ctype, sample.particle.type);
-		std::stringstream ptype;
-		ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << ctype.str();
-		g->drawtext(hudx-212, 15, ptype.str(), 0, 255, 255, 255);
+		if (sample.particle.tmp2==0)
+			tmp2 << "Bot Inactive";
+			
+		if (sample.particle.tmp2==1)
+			tmp2 << "Bot Active";
+			
+		if (sample.particle.tmp2==2)
+			tmp2 << "Bot Active";
+			
+		if (sample.particle.tmp2==3)
+			tmp2 << "Bot Active";
+			
+		if (sample.particle.tmp2==4)
+			tmp2 << "Needs Charge";
 	}
 	else
 	{
-		std::stringstream ptype;
-		ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", ()" ;
-		g->drawtext(hudx-212, 15, ptype.str(), 0, 255, 255, 255);
-	}*/
+	tmp2 << "Tmp2:" << sample.particle.tmp2;
+	}
+	
+	g->drawtext(hudx-212, zoomMove+44, tmp2.str(), 0, 255, 255, 255);
+	
+	std::stringstream vx;
+	vx << "VX:" << (floor(sample.particle.vx*100))/100;
+	g->drawtext(hudx-147, zoomMove+44, vx.str(), 0, 255, 255, 255);
 
-
+	std::stringstream vy;
+	vy << "VY:" << (floor(sample.particle.vy*100))/100;
+	g->drawtext(hudx-77, zoomMove+44, vy.str(), 0, 255, 255, 255);
 }
-
 
 		int wavelengthGfx = 0, alpha = 255;
 		if (toolTipPosition.Y < 120)
 			alpha = 255-toolTipPresence*3;
+			
 		if (alpha < 50)
 			alpha = 50;
+			
 		std::stringstream ptype;
 		std::stringstream tmp;
+		
 		if(sample.particle.type)
 		{
 			std::stringstream temp;
 			temp << "Temp:" << (floor (sample.particle.temp*100))/100-273.15;
-			g->drawtext(hudx-147, 15, temp.str(), 0, 255, 255, 255);
+			g->drawtext(hudx-147, zoomMove+15, temp.str(), 0, 255, 255, 255);
 
 			int ctype = sample.particle.ctype;
+			
 			if (sample.particle.type == PT_PIPE || sample.particle.type == PT_PPIP)
 				ctype = sample.particle.tmp&0xFF;
 
@@ -2478,94 +2494,96 @@ if (sample.particle.type)
 				wavelengthGfx = ctype;
 				if ((sample.particle.type == PT_PIPE || sample.particle.type == PT_PPIP) && c->IsValidElement(ctype))
 					ptype << c->ElementResolve((int)sample.particle.pavg[1], 0);
+					
 			if (sample.particle.type==PT_LAVA && sample.particle.ctype)
 			{
 				ptype << "Molten " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
-				g->drawtext(hudx-212, 15, ptype.str(), 0, 255, 255, 255);
+				g->drawtext(hudx-212, zoomMove+15, ptype.str(), 0, 255, 255, 255);
 			}
-				else if (sample.particle.type == PT_LIFE)
-					ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype);
-				else if (sample.particle.type == PT_FILT)
+			else if (sample.particle.type == PT_LIFE)
+				ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype);
+			else if (sample.particle.type == PT_FILT)
+			{
+				ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype);
+				const char* filtModes[] = {"set", "AND", "OR", "subt", "red", "blue", "none", "XOR", "NOT", "scat"};
+				if (ctype>=1000)
 				{
-					ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype);
-					const char* filtModes[] = {"set", "AND", "OR", "subt", "red", "blue", "none", "XOR", "NOT", "scat"};
-					if (ctype>=1000)
-						{
-						if (ctype>=1000000)
-							{
-							ptype << ", " << ctype/1000000 << "m";
-							}
-						else
-							{
-							ptype << ", " << ctype/1000 << "k";
-							}
-						}
-					else
-						{
-						ptype << ", " << ctype;
-						}
-					if (sample.particle.tmp>=0 && sample.particle.tmp<=9)
-						tmp << "Tmp:" << " (" << filtModes[sample.particle.tmp] << ")";
-					else
-						tmp << "Tmp:" << " (unkn)";
-				}
-				else if (sample.particle.type==PT_NBOT)
-				{
-					if (sample.particle.tmp==0)
-						tmp << "Retrieve(0)";
-					if (sample.particle.tmp==1)
-						tmp << "Explode(1)";
-					if (sample.particle.tmp==2)
-						tmp << "Charge(2)";
-					if (sample.particle.tmp==3)
-						tmp << "Fight(3)";
-					if (sample.particle.tmp==4)
-						tmp << "Break(4)";
-					if (sample.particle.tmp==5)
-						tmp << "Replicate(5)";
-					if (sample.particle.tmp==6)
-						tmp << "Beacon(6)";
-					if (sample.particle.tmp==256)
-						tmp << "Part Stored";
-					if (sample.particle.tmp==257)
-						tmp << "Full(5)";
-					if (ctype==0)
+					if (ctype>=1000000)
 					{
-						ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << "()";
+						ptype << ", " << ctype/1000000 << "m";
 					}
 					else
 					{
-						ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
+						ptype << ", " << ctype/1000 << "k";
 					}
 				}
 				else
 				{
-				tmp << "Tmp:" << sample.particle.tmp;
-					if (ctype==0)
-						{
-						ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << "()";
-						}
-					else
-						{
-						ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
-						}
-					if (wavelengthGfx && PT_PHOT)
-						ptype << ctype/4194304;
-						}
-g->drawtext(hudx-212, 15, ptype.str(), 0, 255, 255, 255);
-g->drawtext(hudx-147, 30, tmp.str(), 0, 255, 255, 255);
+				ptype << ", " << ctype;
+				}
+					
+				if (sample.particle.tmp>=0 && sample.particle.tmp<=9)
+					tmp << "Tmp:" << " (" << filtModes[sample.particle.tmp] << ")";
+				else
+					tmp << "Tmp:" << " (unkn)";
+			}
+			else if (sample.particle.type==PT_NBOT)
+			{
+				if (sample.particle.tmp==0)
+					tmp << "Retrieve(0)";
+				if (sample.particle.tmp==1)
+					tmp << "Explode(1)";
+				if (sample.particle.tmp==2)
+					tmp << "Charge(2)";
+				if (sample.particle.tmp==3)
+					tmp << "Fight(3)";
+				if (sample.particle.tmp==4)
+					tmp << "Break(4)";
+				if (sample.particle.tmp==5)
+					tmp << "Replicate(5)";
+				if (sample.particle.tmp==6)
+					tmp << "Beacon(6)";
+				if (sample.particle.tmp==256)
+					tmp << "Part Stored";
+				if (sample.particle.tmp==257)
+					tmp << "Full(5)";
+				if (ctype==0)
+				{
+					ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << "()";
+				}
+				else
+				{
+					ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
+				}
+			}
+			else
+			{
+			tmp << "Tmp:" << sample.particle.tmp;
+				if (ctype==0)
+					{
+					ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << "()";
+					}
+				else
+					{
+					ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
+					}
+				if (wavelengthGfx && PT_PHOT)
+					ptype << ctype/4194304;
+			}
+g->drawtext(hudx-212, zoomMove+15, ptype.str(), 0, 255, 255, 255);
+g->drawtext(hudx-147, zoomMove+30, tmp.str(), 0, 255, 255, 255);
 }
 else if (sample.WallType)
 {
-	g->drawtext(400, 15, c->WallName(sample.WallType), 255, 255, 255, 255);
-	g->drawtext(465, 15, "Temp:()", 0, 255, 255, 75);
-	g->drawtext(hudx-147, 30, "Tmp:()", 0, 255, 255, 255);
+	g->drawtext(400, zoomMove+15, c->WallName(sample.WallType), 255, 255, 255, 255);
+	g->drawtext(465, zoomMove+15, "Temp:()", 0, 255, 255, 75);
+	g->drawtext(hudx-147, zoomMove+30, "Tmp:()", 0, 255, 255, 255);
 }
 else
 {
-	g->drawtext(hudx-212, 15, "Empty, ()", 0, 255, 255, 255);
-	g->drawtext(hudx-147, 15, "Temp:()", 0, 255, 255, 255);
-	g->drawtext(hudx-147, 30, "Tmp:()", 0, 255, 255, 255);
+	g->drawtext(hudx-212, zoomMove+15, "Empty, ()", 0, 255, 255, 255);
+	g->drawtext(hudx-147, zoomMove+15, "Temp:()", 0, 255, 255, 255);
+	g->drawtext(hudx-147, zoomMove+30, "Tmp:()", 0, 255, 255, 255);
 }
 }
 if (showHud==false)
@@ -2578,8 +2596,8 @@ if (showHud==false)
 
 if(c->GetSimulation()->REALvar==true)
 	{
-	g->fillrect(RMBx, RMBy, 92, 12, 55, 55, 55, 200);
-	g->drawtext(RMx, RMy, "Realistic Mode On", 255, 0, 0, 255);
+	g->fillrect(RMBx, zoomMove+RMBy, 92, 12, 55, 55, 55, 200);
+	g->drawtext(RMx, zoomMove+RMy, "Realistic Mode On", 255, 0, 0, 255);
 	}
 
 	//Tooltips
