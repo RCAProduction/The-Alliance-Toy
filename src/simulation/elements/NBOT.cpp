@@ -50,7 +50,7 @@ Element_NBOT::Element_NBOT()
 int Element_NBOT::update(UPDATE_FUNC_ARGS)
 {
 
-int r, rx, ry, ct = parts[i].ctype, giveAmount, t, tx, ty, multiplyVal;
+int r, rx, ry, ct = parts[i].ctype, giveAmount, t, tx, ty, multiplyVal, ovx, ovy;
 
 if(ct==PT_NBOT)
 {
@@ -83,48 +83,57 @@ if((parts[i].life>=1 && parts[i].tmp2==1) || (parts[i].life>=1 && parts[i].tmp2=
 	{
 		if(parts[i].x>parts[i].tmp3)
 		{
-			parts[i].vx = (rand() % 21)-16;
+			ovx = (rand() % 21)-16;
 		}
 		else if(parts[i].x<parts[i].tmp3)
 		{
-			parts[i].vx = (rand() % 21)-4;
+			ovx = (rand() % 21)-4;
 		}
 		if(parts[i].y>parts[i].tmp4)
 		{
-			parts[i].vy = (rand() % 9)-7;
+			ovy = (rand() % 9)-7;
 		}
 		else if(parts[i].y<parts[i].tmp4)
 		{
-			parts[i].vy = (rand() % 9)-1;
+			ovy = (rand() % 9)-1;
 		}
 	}
 	else if(parts[i].tmp3>=1 && parts[i].x>parts[i].tmp3 && parts[i].tmp!=6)
 	{
-		parts[i].vx = (rand() % 11)-8;
+		ovx = (rand() % 11)-8;
 	}
 	else if(parts[i].tmp3>=1 && parts[i].x<parts[i].tmp3 && parts[i].tmp!=6)
 	{
-		parts[i].vx = (rand() % 11)-2;
+		ovx = (rand() % 11)-2;
 	}
 	if(parts[i].tmp4>=1 && parts[i].y>parts[i].tmp4 && parts[i].tmp!=6)
 	{
-		parts[i].vy = (rand() % 11)-8;
+		ovy = (rand() % 11)-8;
 	}
 	else if(parts[i].tmp4>=1 && parts[i].y<parts[i].tmp4 && parts[i].tmp!=6)
 	{
-		parts[i].vy = (rand() % 11)-2;
+		ovy = (rand() % 11)-2;
 	}
 	else if(parts[i].tmp==3 && parts[i].tmp3==0)
 	{
-		parts[i].vx = (rand() % 21)-10;
-		parts[i].vy = (rand() % 9)-4;
+		ovx = (rand() % 21)-10;
+		ovy = (rand() % 9)-4;
 	}
 	else if(parts[i].tmp3==0)
 	{
-		parts[i].vx = (rand() % 11)-5;
-		parts[i].vy = (rand() % 11)-5;
+		ovx = (rand() % 11)-5;
+		ovy = (rand() % 11)-5;
 	}
+	parts[i].vx = ovx;
+	parts[i].vy = ovy;
 }
+
+if(parts[i].tmp3>0 || parts[i].tmp4>0)
+{
+	parts[i].tmp3 = 0;
+	parts[i].tmp4 = 0;
+}
+
 if(parts[i].tmp==1 && parts[i].life<=10 && parts[i].life>=1)
 {
 	parts[i].tmp = 1;
