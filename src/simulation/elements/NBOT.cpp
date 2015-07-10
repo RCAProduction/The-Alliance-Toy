@@ -140,7 +140,7 @@ if (parts[i].tmp3>0 || parts[i].tmp4>0)
 	parts[i].tmp4 = 0;
 }
 
-if (parts[i].tmp==0 && parts[i].ctype==0 && parts[i].tmp2==0 && parts[i].pavg[0]<100)
+if (parts[i].tmp==0 && parts[i].ctype==0 && parts[i].pavg[0]<100)
 {
 	parts[i].pavg[0] = parts[i].pavg[0] + 1;
 }
@@ -182,6 +182,14 @@ if (parts[i].life>2000 && parts[i].tmp!=2)
 					}
 				}
 				
+				if (parts[i].tmp==0 && parts[i].pavg[0]>=100 && parts[r>>8].type==PT_NBOT && ((parts[r>>8].ctype!=0 && parts[r>>8].tmp==0) || parts[r>>8].tmp!=0)) //Allows blank NBOT to copy into other types
+				{
+					parts[i].tmp = parts[r>>8].tmp;
+					parts[i].tmp2 = parts[r>>8].tmp2;
+					parts[i].ctype = parts[r>>8].ctype;
+					parts[i].pavg[0] = 0;
+				}
+				
 				if ((parts[r>>8].type==PT_SPRK && parts[r>>8].ctype==PT_PSCN) || (parts[r>>8].type==PT_VSPK && parts[r>>8].ctype==PT_PSCN))
 				{
 					parts[i].life = 255;
@@ -209,9 +217,9 @@ if (parts[i].life>2000 && parts[i].tmp!=2)
 					}
 				}
 				
-				if (parts[i].tmp==2 && parts[i].tmp2>=1 && parts[i].tmp2<=3 && parts[r>>8].type==ct && parts[i].life<7000) //Chargers
+				if (parts[i].tmp==2 && parts[i].tmp2>=1 && parts[i].tmp2<=3 && parts[r>>8].type==ct && parts[i].life<2000) //Chargers
 				{
-					parts[i].life = parts[i].life + ((rand() % 100)+1000);
+					parts[i].life = parts[i].life + ((rand() % 100)+7000);
 					sim->kill_part(r>>8);
 				}
 				
@@ -233,6 +241,7 @@ if (parts[i].life>2000 && parts[i].tmp!=2)
 								
 								if (!t)
 								{
+									sim->kill_part(r>>8);
 									sim->create_part(-1,x+tx,y+ty,PT_NBOT);
 								}
 							}
@@ -290,14 +299,6 @@ if (parts[i].life>2000 && parts[i].tmp!=2)
 					}
 					sim->part_change_type(i,x,y,ct);
 					ct = PT_NONE;
-				}
-				
-				if (parts[i].tmp==0 && parts[i].tmp2==0 && parts[i].pavg[0]>=100 && parts[r>>8].type==PT_NBOT && parts[r>>8].ctype!=0) //Allows blank NBOT to copy into other types
-				{
-					parts[i].tmp = parts[r>>8].tmp;
-					parts[i].tmp2 = parts[r>>8].tmp2;
-					parts[i].ctype = parts[r>>8].ctype;
-					parts[i].pavg[0] = 0;
 				}
 			}	
 	return 0;
