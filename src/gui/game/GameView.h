@@ -159,6 +159,7 @@ public:
 	int frameCount;
 	int cctype;
 	int zoomMove;
+	int xMove;
 
 	bool INFOvar;
 	bool FPSGvar;

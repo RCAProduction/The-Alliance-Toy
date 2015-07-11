@@ -2362,6 +2362,10 @@ tmp4 << sample.particle.tmp4;
 if (zoomEnabled==true)
 {
 	zoomMove = 246;
+	if (sample.PositionX>305)
+		xMove = 384;
+	else
+		xMove = 0;
 }
 else
 {
@@ -2381,15 +2385,15 @@ time ( &rawtime );
 timeinfo = localtime ( &rawtime );
 
 //Behind HUD, so that values are easily visible when particles are behind it.
-g->fillrect(hudx-214, zoomMove+13, 187, 12, 55, 55, 55, 200);
-g->fillrect(hudx-214, zoomMove+27, 200, 12, 55, 55, 55, 200);
-g->fillrect(14, zoomMove+13, 210, 12, 55, 55, 55, 200);
+g->fillrect(hudx-214-xMove, zoomMove+13, 187, 12, 55, 55, 55, 200);
+g->fillrect(hudx-214-xMove, zoomMove+27, 200, 12, 55, 55, 55, 200);
+g->fillrect(14+xMove, zoomMove+13, 210, 12, 55, 55, 55, 200);
 
-g->drawtext(16, zoomMove+15, asctime(timeinfo), 0, 255, 68, 255);
+g->drawtext(16+xMove, zoomMove+15, asctime(timeinfo), 0, 255, 68, 255);
 
 std::stringstream parts;
 parts << "Parts:" << sample.NumParts;
-g->drawtext(160, zoomMove+15, parts.str(), 0, 255, 255, 255);
+g->drawtext(160+xMove, zoomMove+15, parts.str(), 0, 255, 255, 255);
 
 /*std::stringstream pavg;
 pavg << sample.particle.pavg[0];
@@ -2397,24 +2401,24 @@ g->drawtext(300, 15, pavg.str(), 255, 0, 255, 255);*/
 
 std::stringstream pres;
 pres << "Pres:" << (floor (sample.AirPressure*100))/100;
-g->drawtext(hudx-77, zoomMove+15, pres.str(), 0, 255, 255, 255);
+g->drawtext(hudx-77-xMove, zoomMove+15, pres.str(), 0, 255, 255, 255);
 
 std::stringstream life;
 life << "Life:" << sample.particle.life;
-g->drawtext(hudx-212, zoomMove+30, life.str(), 0, 255, 255, 255);
+g->drawtext(hudx-212-xMove, zoomMove+30, life.str(), 0, 255, 255, 255);
 
 std::stringstream x;
 x << "X:" << sample.PositionX;
-g->drawtext(hudx-71, zoomMove+30, x.str(), 0, 255, 255, 255);
+g->drawtext(hudx-71-xMove, zoomMove+30, x.str(), 0, 255, 255, 255);
 
 std::stringstream y;
 y << "Y:" << sample.PositionY;
-g->drawtext(hudx-42, zoomMove+30, y.str(), 0, 255, 255, 255);
+g->drawtext(hudx-42-xMove, zoomMove+30, y.str(), 0, 255, 255, 255);
 
 if (showDebug)
 {
-	g->fillrect(hudx-214, zoomMove+41, 180, 12, 55, 55, 55, 200);
-	g->fillrect(14, zoomMove+27, 61, 12, 55, 55, 55, 200);
+	g->fillrect(hudx-214-xMove, zoomMove+41, 180, 12, 55, 55, 55, 200);
+	g->fillrect(14+xMove, zoomMove+27, 61, 12, 55, 55, 55, 200);
 
 	std::stringstream extraInfo;
 	if (c->GetReplaceModeFlags()&REPLACE_MODE)
@@ -2429,11 +2433,11 @@ if (showDebug)
 	if (LinkVar==true)
 		extraInfo << "[LINK MODE]";
 		
-	g->drawtext(16, zoomMove+43, extraInfo.str(), 0, 255, 255, 255);
+	g->drawtext(16+xMove, zoomMove+43, extraInfo.str(), 0, 255, 255, 255);
 
 	std::stringstream fps;
 	fps << "FPS:" << (floor(ui::Engine::Ref().GetFps()*100))/100;
-	g->drawtext(16, zoomMove+29, fps.str(), 0, 255, 255 ,255);
+	g->drawtext(16+xMove, zoomMove+29, fps.str(), 0, 255, 255 ,255);
 
 	std::stringstream tmp2;
 	if (sample.particle.type==PT_NBOT)
@@ -2458,15 +2462,15 @@ if (showDebug)
 	tmp2 << "Tmp2:" << sample.particle.tmp2;
 	}
 	
-	g->drawtext(hudx-212, zoomMove+44, tmp2.str(), 0, 255, 255, 255);
+	g->drawtext(hudx-212-xMove, zoomMove+44, tmp2.str(), 0, 255, 255, 255);
 	
 	std::stringstream vx;
 	vx << "VX:" << (floor(sample.particle.vx*100))/100;
-	g->drawtext(hudx-147, zoomMove+44, vx.str(), 0, 255, 255, 255);
+	g->drawtext(hudx-147-xMove, zoomMove+44, vx.str(), 0, 255, 255, 255);
 
 	std::stringstream vy;
 	vy << "VY:" << (floor(sample.particle.vy*100))/100;
-	g->drawtext(hudx-77, zoomMove+44, vy.str(), 0, 255, 255, 255);
+	g->drawtext(hudx-77-xMove, zoomMove+44, vy.str(), 0, 255, 255, 255);
 }
 
 		int wavelengthGfx = 0, alpha = 255;
@@ -2483,7 +2487,7 @@ if (showDebug)
 		{
 			std::stringstream temp;
 			temp << "Temp:" << (floor (sample.particle.temp*100))/100-273.15;
-			g->drawtext(hudx-147, zoomMove+15, temp.str(), 0, 255, 255, 255);
+			g->drawtext(hudx-147-xMove, zoomMove+15, temp.str(), 0, 255, 255, 255);
 
 			int ctype = sample.particle.ctype;
 			
@@ -2498,7 +2502,7 @@ if (showDebug)
 			if (sample.particle.type==PT_LAVA && sample.particle.ctype)
 			{
 				ptype << "Molten " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
-				g->drawtext(hudx-212, zoomMove+15, ptype.str(), 0, 255, 255, 255);
+				g->drawtext(hudx-212-xMove, zoomMove+15, ptype.str(), 0, 255, 255, 255);
 			}
 			else if (sample.particle.type == PT_LIFE)
 				ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype);
@@ -2570,20 +2574,20 @@ if (showDebug)
 				if (wavelengthGfx && PT_PHOT)
 					ptype << ctype/4194304;
 			}
-g->drawtext(hudx-212, zoomMove+15, ptype.str(), 0, 255, 255, 255);
-g->drawtext(hudx-147, zoomMove+30, tmp.str(), 0, 255, 255, 255);
+g->drawtext(hudx-212-xMove, zoomMove+15, ptype.str(), 0, 255, 255, 255);
+g->drawtext(hudx-147-xMove, zoomMove+30, tmp.str(), 0, 255, 255, 255);
 }
 else if (sample.WallType)
 {
-	g->drawtext(400, zoomMove+15, c->WallName(sample.WallType), 255, 255, 255, 255);
-	g->drawtext(465, zoomMove+15, "Temp:()", 0, 255, 255, 75);
-	g->drawtext(hudx-147, zoomMove+30, "Tmp:()", 0, 255, 255, 255);
+	g->drawtext(400-xMove, zoomMove+15, c->WallName(sample.WallType), 255, 255, 255, 255);
+	g->drawtext(465-xMove, zoomMove+15, "Temp:()", 0, 255, 255, 75);
+	g->drawtext(hudx-147-xMove, zoomMove+30, "Tmp:()", 0, 255, 255, 255);
 }
 else
 {
-	g->drawtext(hudx-212, zoomMove+15, "Empty, ()", 0, 255, 255, 255);
-	g->drawtext(hudx-147, zoomMove+15, "Temp:()", 0, 255, 255, 255);
-	g->drawtext(hudx-147, zoomMove+30, "Tmp:()", 0, 255, 255, 255);
+	g->drawtext(hudx-212-xMove, zoomMove+15, "Empty, ()", 0, 255, 255, 255);
+	g->drawtext(hudx-147-xMove, zoomMove+15, "Temp:()", 0, 255, 255, 255);
+	g->drawtext(hudx-147-xMove, zoomMove+30, "Tmp:()", 0, 255, 255, 255);
 }
 }
 if (showHud==false)
