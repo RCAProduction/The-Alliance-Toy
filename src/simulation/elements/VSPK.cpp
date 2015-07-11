@@ -49,26 +49,20 @@ Element_VSPK::Element_VSPK()
 //#TPT-Directive ElementHeader Element_VSPK static int update(UPDATE_FUNC_ARGS)
 int Element_VSPK::update(UPDATE_FUNC_ARGS)
 {
-	int r, rx, ry, nearp, pavg, ct = parts[i].ctype, sender, receiver;
-	Element_FIRE::update(UPDATE_FUNC_SUBCALL_ARGS);
 
-	if (parts[i].life<=0)
-	{
-		if (ct<=0 || ct>=PT_NUM || !sim->elements[parts[i].ctype].Enabled)
-			sim->kill_part(i);
-		sim->part_change_type(i,x,y,ct);
-		parts[i].ctype = PT_NONE;
-		parts[i].life = 4;
+int r, rx, ry, ct = parts[i].ctype, sender, receiver, pavg, giveAmount;
+	
+if (parts[i].ctype==PT_VSPK)
+	sim->kill_part(i);
 
-		return 0;
-	}
-	//Kills VSPK if it has a ctype of itself.
-	switch(ct)
-	{
-	case PT_VSPK:
-		sim->kill_part(i);
-		return 1;
-	}
+if (parts[i].life<=0 || !(sim->elements[parts[i].ctype].Properties&PROP_CONDUCTS))
+{
+	parts[i].life = 15;
+	sim->part_change_type(i,x,y,ct);
+}
+
+if (parts[i].tmp2>=1)
+	parts[i].tmp2 = parts[i].tmp2 - 1;
 	
 	for (rx=-2; rx<3; rx++)
 		for (ry=-2; ry<3; ry++)
@@ -77,32 +71,23 @@ int Element_VSPK::update(UPDATE_FUNC_ARGS)
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				receiver = r&0xFF;
-				sender = ct;
+				
 				pavg = sim->parts_avg(r>>8, i,PT_INSL);
-				//receiver is the element VSPK is trying to conduct to
-				//sender is the element the VSPK is on
-
-				if (pavg == PT_INSL || pavg == PT_CBNF) continue; //Insulation and CBNF blocks everything past here
-				if (!((sim->elements[receiver].Properties&PROP_CONDUCTS)||receiver==PT_INST||receiver==PT_QRTZ)) continue; //Stop non-conducting receivers, allow INST and QRTZ as special cases
-
-				if (parts[r>>8].life==0) {
+					
+				if (pavg==PT_INSL || pavg==PT_CBNF)
+					continue;
+				
+				if (parts[r>>8].life==0 && parts[r>>8].type!=PT_VSPK && parts[i].tmp2==0)
+				{
+					parts[r>>8].ctype = parts[r>>8].type;
+					sim->part_change_type(r>>8, x+rx, y+ry, PT_VSPK);
 					parts[r>>8].life = parts[i].life - 1;
-					parts[r>>8].ctype = receiver;
-					sim->part_change_type(r>>8,x+rx,y+ry,PT_VSPK);
-
-					if (parts[i].ctype!=PT_ZRNT && parts[r>>8].ctype!=PT_ZRNT && parts[r>>8].type!=PT_ZRNT)
-					{
-						parts[r>>8].temp = 4500;
-						parts[i].life = parts[i].life - 300;
-						parts[i].temp = 5000;
-						if(parts[i].ctype==PT_ZRNT || parts[r>>8].type==PT_CBNF)
-						{
-							parts[i].temp = 273.15;
-						}
-					}
-					if(parts[i].temp>=4500)
-						sim->part_change_type(i,x,y,ct);
+					parts[r>>8].tmp2 = 2;
+				}
+				
+				if (parts[i].life>parts[r>>8].life && parts[r>>8].type==PT_VSPK && parts[i].life>=16)
+				{
+					parts[r>>8].life = parts[i].life - 1;
 				}
 			}
 	return 0;
