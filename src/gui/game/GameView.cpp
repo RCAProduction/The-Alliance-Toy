@@ -215,6 +215,8 @@ GameView::GameView():
 	FPS5=60;
 	frameCount = 0;
 	int currentX = 1;
+	xMove = 0;
+	
 	//Set up UI
 	class SearchAction : public ui::ButtonAction
 	{
@@ -2363,12 +2365,17 @@ if (zoomEnabled==true)
 {
 	zoomMove = 246;
 	if (sample.PositionX>305)
+	{
 		xMove = 384;
+	}
 	else
+	{
 		xMove = 0;
+	}
 }
 else
 {
+	xMove = 0;
 	zoomMove = 0;
 }
 
@@ -2387,13 +2394,13 @@ timeinfo = localtime ( &rawtime );
 //Behind HUD, so that values are easily visible when particles are behind it.
 g->fillrect(hudx-214-xMove, zoomMove+13, 187, 12, 55, 55, 55, 200);
 g->fillrect(hudx-214-xMove, zoomMove+27, 200, 12, 55, 55, 55, 200);
-g->fillrect(14+xMove, zoomMove+13, 210, 12, 55, 55, 55, 200);
+g->fillrect(14+xMove, 13, 210, 12, 55, 55, 55, 200);
 
-g->drawtext(16+xMove, zoomMove+15, asctime(timeinfo), 0, 255, 68, 255);
+g->drawtext(16+xMove, 15, asctime(timeinfo), 0, 255, 68, 255);
 
 std::stringstream parts;
 parts << "Parts:" << sample.NumParts;
-g->drawtext(160+xMove, zoomMove+15, parts.str(), 0, 255, 255, 255);
+g->drawtext(160+xMove, 15, parts.str(), 0, 255, 255, 255);
 
 /*std::stringstream pavg;
 pavg << sample.particle.pavg[0];
@@ -2418,7 +2425,7 @@ g->drawtext(hudx-42-xMove, zoomMove+30, y.str(), 0, 255, 255, 255);
 if (showDebug)
 {
 	g->fillrect(hudx-214-xMove, zoomMove+41, 180, 12, 55, 55, 55, 200);
-	g->fillrect(14+xMove, zoomMove+27, 61, 12, 55, 55, 55, 200);
+	g->fillrect(14+xMove, 27, 61, 12, 55, 55, 55, 200);
 
 	std::stringstream extraInfo;
 	if (c->GetReplaceModeFlags()&REPLACE_MODE)
@@ -2433,11 +2440,11 @@ if (showDebug)
 	if (LinkVar==true)
 		extraInfo << "[LINK MODE]";
 		
-	g->drawtext(16+xMove, zoomMove+43, extraInfo.str(), 0, 255, 255, 255);
+	g->drawtext(16+xMove, 43, extraInfo.str(), 0, 255, 255, 255);
 
 	std::stringstream fps;
 	fps << "FPS:" << (floor(ui::Engine::Ref().GetFps()*100))/100;
-	g->drawtext(16+xMove, zoomMove+29, fps.str(), 0, 255, 255 ,255);
+	g->drawtext(16+xMove, 29, fps.str(), 0, 255, 255 ,255);
 
 	std::stringstream tmp2;
 	if (sample.particle.type==PT_NBOT)
@@ -2600,8 +2607,8 @@ if (showHud==false)
 
 if(c->GetSimulation()->REALvar==true)
 	{
-	g->fillrect(RMBx, zoomMove+RMBy, 92, 12, 55, 55, 55, 200);
-	g->drawtext(RMx, zoomMove+RMy, "Realistic Mode On", 255, 0, 0, 255);
+	g->fillrect(RMBx+xMove, RMBy, 92, 12, 55, 55, 55, 200);
+	g->drawtext(RMx+xMove, RMy, "Realistic Mode On", 255, 0, 0, 255);
 	}
 
 	//Tooltips
