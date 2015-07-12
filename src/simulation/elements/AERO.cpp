@@ -28,7 +28,7 @@ Element_AERO::Element_AERO()
 
 	Temperature = R_TEMP + 0.0f + 273.15f;
 	HeatConduct = 0;
-	Description = "Aerogel, an amazing heat insulator. Also looks amazing.";
+	Description = "Aerogel. Powerful heat insulator.";
 
 	State = ST_SOLID;
 	Properties = TYPE_SOLID;
@@ -62,6 +62,10 @@ int Element_AERO::update(UPDATE_FUNC_ARGS)
 				r = pmap[y + ry][x + rx];
 				if (!r)
 					continue;
+					
+				if (parts[r>>8].type==PT_ARAY || parts[r>>8].type==PT_GPMP || parts[r>>8].type==PT_INSL || (parts[r>>8].type==PT_HSWC && parts[r>>8].life==0)) //Stop conduction to non-conducting elements
+					continue;
+					
 				if (parts[i].temp - parts[r>>8].temp != 0)
 				{
 					give_temp = ((parts[i].temp - parts[r>>8].temp) / 300);
