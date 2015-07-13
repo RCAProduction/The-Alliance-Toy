@@ -1,5 +1,5 @@
 static const char *introTextData =
-	"\blRCA's Mod - Version 0.1.8 - RCAProductionmaster@gmail.com, irc.freenode.net #powder\n"
+	"\blRCA's Mod - Version 0.1.9 - RCAProductionmaster@gmail.com, irc.freenode.net #powder\n"
 	"\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\n"
 	"\n"
 	"\bgControl+C/V/X are Copy, Paste and cut respectively.\n"
