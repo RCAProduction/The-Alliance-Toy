@@ -2364,7 +2364,11 @@ tmp4 << sample.particle.tmp4;
 if (zoomEnabled==true)
 {
 	zoomMove = 246;
-	if (sample.PositionX>305)
+	if (zoomCursorFixed)
+	{
+		
+	}
+	else if (sample.PositionX>305)
 	{
 		xMove = 384;
 	}
