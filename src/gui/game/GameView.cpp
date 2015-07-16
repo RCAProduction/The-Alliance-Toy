@@ -977,12 +977,12 @@ void GameView::NotifySaveChanged(GameModel * sender)
 			}
 			else
 			{
-				tagSimulationButton->SetText("[no tags set]");
+				tagSimulationButton->SetText("[set search tags here]");
 			}
 		}
 		else
 		{
-			tagSimulationButton->SetText("[no tags set]");
+			tagSimulationButton->SetText("[set search tags here]");
 		}
 		currentSaveType = 1;
 	}
@@ -1001,13 +1001,13 @@ void GameView::NotifySaveChanged(GameModel * sender)
 		upVoteButton->Appearance.BackgroundDisabled = (ui::Colour(0, 0, 0));
 		downVoteButton->Appearance.BorderDisabled = ui::Colour(100, 100, 100);
 		tagSimulationButton->Enabled = false;
-		tagSimulationButton->SetText("[no tags set]");
+		tagSimulationButton->SetText("[set search tags here]");
 		currentSaveType = 2;
 	}
 	else
 	{
 		((SplitButton*)saveSimulationButton)->SetShowSplit(false);
-		saveSimulationButton->SetText("[untitled simulation]");
+		saveSimulationButton->SetText("[save simulation]");
 		reloadButton->Enabled = false;
 		upVoteButton->Enabled = false;
 		upVoteButton->Appearance.BackgroundDisabled = (ui::Colour(0, 0, 0));
@@ -1016,7 +1016,7 @@ void GameView::NotifySaveChanged(GameModel * sender)
 		downVoteButton->Appearance.BackgroundDisabled = (ui::Colour(0, 0, 0));
 		downVoteButton->Appearance.BorderDisabled = ui::Colour(100, 100, 100),
 		tagSimulationButton->Enabled = false;
-		tagSimulationButton->SetText("[no tags set]");
+		tagSimulationButton->SetText("[set search tags here]");
 		currentSaveType = 0;
 	}
 	saveSimulationButton->Enabled = (saveSimulationButtonEnabled || ctrlBehaviour);
@@ -2385,7 +2385,15 @@ else
 
 if (superDebug==true)
 {
-
+	g->fillrect(231, 13, 160, 12, 55, 55, 55, 200);
+	
+	std::stringstream Grav;
+	Grav << "Grav:" << (floor(sample.Gravity*10000))/10000;
+	g->drawtext(233, 15, Grav.str(), 0, 255, 255, 255);
+	
+	std::stringstream Ambient;
+	Ambient << "Ambnt:" << sample.AirTemperature-273.15;
+	g->drawtext(300, 15, Ambient.str(), 0, 255, 255, 255);
 }
 
 //Time
