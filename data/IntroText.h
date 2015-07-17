@@ -40,9 +40,6 @@ static const char *introTextData =
 #ifdef X86_SSE3
 	"X86_SSE3 "
 #endif
-#ifdef MACOSX
-	"MACOSX "
-#endif
 #ifdef LUACONSOLE
 	"LUACONSOLE "
 #endif
