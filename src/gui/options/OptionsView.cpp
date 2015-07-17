@@ -162,11 +162,11 @@ OptionsView::OptionsView():
 		FullscreenAction(OptionsView * v_){	v = v_;	}
 		virtual void ActionCallback(ui::Checkbox * sender)
 		{
-#ifdef MACOSX
-			ErrorMessage::Blocking("Error", "fullscreen doesn't work on OS X");
-#else
+//#ifdef MACOSX
+//			ErrorMessage::Blocking("Error", "fullscreen doesn't work on OS X");
+//#else
 			v->c->SetFullscreen(sender->GetChecked());
-#endif
+//#endif
 		}
 	};
 
