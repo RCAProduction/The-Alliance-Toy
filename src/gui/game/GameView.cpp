@@ -2363,6 +2363,7 @@ tmp4 << sample.particle.tmp4;
 
 if (zoomEnabled==true)
 {
+	superMove = 295;
 	zoomMove = 246;
 	if (zoomCursorFixed)
 	{
@@ -2371,29 +2372,52 @@ if (zoomEnabled==true)
 	else if (sample.PositionX>305)
 	{
 		xMove = 384;
+		superX = -217;
 	}
 	else
 	{
 		xMove = 0;
+		superX = 167;
 	}
 }
 else
 {
 	xMove = 0;
 	zoomMove = 0;
+	superMove = 0;
+	superX = 0;
 }
 
 if (superDebug==true)
 {
-	g->fillrect(231, 13, 160, 12, 55, 55, 55, 200);
+	showDebug = true;
+	g->fillrect(superX+231, superMove+13, 160, 12, 55, 55, 55, 200);
+	g->fillrect(superX+231, superMove+27, 160, 12, 55, 55, 55, 200);
+	g->fillrect(superX+231, superMove+41, 160, 12, 55, 55, 55, 200);
 	
 	std::stringstream Grav;
 	Grav << "Grav:" << (floor(sample.Gravity*10000))/10000;
-	g->drawtext(233, 15, Grav.str(), 0, 255, 255, 255);
+	g->drawtext(superX+233, superMove+15, Grav.str(), 0, 255, 255, 255);
 	
 	std::stringstream Ambient;
-	Ambient << "Ambnt:" << sample.AirTemperature-273.15;
-	g->drawtext(300, 15, Ambient.str(), 0, 255, 255, 255);
+	Ambient << "Ambt:" << sample.AirTemperature-273.15;
+	g->drawtext(superX+300, superMove+15, Ambient.str(), 0, 255, 255, 255);
+	
+	std::stringstream GravX;
+	GravX << "GravX:" << (floor(sample.GravityVelocityX*1000))/1000;
+	g->drawtext(superX+233, superMove+30, GravX.str(), 0, 255, 255, 255);
+	
+	std::stringstream GravY;
+	GravY << "GravY:" << (floor(sample.GravityVelocityY*1000))/1000;
+	g->drawtext(superX+300, superMove+30, GravY.str(), 0, 255, 255, 255);
+	
+	std::stringstream AirX;
+	AirX << "AirX:" << (floor(sample.AirVelocityX*1000))/1000;
+	g->drawtext(superX+233, superMove+45, AirX.str(), 0, 255, 255, 255);
+	
+	std::stringstream AirY;
+	AirY << "AirY:" << (floor(sample.AirVelocityY*1000))/1000;
+	g->drawtext(superX+300, superMove+45, AirY.str(), 0, 255, 255, 255);
 }
 
 //Time
