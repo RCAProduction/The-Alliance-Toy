@@ -1272,9 +1272,11 @@ RequestBroker::Request * Client::SaveUserInfoAsync(UserInfo info)
 		virtual ~StatusParser() { }
 	};
 	std::map<std::string, std::string> postData;
-	postData.insert(std::pair<std::string, std::string>("Location", info.Location));
-	postData.insert(std::pair<std::string, std::string>("Biography", info.Biography));
-	return new APIRequest(("http://"+ SERVER+ "/Profile.json").c_str(), postData, new StatusParser());	
+
+	postData.insert(std::pair<std::string, std::string>("Location", info.location));
+	postData.insert(std::pair<std::string, std::string>("Biography", info.biography));
+	return new APIRequest("http://"+ SERVER+ "/Profile.json", postData, new StatusParser());	
+
 }
 
 RequestBroker::Request * Client::GetUserInfoAsync(std::string username)
