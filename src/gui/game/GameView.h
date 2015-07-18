@@ -160,6 +160,8 @@ public:
 	int cctype;
 	int zoomMove;
 	int xMove;
+	int superMove;
+	int superX;
 
 	bool INFOvar;
 	bool FPSGvar;

@@ -6,7 +6,7 @@ Element_EQB2::Element_EQB2()
 	Name = "EQB2";
 	Colour = PIXPACK(0xFECB67);
 	MenuVisible = 1;
-	MenuSection = SC_LIQUID;
+	MenuSection = SC_ALLY;
 	Enabled = 1;
 	
 	Advection = 0.3f;

@@ -6,7 +6,7 @@ Element_EQBM::Element_EQBM()
 	Name = "EQBM";
 	Colour = PIXPACK(0xA6FFB4);
 	MenuVisible = 1;
-	MenuSection = SC_LIQUID;
+	MenuSection = SC_ALLY;
 	Enabled = 1;
 	
 	Advection = 0.3f;

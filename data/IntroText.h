@@ -1,7 +1,8 @@
 static const char *introTextData =
-	"\blRCA's Mod - Version 0.1.9 - RCAProductionmaster@gmail.com, irc.freenode.net #powder\n"
+	"\blRCA's Mod - Version 0.2.0 - RCAProductionmaster@gmail.com, irc.freenode.net #powder\n"
 	"\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\n"
-	"\n"
+	//"\baA\bbB\bcC\bdD\beE\bfF\bgG\bhH\biI\bjJ\bkK\blL\bmM\bnN\boO\bpP\bqQ\brR\bsS\btT\buU\bvV\bwW\bxX\byY\bzZ\n"
+	"\brPress 'ctrl+H' or 'F1' to access this message again.\n"
 	"\bgControl+C/V/X are Copy, Paste and cut respectively.\n"
 	"\bgTo choose a material, hover over one of the icons on the right, it will show a selection of elements in that group.\n"
 	"\bgPick your material from the menu using mouse left/right buttons.\n"
@@ -12,21 +13,19 @@ static const char *introTextData =
 	"Use the mouse scroll wheel, or '[' and ']', to change the tool size for particles.\n"
 	"Middle click or Alt+Click to \"sample\" the particles.\n"
 	"Ctrl+Z will act as Undo.\n"
-	"\n\boUse 'Z' for a zoom tool. Click to make the drawable zoom window stay around. Use the wheel to change the zoom strength\n"
+	"\n\boUse 'Z' for the zoom tool. Click to make the zoom window stay. Use the mouse wheel to change the zoom strength.\n"
 	"The spacebar can be used to pause physics.\n"
-	"Use 'S' to save parts of the window as 'stamps'.\n"
-	"'L' will load the most recent stamp, 'K' shows a library of stamps you saved.\n"
+	"Use 'S' to save parts of the window as 'stamps'. 'L' will load the most recent stamp, 'K' shows a library of stamps you saved.\n"
+	"'H' will toggle the HUD. 'D' will toggle debug mode. 'ctrl+shift+D' will toggle super debug mode.\n"
 	"'P' will take a screenshot and save it into the current directory.\n"
 	"\n"
 	"Contributors: \bgStanislaw K Skowronek (Designed the original Powder Toy),\n"
-	"\bgSimon Robertshaw, Skresanov Savely, cracker64, Catelite, Bryan Hoyle, Nathan Cousins, jacksonmj,\n"
-	"\bgFelix Wallin, Lieuwe Mosch, Anthony Boot, Matthew \"me4502\", MaksProg, jacob1, mniip, RCAProduction\n"
+	"\bgSimon Robertshaw, Skresanov Savely, cracker64, Catelite, Bryan Hoyle, Nathan Cousins, jacksonmj, Felix Wallin,\n"
+	"\bgLieuwe Mosch, Anthony Boot, Matthew \"me4502\", MaksProg, jacob1, mniip, RCAProduction, the_new_powder99999\n"
 	"\n"
-#ifndef BETA
-	"\bgTo use online features such as saving, you need to register at: \brhttp://powdertoy.co.uk/Register.html\n"
-#else
-	"\brThis is a MOD, you cannot save things publicly. If you are planning on publishing any saves, use the release version\n"
-#endif
+	"\bgTo use online features such as saving, you need to register at: \brhttp://powdertoy.co.uk/Register.html \bgor\n"
+	"\brhttp://ThePowderToy.net \bgdepending on your choice of servers.\n"
+
 	"\n"
 	"\bt" MTOS(SAVE_VERSION) "." MTOS(MINOR_VERSION) "." MTOS(BUILD_NUM) " " IDENT_PLATFORM " "
 #ifdef X86
@@ -40,9 +39,6 @@ static const char *introTextData =
 #endif
 #ifdef X86_SSE3
 	"X86_SSE3 "
-#endif
-#ifdef MACOSX
-	"MACOSX "
 #endif
 #ifdef LUACONSOLE
 	"LUACONSOLE "

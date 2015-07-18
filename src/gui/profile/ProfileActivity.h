@@ -7,9 +7,15 @@
 #include "client/UserInfo.h"
 #include "gui/interface/Window.h"
 
+namespace ui
+{
+class Label;
+class ScrollPanel;
+}
 class ProfileActivity: public WindowActivity, public RequestListener {
-	ui::Component * location;
-	ui::Component * bio;
+	ui::ScrollPanel *scrollPanel;
+	ui::Label *location;
+	ui::Label *bio;
 	UserInfo info;
 	bool editable;
 	bool loading;
@@ -20,6 +26,9 @@ public:
 	virtual ~ProfileActivity();
 	virtual void OnResponseReady(void * userDataPtr, int identifier);
 	virtual void OnDraw();
+	virtual void OnTryExit(ExitMethod method);
+
+	void ResizeArea();
 };
 
 #endif /* PROFILEACTIVITY_H_ */
