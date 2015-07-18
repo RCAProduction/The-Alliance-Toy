@@ -49,7 +49,7 @@ Element_EQBM::Element_EQBM()
 //#TPT-Directive ElementHeader Element_EQBM static int update(UPDATE_FUNC_ARGS)
 int Element_EQBM::update(UPDATE_FUNC_ARGS)
 {
-	int r, rx, ry;
+	int r, rx, ry, ave_temp;
 	for (rx = -1; rx<2; rx++)
 	for (ry = -1; ry<2; ry++)
 	if (BOUNDS_CHECK && (rx || ry))
@@ -57,18 +57,15 @@ int Element_EQBM::update(UPDATE_FUNC_ARGS)
 		r = pmap[y + ry][x + rx];
 		if (!r)
 			continue;
-//if a random number from 1 to 50 = 1 then set tmp to 5 and continue.
-		if (((floor(rand() % 50)) + 1) == 1)
-		{
-			parts[i].tmp = 5;
-//if touching EQBM change it and myself to EQB2, set tmp to 10 as a test.
-			if (parts[r>>8].type == 187)
+		ave_temp = (parts[i].temp + parts[r>>8].temp) / 2;
+//if a random number from 1 to f(average temp) = 1 and touching EQBM then set both types to EQB2 and increase temperature.
+		if (floor(rand() % (floor((ave_temp/100)))) == 1 && parts[r>>8].type == 187)
 			{
-				parts[i].tmp = 10;
 				sim->part_change_type(r>>8,x+rx,y+ry,188);
 				sim->part_change_type(i, x, y, 188);
+				parts[i].temp = parts[i].temp + 0.1;
+				parts[r>>8].temp = parts[r>>8].temp + 0.1;
 			}
-		}
 	}
 	return 0;
 }
