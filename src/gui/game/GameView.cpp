@@ -2546,6 +2546,7 @@ if (showDebug)
 			{
 				ptype << "Molten " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
 				g->drawtext(hudx-212-xMove, zoomMove+15, ptype.str(), 0, 255, 255, 255);
+				tmp << "Tmp:()";
 			}
 			else if (sample.particle.type == PT_LIFE)
 				ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype);
