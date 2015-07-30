@@ -88,8 +88,7 @@ Shift + Mouse scroll     Change horizontal brush size
 Shift + R                Horizontal mirror for selected area when pasting stamps
 Ctrl + Shift + R         Vertical mirror for selected area when pasting stamps
 R                        Rotate selected area counterclockwise when pasting stamps
-M                        Turns on the "realistic mode" which resets the temperature of every part every 10 frames
-
+M                        Turns on the "realistic mode"
 Only the left Ctrl, Shift, and Alt buttons are enabled to work, not the ones on the right
 
 
