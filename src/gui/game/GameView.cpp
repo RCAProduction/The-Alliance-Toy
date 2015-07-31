@@ -2507,6 +2507,14 @@ if (showDebug)
 	
 	g->drawtext(hudx-212-xMove, zoomMove+44, tmp2.str(), 0, 255, 255, 255);
 	
+	if (sample.particle.type==PT_FILT)
+	{
+		std::stringstream filtVal;
+		filtVal << "Value:" << sample.particle.ctype;
+		g->drawtext(hudx-147-xMove, zoomMove+44, filtVal.str(), 0, 255, 255, 255);
+	}
+	else
+	{
 	std::stringstream vx;
 	vx << "VX:" << (floor(sample.particle.vx*100))/100;
 	g->drawtext(hudx-147-xMove, zoomMove+44, vx.str(), 0, 255, 255, 255);
@@ -2514,6 +2522,7 @@ if (showDebug)
 	std::stringstream vy;
 	vy << "VY:" << (floor(sample.particle.vy*100))/100;
 	g->drawtext(hudx-77-xMove, zoomMove+44, vy.str(), 0, 255, 255, 255);
+	}
 }
 
 		int wavelengthGfx = 0, alpha = 255;
@@ -2546,6 +2555,7 @@ if (showDebug)
 			{
 				ptype << "Molten " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
 				g->drawtext(hudx-212-xMove, zoomMove+15, ptype.str(), 0, 255, 255, 255);
+				tmp << "Tmp:()";
 			}
 			else if (sample.particle.type == PT_LIFE)
 				ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype);

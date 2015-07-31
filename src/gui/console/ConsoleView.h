@@ -25,6 +25,7 @@ public:
 	void NotifyPreviousCommandsChanged(ConsoleModel * sender);
 	void NotifyCurrentCommandChanged(ConsoleModel * sender);
 	virtual ~ConsoleView();
+	int pulse;
 };
 
 #endif /* CONSOLEVIEW_H_ */
