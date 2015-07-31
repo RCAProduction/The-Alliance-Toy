@@ -64,6 +64,12 @@ if (parts[i].life<=0 || !(sim->elements[parts[i].ctype].Properties&PROP_CONDUCTS
 if (parts[i].tmp2>=1)
 	parts[i].tmp2 = parts[i].tmp2 - 1;
 	
+if (parts[i].ctype!=PT_ZRNT)
+{
+	parts[i].temp = 5000;
+	sim->part_change_type(i, x, y, PT_LAVA);
+}
+	
 	for (rx=-2; rx<3; rx++)
 		for (ry=-2; ry<3; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
@@ -76,6 +82,14 @@ if (parts[i].tmp2>=1)
 					
 				if (pavg==PT_INSL || pavg==PT_CBNF)
 					continue;
+				
+				if ((sim->elements[parts[r>>8].type].Properties&PROP_CONDUCTS) && parts[r>>8].type!=PT_ZRNT)
+				{
+					parts[r>>8].ctype = parts[r>>8].type;
+					parts[r>>8].temp = 5000;
+					sim->part_change_type(r>>8, x, y, PT_LAVA);
+					continue;
+				}
 				
 				if (parts[r>>8].life==0 && parts[r>>8].type!=PT_VSPK && parts[i].tmp2==0)
 				{
