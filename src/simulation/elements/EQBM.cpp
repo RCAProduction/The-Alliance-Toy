@@ -63,7 +63,7 @@ int Element_EQBM::update(UPDATE_FUNC_ARGS)
 		someVariable = (floor(ave_temp / 10));
 		if (someVariable != 0)
 		{
-			if (floor(rand() % (someVariable)) == 0 && parts[r>>8].type == 187 && parts[i].type=187)
+			if (floor(rand() % (someVariable)) == 0 && parts[r>>8].type == 187 && parts[i].type==187)
 			{
 				sim->part_change_type(r>>8, x + rx, y + ry, 188);
 				sim->part_change_type(i, x, y, 188);
