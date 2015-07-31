@@ -70,7 +70,7 @@ if (parts[i].ctype!=PT_ZRNT)
 	sim->part_change_type(i, x, y, PT_LAVA);
 }
 	
-	for (rx=-2; rx<3; rx++)
+	for (rx=-2; rx<3; rx++) 
 		for (ry=-2; ry<3; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
 			{
