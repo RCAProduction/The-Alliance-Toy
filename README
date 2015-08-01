@@ -44,6 +44,8 @@ Controls:
 ---------------------------------------------------------------------------
 
 
+Left Click               Select/Place primary element
+Right Click              Select/Place secondary element, normally is set as erase
 TAB                      Switch between circle/square/triangle brush
 Space                    Pause
 Q                        Quit
@@ -96,6 +98,17 @@ Only the left Ctrl, Shift, and Alt buttons are enabled to work, not the ones on 
 Command Line:
 ---------------------------------------------------------------------------
 
+!set <value_type> <element> <value>
+	<value_type>     What you want to set. A few options are tmp, temp, particle type (Suchs as DUST)
+	<element>        The element you wish to apply the changes to, such as DUST
+	<value>          The value to set, usually a number
+
+		EXAMPLES:
+		
+		!set type DUST WATR             Sets all DUST particles to WATR
+		!set temp all 10000             Sets the temp of all particles to the max temp
+		!set ctype CRAY BRCK            Sets the ctype of CRAY to BRCK
+     
 scale:1                  Normal window resolution
 scale:2                  Doubled window resolution
 kiosk                    Fullscreen mode
@@ -103,3 +116,5 @@ proxy:server[:port]      Proxy server to use [Example: proxy:wwwcache.lancs.ac.u
 open <file>              Opens the file as a stamp or game save
 ddir <directory>         Directory used for saving stamps and preferences
 ptsave:<save id>#[name]  [Example: ptsave:2198#Destroyable_city_5_wth_metro~dima-gord]
+
+The command line also supports all lua api and TPT++ commands and encoded functions.
