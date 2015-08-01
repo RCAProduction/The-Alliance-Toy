@@ -5,7 +5,7 @@ Element_EQB2::Element_EQB2()
 	Identifier = "DEFAULT_PT_EQB2";
 	Name = "EQB2";
 	Colour = PIXPACK(0xFECB67);
-	MenuVisible = 1;
+	MenuVisible = 0;
 	MenuSection = SC_ALLY;
 	Enabled = 1;
 	
@@ -23,7 +23,7 @@ Element_EQB2::Element_EQB2()
 	Explosive = 0;
 	Meltable = 0;
 	Hardness = 2;
-	Weight = 10;
+	Weight = 20;
 	
 	Temperature = R_TEMP+20.0f+273.15f;
 	HeatConduct = 164;
