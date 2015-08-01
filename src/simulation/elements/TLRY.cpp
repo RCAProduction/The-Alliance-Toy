@@ -1,5 +1,5 @@
 #include "simulation/Elements.h"
-//#TPT-Directive ElementClass Element_TLRY PT_TLRY 189
+//#TPT-Directive ElementClass Element_TLRY PT_TLRY 190
 Element_TLRY::Element_TLRY()
 {
 	Identifier = "DEFAULT_PT_TLRY";
@@ -17,17 +17,17 @@ Element_TLRY::Element_TLRY()
 	Gravity = 0.3f;
 	Diffusion = 0.00f;
 	HotAir = 0.000f	* CFDS;
-	Falldown = 1;
+	Falldown = 2;
 	
 	Flammable = 0;
-	Explosive = 1;
+	Explosive = 0;
 	Meltable = 0;
 	Hardness = 2;
 	
 	Weight = 100;
 	
 	Temperature = R_TEMP+0.0f	+273.15f;
-	HeatConduct = 251;
+	HeatConduct = 150;
 	Description = "Artillery Shell.";
 	
 	State = ST_SOLID;
@@ -35,8 +35,8 @@ Element_TLRY::Element_TLRY()
 	
 	LowPressure = IPL;
 	LowPressureTransition = NT;
-	HighPressure = 1.0f;
-	HighPressureTransition = ST;
+	HighPressure = NT;
+	HighPressureTransition = NT;
 	LowTemperature = ITL;
 	LowTemperatureTransition = NT;
 	HighTemperature = NT;
@@ -49,7 +49,7 @@ Element_TLRY::Element_TLRY()
 //#TPT-Directive ElementHeader Element_TLRY static int update(UPDATE_FUNC_ARGS)
 int Element_TLRY::update(UPDATE_FUNC_ARGS)
  {
-	int r, rx, ry;
+	/*int r, rx, ry;
 		for (rx=-1; rx<2; rx++)
 			for (ry=-1; ry<2; ry++)
 				if (BOUNDS_CHECK && (rx || ry))
@@ -65,7 +65,7 @@ int Element_TLRY::update(UPDATE_FUNC_ARGS)
 						sim->create_part(1, x+rx, y+ry, PT_FIRE);
 					}
 
-				}
+				}*/
 	return 0;
 }
 
