@@ -60,11 +60,11 @@ int Element_GOTO::update(UPDATE_FUNC_ARGS)
 				
 				if (parts[r>>8].type==PT_SPRK && parts[r>>8].ctype==PT_PSCN)
 				{
-					parts[i].tmp = 0;
+					parts[i].tmp2 = 0;
 				}
 				if (parts[r>>8].type==PT_SPRK && parts[r>>8].ctype==PT_NSCN)
 				{
-					parts[i].tmp = 1;
+					parts[i].tmp2 = 1;
 				}
 			}
 	return 0;
@@ -72,7 +72,7 @@ int Element_GOTO::update(UPDATE_FUNC_ARGS)
 //#TPT-Directive ElementHeader Element_GOTO static int graphics(GRAPHICS_FUNC_ARGS)
 int Element_GOTO::graphics(GRAPHICS_FUNC_ARGS)
 {
-	if (cpart->tmp2 == 1)
+	if (cpart->tmp3 == 1)
 	{
 		*pixel_mode |= FIRE_ADD;
 		*colb += 100;
@@ -84,7 +84,7 @@ int Element_GOTO::graphics(GRAPHICS_FUNC_ARGS)
 		
 		return 1;
 	}
-	if (cpart->tmp == 0)
+	if (cpart->tmp2 == 0)
 	{
 		*pixel_mode |= FIRE_ADD;
 		*colb += 100;
