@@ -724,8 +724,8 @@ void BlueScreen(const char * detailMessage){
 	std::string errorTitle = "ERROR";
 	std::string errorDetails = "Details: " + std::string(detailMessage);
 
-	std::string errorHelp = "An unrecoverable fault has occured, please report the error by emailing:\n"
-		"RCAProductionmaster@gmail.com";
+	std::string errorHelp = "An unrecoverable fault has occured, please report the error by email using\n"
+		"RCAProductionmaster@gmail.com or by PM to RCAProduction on powdertoy.co.uk";
 
 	int currentY = 0, width, height;
 	int errorWidth = 0;
