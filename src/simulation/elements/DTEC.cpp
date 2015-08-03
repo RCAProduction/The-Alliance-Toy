@@ -84,6 +84,10 @@ int Element_DTEC::update(UPDATE_FUNC_ARGS)
 					r = sim->photons[y+ry][x+rx];
 				if(!r)
 					continue;
+				if (parts[r>>8].ctype && parts[i].tmp3 == parts[r>>8].ctype)
+				{
+					parts[i].life = 1;
+				}
 				if ((r&0xFF) == parts[i].ctype && (parts[i].ctype != PT_LIFE || parts[i].tmp == parts[r>>8].ctype || !parts[i].tmp))
 					parts[i].life = 1;
 				if ((r&0xFF) == PT_PHOT || ((r&0xFF) == PT_BRAY && parts[r>>8].tmp!=2))
