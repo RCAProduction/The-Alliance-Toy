@@ -28,7 +28,7 @@ Element_GOTO::Element_GOTO()
 	
 	Temperature = R_TEMP+0.0f	+273.15f;
 	HeatConduct = 251;
-	Description = "A linking element. Set link ID in tmp.";
+	Description = "Similar to the sign tool. Set link ID in tmp. Enable/Disable with PSCN/NSCN.";
 	
 	State = ST_SOLID;
 	Properties = TYPE_SOLID|PROP_HOT_GLOW;
