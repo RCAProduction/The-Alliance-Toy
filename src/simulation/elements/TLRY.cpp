@@ -39,8 +39,8 @@ Element_TLRY::Element_TLRY()
 	HighPressureTransition = NT;
 	LowTemperature = ITL;
 	LowTemperatureTransition = NT;
-	HighTemperature = 1273.0f;
-	HighTemperatureTransition = ST;
+	HighTemperature = ITH;
+	HighTemperatureTransition = NT;
 	
 	Update = &Element_TLRY::update;
 	
@@ -49,32 +49,33 @@ Element_TLRY::Element_TLRY()
 //#TPT-Directive ElementHeader Element_TLRY static int update(UPDATE_FUNC_ARGS)
 int Element_TLRY::update(UPDATE_FUNC_ARGS)
  {
-	int r, rx, ry, tempFactor;
-	if (parts[i].temp > 523.15f)//250.0f+273.15f
-	{
-		tempFactor = 1000 - ((523.15f-parts[i].temp)*2);
-		if(tempFactor < 2)
-			tempFactor = 2;
-		for (rx=-1; rx<2; rx++)
-			for (ry=-1; ry<2; ry++)
-				if (BOUNDS_CHECK && (rx || ry))
+int r, rx, ry, sx, sy;
+	for (rx=-1; rx<2; rx++)
+		for (ry=-1; ry<2; ry++)
+			if (BOUNDS_CHECK && (rx || ry))
+			{
+				r = pmap[y+ry][x+rx];
+				if (!r)
+					continue;
+				if (parts[r>>8].type!=PT_TLRY && parts[r>>8].type!=PT_FIRE && parts[r>>8].type!=PT_PLSM)
 				{
-					r = pmap[y+ry][x+rx];
-					if (!r)
-						continue;
-					if ((r&0xFF)==PT_BREC && !(rand()%tempFactor))
-					{
-						if(rand()%2)
-						{
-							sim->create_part(r>>8, x+rx, y+ry, PT_THRM);
-						}
-						else
-							sim->create_part(i, x, y, PT_THRM);
-						//part_change_type(r>>8,x+rx,y+ry,PT_BMTL);
-						//parts[r>>8].tmp=(parts[i].tmp<=7)?parts[i].tmp=1:parts[i].tmp-(rand()%5);//rand()/(RAND_MAX/300)+100;
-					}
+					for (sx=-5; sx<6; sx++)
+						for (sy=-5; sy<6; sy++)
+							if ((rand()%10)>=3)
+							{
+								sim->create_part(-1, x+sx, y+sy, PT_FIRE);
+							}
+							else
+							{
+								sim->create_part(-1, x+sx, y+sy, PT_PLSM);
+							}
+							
+					sim->create_part(i, x, y, PT_FIRE);
+					sim->pv[y/CELL][x/CELL] = 25;
 				}
-	}
+				
+					
+			}
 	return 0;
 }
 
