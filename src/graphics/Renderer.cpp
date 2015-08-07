@@ -1990,6 +1990,11 @@ void Renderer::render_parts()
 					fire_b[ny/CELL][nx/CELL] = (firea*fireb + (255-firea)*fire_b[ny/CELL][nx/CELL]) >> 8;
 #endif
 				}
+				//CNON  Tmp 0 is x1 = 4 y1 = 4
+				if (t==PT_CNON)
+				{
+					g->draw_line(parts[i].x, parts[i].y, 300, 300, 0, 255, 255, 255);
+				}
 			}
 		}
 	}
