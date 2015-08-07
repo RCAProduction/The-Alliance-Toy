@@ -14,7 +14,7 @@ Element_TLRY::Element_TLRY()
 	AirLoss = 0.94f;
 	Loss = 0.95f;
 	Collision = -0.1f;
-	Gravity = 0.3f;
+	Gravity = 0.9f;
 	Diffusion = 0.00f;
 	HotAir = 0.000f	* CFDS;
 	Falldown = 1;
@@ -24,7 +24,7 @@ Element_TLRY::Element_TLRY()
 	Meltable = 2;
 	Hardness = 2;
 	
-	Weight = 90;
+	Weight = 50;
 	
 	Temperature = R_TEMP+0.0f	+273.15f;
 	HeatConduct = 211;
@@ -71,7 +71,7 @@ int r, rx, ry, sx, sy;
 							}
 							
 					sim->create_part(i, x, y, PT_FIRE);
-					sim->pv[y/CELL][x/CELL] = 25;
+					sim->pv[y/CELL][x/CELL] = 50;
 				}
 				
 					
