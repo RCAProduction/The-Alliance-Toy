@@ -9,6 +9,7 @@
 #include "simulation/Elements.h"
 #include "simulation/ElementGraphics.h"
 #include "simulation/Air.h"
+#include "gui/interface/Engine.h"
 #ifdef LUACONSOLE
 #include "lua/LuaScriptInterface.h"
 #include "lua/LuaScriptHelper.h"
@@ -1993,7 +1994,13 @@ void Renderer::render_parts()
 				//CNON  Tmp 0 is x1 = 4 y1 = 4
 				if (t==PT_CNON)
 				{
-					g->draw_line(parts[i].x, parts[i].y, 300, 300, 0, 255, 255, 255);
+                    int mousex = ui::Engine::Ref().GetMouseX();
+                    int mousey = ui::Engine::Ref().GetMouseY();
+                    
+                    int x = mousex - parts[i].x;
+                    int y = mousey - parts[i].y;
+
+					g->draw_line(parts[i].x, parts[i].y, parts[i].x+x, parts[i].y+y, 0, 255, 255, 255);
 				}
 			}
 		}
