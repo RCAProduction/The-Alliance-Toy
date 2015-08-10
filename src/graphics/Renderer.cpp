@@ -1994,13 +1994,36 @@ void Renderer::render_parts()
 				//CNON  Tmp 0 is x1 = 4 y1 = 4
 				if (t==PT_CNON)
 				{
-                    int mousex = ui::Engine::Ref().GetMouseX();
+					int radius = 4;
+					int x = parts[i].x;
+					int y = parts[i].y;
+					int yval = 10;
+					
+					int mousex = ui::Engine::Ref().GetMouseX();
+                    int mousey = ui::Engine::Ref().GetMouseY();
+					
+					int angle = ((parts[i].x-mousex)/(parts[i].y-mousey));
+					
+					std::stringstream xp;
+					xp << angle;
+					yval = yval+10;
+					//g->drawtext(100, yval, xp.str(), 0, 255, 255, 255);
+					
+					for (x=parts[i].x-radius; x<(radius+parts[i].x); x++)
+						for (y=parts[i].y-radius; y<(radius+parts[i].y); y++)
+						{
+							
+							if ((((x-parts[i].x)*(x-parts[i].x))+((y-parts[i].y)*(y-parts[i].y)))<=(radius*radius))
+								g->draw_line(x, y, x, y, 0, 255, 255, 255);
+						}
+					
+					/*
+					                    int mousex = ui::Engine::Ref().GetMouseX();
                     int mousey = ui::Engine::Ref().GetMouseY();
                     
-                    int x = mousex - parts[i].x;
+                    int x = mousex;
                     int y = mousey - parts[i].y;
-
-					g->draw_line(parts[i].x, parts[i].y, parts[i].x+x, parts[i].y+y, 0, 255, 255, 255);
+					*/
 				}
 			}
 		}
