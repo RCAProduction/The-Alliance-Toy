@@ -1995,35 +1995,36 @@ void Renderer::render_parts()
 				if (t==PT_CNON)
 				{
 					int radius = 4;
-					int x = parts[i].x;
-					int y = parts[i].y;
-					int yval = 10;
+					double x = parts[i].x;
+					double y = parts[i].y;
 					
-					int mousex = ui::Engine::Ref().GetMouseX();
-                    int mousey = ui::Engine::Ref().GetMouseY();
+					double mousex = ui::Engine::Ref().GetMouseX();
+                    double mousey = ui::Engine::Ref().GetMouseY();
 					
-					int angle = ((parts[i].x-mousex)/(parts[i].y-mousey));
+					if (y-mousey==0)
+						y = y + 1;
+						
+					if (x-mousex==0)
+						x = x + 1;
 					
-					std::stringstream xp;
-					xp << angle;
-					yval = yval+10;
-					//g->drawtext(100, yval, xp.str(), 0, 255, 255, 255);
+					double angle = (floor(((y-mousey)/(x-mousex))*10))/10;
+					
+					std::stringstream meow;
+					meow << "Angle: " << angle;
+					g->drawtext(100, 100, meow.str(), 255, 255, 255, 255);
+					
+					//if (abs(angle)>=3.3)
 					
 					for (x=parts[i].x-radius; x<(radius+parts[i].x); x++)
 						for (y=parts[i].y-radius; y<(radius+parts[i].y); y++)
 						{
 							
-							if ((((x-parts[i].x)*(x-parts[i].x))+((y-parts[i].y)*(y-parts[i].y)))<=(radius*radius))
+							if ((((x-parts[i].x)*(x-parts[i].x))+((y-parts[i].y)*(y-parts[i].y)))<=(radius*radius) && ((floor(((parts[i].y-y)/(parts[i].x-x))*10))/10)==angle)
 								g->draw_line(x, y, x, y, 0, 255, 255, 255);
+								
+								//meow << ((floor(((parts[i].y-y)/(parts[i].x-x))*10))/10);
+								//g->drawtext(300, 300, meow.str(), 255, 255, 255, 255);
 						}
-					
-					/*
-					                    int mousex = ui::Engine::Ref().GetMouseX();
-                    int mousey = ui::Engine::Ref().GetMouseY();
-                    
-                    int x = mousex;
-                    int y = mousey - parts[i].y;
-					*/
 				}
 			}
 		}
