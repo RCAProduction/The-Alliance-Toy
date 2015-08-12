@@ -2018,7 +2018,19 @@ void Renderer::render_parts()
 					for (x=parts[i].x-radius; x<(radius+parts[i].x); x++)
 						for (y=parts[i].y-radius; y<(radius+parts[i].y); y++)
 						{
-							
+							if (std::abs(angle)>=3.3)
+							{
+								if (mousey>parts[i].y)
+								{
+									g->draw_line(parts[i].x, parts[i].y, parts[i].x, parts[i].y+4, 0, 255, 255, 255);
+									continue;
+								}
+								else
+								{
+									g->draw_line(parts[i].x, parts[i].y, parts[i].x, parts[i].y-4, 0, 255, 255, 255);
+									continue;
+								}
+							}
 							if ((((x-parts[i].x)*(x-parts[i].x))+((y-parts[i].y)*(y-parts[i].y)))<=(radius*radius) && ((floor(((parts[i].y-y)/(parts[i].x-x))*10))/10)==angle)
 								g->draw_line(x, y, x, y, 0, 255, 255, 255);
 								
