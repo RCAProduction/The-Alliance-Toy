@@ -2032,7 +2032,7 @@ void Renderer::render_parts()
 								}
 							}
 							if ((((x-parts[i].x)*(x-parts[i].x))+((y-parts[i].y)*(y-parts[i].y)))<=(radius*radius) && ((floor(((parts[i].y-y)/(parts[i].x-x))*10))/10)==angle)
-								g->draw_line(x, y, x, y, 0, 255, 255, 255);
+								g->draw_line(parts[i].x, parts[i].y, floor(x), floor(y), 0, 255, 255, 255);
 								
 								//meow << ((floor(((parts[i].y-y)/(parts[i].x-x))*10))/10);
 								//g->drawtext(300, 300, meow.str(), 255, 255, 255, 255);
