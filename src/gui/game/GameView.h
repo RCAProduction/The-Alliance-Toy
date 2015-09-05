@@ -162,12 +162,35 @@ public:
 	int xMove;
 	int superMove;
 	int superX;
+	int countt;
+	int pa20;
+	int pa19;
+	int pa18;
+	int pa17;
+	int pa16;
+	int pa15;
+	int pa14;
+	int pa13;
+	int pa12;
+	int pa11;
+	int pa10;
+	int pa9;
+	int pa8;
+	int pa7;
+	int pa6;
+	int pa5;
+	int pa4;
+	int pa3;
+	int pa2;
+	int pa1;
+	int pixAmount;
 
 	bool INFOvar;
 	bool FPSGvar;
 	bool REALvar;
 	bool LinkVar;
 	bool superDebug;
+	bool elCount;
 
 	void ExitPrompt();
 	SelectMode GetSelectMode() { return selectMode; }

@@ -157,6 +157,7 @@ GameView::GameView():
 	ui::Window(ui::Point(0, 0), ui::Point(WINDOWW, WINDOWH)),
 	isMouseDown(false),
 
+	elCount(false),
 	FPSGvar(false),
 	INFOvar(false),
 	superDebug(false),
@@ -216,6 +217,27 @@ GameView::GameView():
 	frameCount = 0;
 	int currentX = 1;
 	xMove = 0;
+	
+	int pa20 = 0;
+	int pa19 = 0;
+	int pa18 = 0;
+	int pa17 = 0;
+	int pa16 = 0;
+	int pa15 = 0;
+	int pa14 = 0;
+	int pa13 = 0;
+	int pa12 = 0;
+	int pa11 = 0;
+	int pa10 = 0;
+	int pa9 = 0;
+	int pa8 = 0;
+	int pa7 = 0;
+	int pa6 = 0;
+	int pa5 = 0;
+	int pa4 = 0;
+	int pa3 = 0;
+	int pa2 = 0;
+	int pa1 = 0;
 	
 	//Set up UI
 	class SearchAction : public ui::ButtonAction
@@ -1428,7 +1450,14 @@ void GameView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		break;
 	case 'p':
 	case KEY_F2:
-		screenshot();
+		if (ctrl)
+		{
+			elCount = !elCount;
+		}
+		else
+		{
+			screenshot();
+		}
 		break;
 	case KEY_F3:
 		SetDebugHUD(!GetDebugHUD());
@@ -2388,6 +2417,61 @@ else
 	superX = 0;
 }
 
+if (elCount==true)
+{
+	countt++;
+	int pixAmount = sample.NumParts;
+	int xx = 0;
+	if (countt>=7)
+	{
+		countt = 0;
+		pa20 = pa19;
+		pa19 = pa18;
+		pa18 = pa17;
+		pa17 = pa16;
+		pa16 = pa15;
+		pa15 = pa14;
+		pa14 = pa13;
+		pa13 = pa12;
+		pa12 = pa11;
+		pa11 = pa10;
+		pa10 = pa9;
+		pa9 = pa8;
+		pa8 = pa7;
+		pa7 = pa6;
+		pa6 = pa5;
+		pa5 = pa4;
+		pa4 = pa3;
+		pa3 = pa2;
+		pa2 = pa1;
+		while (370-pixAmount<=0)
+		{
+			pixAmount = pixAmount/2;
+		}
+		pa1 = 380-pixAmount;
+	}
+	g->draw_line(10+xx, pa1, 20+xx, pa2, 0, 255, 255, 255);
+	g->draw_line(20+xx, pa2, 30+xx, pa3, 0, 255, 255, 255);
+	g->draw_line(30+xx, pa3, 40+xx, pa4, 0, 255, 255, 255);
+	g->draw_line(40+xx, pa4, 50+xx, pa5, 0, 255, 255, 255);
+	g->draw_line(50+xx, pa5, 60+xx, pa6, 0, 255, 255, 255);
+	g->draw_line(60+xx, pa6, 70+xx, pa7, 0, 255, 255, 255);
+	g->draw_line(70+xx, pa7, 80+xx, pa8, 0, 255, 255, 255);
+	g->draw_line(80+xx, pa8, 90+xx, pa9, 0, 255, 255, 255);
+	g->draw_line(90+xx, pa9, 100+xx, pa10, 0, 255, 255, 255);
+	g->draw_line(100+xx, pa10, 110+xx, pa11, 0, 255, 255, 255);
+	g->draw_line(110+xx, pa11, 120+xx, pa12, 0, 255, 255, 255);
+	g->draw_line(120+xx, pa12, 130+xx, pa13, 0, 255, 255, 255);
+	g->draw_line(130+xx, pa13, 140+xx, pa14, 0, 255, 255, 255);
+	g->draw_line(140+xx, pa14, 150+xx, pa15, 0, 255, 255, 255);
+	g->draw_line(150+xx, pa15, 160+xx, pa16, 0, 255, 255, 255);
+	g->draw_line(160+xx, pa16, 170+xx, pa17, 0, 255, 255, 255);
+	g->draw_line(170+xx, pa17, 180+xx, pa18, 0, 255, 255, 255);
+	g->draw_line(180+xx, pa18, 190+xx, pa19, 0, 255, 255, 255);
+	g->draw_line(190+xx, pa19, 200+xx, pa20, 0, 255, 255, 255);
+	g->draw_line(10+xx, 380, 200+xx, 380, 0, 255, 0, 255);
+}
+
 if (superDebug==true)
 {
 	showDebug = true;
@@ -2624,7 +2708,7 @@ if (showDebug)
 					{
 					ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << ", " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
 					}
-				if (wavelengthGfx && PT_PHOT)
+				if (wavelengthGfx & PT_PHOT)
 					ptype << ctype/4194304;
 			}
 g->drawtext(hudx-212-xMove, zoomMove+15, ptype.str(), 0, 255, 255, 255);
