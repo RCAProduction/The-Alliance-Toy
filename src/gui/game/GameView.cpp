@@ -2432,7 +2432,7 @@ if (elCount==true)
 		xx = 412;
 	}
 	countt++;
-	int pixAmount = sample.NumParts;
+	pixAmount = sample.NumParts;
 	if (countt>=7)
 	{
 		countt = 0;
@@ -2456,7 +2456,7 @@ if (elCount==true)
 		pa3 = pa2;
 		pa2 = pa1;
 		
-		factor = 1;
+		factor = 0;
 		
 		while (370-pixAmount<=0)
 		{
@@ -2486,7 +2486,7 @@ if (elCount==true)
 	g->draw_line(190+xx, pa19, 200+xx, pa20, 0, 255, 255, 255);
 	g->draw_line(10+xx, 370, 200+xx, 370, 0, 255, 0, 255);
 	std::stringstream factors;
-	factors << "Factor: " << factor;
+	factors << "Factor: 2^" << factor;
 	g->drawtext(12+xx, 373, factors.str(), 255, 0, 0, 255);
 }
 
