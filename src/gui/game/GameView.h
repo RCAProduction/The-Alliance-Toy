@@ -184,6 +184,8 @@ public:
 	int pa2;
 	int pa1;
 	int pixAmount;
+	int xx;
+	int factor;
 
 	bool INFOvar;
 	bool FPSGvar;
