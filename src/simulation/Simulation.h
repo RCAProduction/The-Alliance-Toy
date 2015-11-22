@@ -43,7 +43,11 @@ class Simulation
 public:
 
 	bool REALvar;
+	bool targetfire;
 	int count;
+	int targetx;
+	int targety;
+	int oneshot;
 
 	bool getSim;
 
