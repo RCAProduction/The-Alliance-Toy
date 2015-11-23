@@ -73,8 +73,8 @@ if (parts[i].tmp3>=150)
 				
 					
 			}
+	}
 	return 0;
-}
 }
 
 
