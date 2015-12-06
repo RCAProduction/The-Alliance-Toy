@@ -53,7 +53,7 @@ int angle, v, nb;
 
 if (parts[i].tmp==0)
 	parts[i].tmp=239;
-if ((rand()%1400)==1)
+if ((rand()%14000)==1)
 {
 	sim->create_part(i, x, y, PT_U);
 	nb = sim->create_part(-3, x, y, PT_HE);

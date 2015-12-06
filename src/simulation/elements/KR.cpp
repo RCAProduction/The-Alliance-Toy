@@ -51,6 +51,20 @@ int Element_KR::update(UPDATE_FUNC_ARGS)
  {
 int rx, ry, r, nb, v, angle;
 parts[i].life=0;
+if (parts[i].tmp==0)
+	parts[i].tmp=82;
+	
+if (parts[i].tmp==92 && (rand()%2)>=1)
+{
+	nb = sim->create_part(-3, x, y, PT_ELEC);
+	angle = rand()*2.0f*M_PI/RAND_MAX;
+	v = (float)(rand())*5.0f/RAND_MAX;
+	parts[nb].vx = v*cosf(angle);
+	parts[nb].vy = v*sinf(angle);
+	
+	sim->create_part(i, x, y, PT_RB);
+}
+
 	for (rx=-6; rx<7; rx++) 
 		for (ry=-6; ry<7; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
