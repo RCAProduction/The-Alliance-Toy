@@ -72,7 +72,6 @@ if (parts[i].tmp==236)
 	{
 		createcount++;
 		nb = sim->create_part(-3, x, y, PT_N0);
-		parts[nb].life = 2000;
 		parts[nb].temp = MAX_TEMP/2;
 		angle = rand()*2.0f*M_PI/RAND_MAX;
 		v = (float)(rand())*5.0f/RAND_MAX;

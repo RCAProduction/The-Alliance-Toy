@@ -49,7 +49,31 @@ Element_KR::Element_KR()
 //#TPT-Directive ElementHeader Element_KR static int update(UPDATE_FUNC_ARGS)
 int Element_KR::update(UPDATE_FUNC_ARGS)
  {
-	
+int rx, ry, r, nb, v, angle;
+	for (rx=-6; rx<7; rx++) 
+		for (ry=-6; ry<7; ry++)
+			if (BOUNDS_CHECK && (rx || ry))
+			{
+				r = pmap[y+ry][x+rx];
+				if (!r)
+					continue;
+				if (parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY)
+				{
+					nb = sim->create_part(-3, x, y, PT_PHOT);
+					parts[nb].ctype=2;
+					
+					if ((rand()%2)>=1)
+					{
+						parts[nb].ctype=536870912;
+					}
+					
+					parts[nb].temp = 999;
+					angle = rand()*2.0f*M_PI/RAND_MAX;
+					v = (float)(rand())*5.0f/RAND_MAX;
+					parts[nb].vx = v*cosf(angle);
+					parts[nb].vy = v*sinf(angle);
+				}
+			}
 	return 0;
 }
 
