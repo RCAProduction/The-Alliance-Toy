@@ -31,7 +31,7 @@ Element_HE::Element_HE()
 	Description = "Helium. He-4/100";
 	
 	State = ST_GAS;
-	Properties = TYPE_GAS | PROP_RADIOACTIVE;
+	Properties = TYPE_GAS | PROP_RADIOACTIVE | PROP_CONDUCTS;
 	
 	LowPressure = IPL;
 	LowPressureTransition = NT;

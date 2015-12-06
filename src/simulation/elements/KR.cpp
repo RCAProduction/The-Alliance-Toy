@@ -31,7 +31,7 @@ Element_KR::Element_KR()
 	Description = "Krypton. Kr-78/.35 Kr-86/17.3 Kr-84/57.0 Kr-82/11.58 Kr-83/13.8";
 	
 	State = ST_GAS;
-	Properties = TYPE_GAS | PROP_RADIOACTIVE;
+	Properties = TYPE_GAS | PROP_RADIOACTIVE | PROP_CONDUCTS;
 	
 	LowPressure = IPL;
 	LowPressureTransition = NT;
