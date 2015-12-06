@@ -49,18 +49,17 @@ Element_BA::Element_BA()
 //#TPT-Directive ElementHeader Element_BA static int update(UPDATE_FUNC_ARGS)
 int Element_BA::update(UPDATE_FUNC_ARGS)
  {
-	if (!sim->legacy_enable && sim->pv[y/CELL][x/CELL]>0.0f)
-	{
-		if (parts[i].temp == MIN_TEMP)
-		{
-			parts[i].temp += .01f;
-		}
-		else
-		{
-			float atemp = parts[i].temp + (-MIN_TEMP);
-			parts[i].temp = restrict_flt((atemp*(1+(sim->pv[y/CELL][x/CELL]/2000)))+MIN_TEMP, MIN_TEMP, MAX_TEMP);
-		}
-	}
+int angle, nb, v;
+if (parts[i].tmp==141)
+{
+	nb = sim->create_part(-3, x, y, PT_ELEC);
+	parts[nb].temp = MAX_TEMP/2;
+	angle = rand()*2.0f*M_PI/RAND_MAX;
+	v = (float)(rand())*5.0f/RAND_MAX+10;
+	parts[nb].vx = v*cosf(angle);
+	parts[nb].vy = v*sinf(angle);
+	sim->part_change_type(i,x,y,PT_RB);
+}
 	return 0;
 }
 

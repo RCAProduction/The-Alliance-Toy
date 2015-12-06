@@ -52,10 +52,10 @@ int Element_N0::update(UPDATE_FUNC_ARGS)
 	int r, rx, ry;
 	
 	if (parts[i].vx<=5 && parts[i].vx>=-5)
-		parts[i].vx = parts[i].vx*5;
+		parts[i].vx = parts[i].vx*2;
 	
 	if (parts[i].vy<=5 && parts[i].vy>=-5)
-		parts[i].vy = parts[i].vy*5;
+		parts[i].vy = parts[i].vy*2;
 		
 		
 	int pressureFactor = 3 + (int)sim->pv[y/CELL][x/CELL];

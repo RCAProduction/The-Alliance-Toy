@@ -4814,7 +4814,7 @@ if(REALvar==true && count>=20)
 					if (!pmap[y][x] || (t!=PT_INVIS && t!= PT_FILT))
 						pmap[y][x] = t|(i<<8);
 					// (there are a few exceptions, including energy particles - currently no limit on stacking those)
-					if (t!=PT_THDR && t!=PT_EMBR && t!=PT_FIGH && t!=PT_PLSM && t!=PT_U && t!=PT_PU && t!=PT_HE && t!=PT_H && t!=PT_KR && t!=PT_BA)
+					if (t!=PT_THDR && t!=PT_EMBR && t!=PT_FIGH && t!=PT_PLSM && t!=PT_U && t!=PT_PU && t!=PT_HE && t!=PT_H && t!=PT_KR && t!=PT_BA && t!=PT_RB && t!=PT_SR && t!=PT_Y && t!=PT_ZR)
 						pmap_count[y][x]++;
 				}
 			}

@@ -72,7 +72,7 @@ if (parts[i].tmp==239)
 }
 if (parts[i].tmp==244)
 {
-	sim->create_part(i, x, y, PT_BA);
+	sim->part_change_type(i,x,y,PT_BA);
 	nb = sim->create_part(-3, x, y, PT_HE);
 	parts[nb].temp = 9000;
 	angle = rand()*2.0f*M_PI/RAND_MAX;

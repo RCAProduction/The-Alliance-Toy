@@ -1,10 +1,10 @@
 #include "simulation/Elements.h"
-//#TPT-Directive ElementClass Element_RB PT_RB 201
-Element_RB::Element_RB()
+//#TPT-Directive ElementClass Element_SR PT_SR 202
+Element_SR::Element_SR()
 {
-	Identifier = "DEFAULT_PT_RB";
-	Name = "RB";
-	Colour = PIXPACK(0xCCCCCC);
+	Identifier = "DEFAULT_PT_SR";
+	Name = "SR";
+	Colour = PIXPACK(0x7B8784);
 	MenuVisible = 1;
 	MenuSection = SC_ALLY;
 	Enabled = 1;
@@ -28,7 +28,7 @@ Element_RB::Element_RB()
 	
 	Temperature = R_TEMP+0.0f	+273.15f;
 	HeatConduct = 240;
-	Description = "Rubidium. Rb-92/?";
+	Description = "Strontium.";
 	
 	State = ST_SOLID;
 	Properties = TYPE_SOLID;
@@ -42,12 +42,12 @@ Element_RB::Element_RB()
 	HighTemperature = 312.0f;
 	HighTemperatureTransition = NT;
 	
-	Update = &Element_RB::update;
+	Update = &Element_SR::update;
 	
 }
 
-//#TPT-Directive ElementHeader Element_RB static int update(UPDATE_FUNC_ARGS)
-int Element_RB::update(UPDATE_FUNC_ARGS)
+//#TPT-Directive ElementHeader Element_SR static int update(UPDATE_FUNC_ARGS)
+int Element_SR::update(UPDATE_FUNC_ARGS)
  {
 int angle, nb, v;
 if (parts[i].tmp==141)
@@ -58,8 +58,9 @@ if (parts[i].tmp==141)
 	v = (float)(rand())*5.0f/RAND_MAX+10;
 	parts[nb].vx = v*cosf(angle);
 	parts[nb].vy = v*sinf(angle);
-	sim->part_change_type(i,x,y,PT_SR);
+	sim->part_change_type(i,x,y,PT_Y);
 }
 	return 0;
 }
-Element_RB::~Element_RB() {}
+
+Element_SR::~Element_SR() {}

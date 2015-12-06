@@ -57,13 +57,13 @@ if (parts[i].tmp==236)
 	sim->pv[y/CELL][x/CELL] = 175;
 	if ((rand()%2)>=1)
 	{
-		sim->create_part(i, x, y, PT_KR);
 		parts[i].tmp = 92;
+		sim->part_change_type(i,x,y,PT_KR);
 	}
 	else
 	{
 		parts[i].tmp = 141;
-		sim->create_part(i, x, y, PT_BA);
+		sim->part_change_type(i,x,y,PT_BA);
 	}
 	
 	createcount=0;
