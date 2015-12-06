@@ -186,6 +186,11 @@ public:
 	int pixAmount;
 	int xx;
 	int factor;
+	int targetx;
+	int targety;
+	int accelcount;
+	int accel;
+	int acceltimer;
 
 	bool INFOvar;
 	bool FPSGvar;
@@ -193,6 +198,13 @@ public:
 	bool LinkVar;
 	bool superDebug;
 	bool elCount;
+	bool targetxadd;
+	bool targetxsubtract;
+	bool targetyadd;
+	bool targetysubtract;
+	int targetfire;
+	bool invertvar;
+	bool fired;
 
 	void ExitPrompt();
 	SelectMode GetSelectMode() { return selectMode; }

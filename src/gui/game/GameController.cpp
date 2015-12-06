@@ -910,6 +910,14 @@ void GameController::Update()
 	sim->UpdateSim();
 	if (!sim->sys_pause || sim->framerender)
 		sim->UpdateParticles(0, NPART);
+		
+	if(gameView->targetfire==true)
+		sim->targetfire = true;
+	else
+		sim->targetfire = false;
+		
+	sim->targetx = gameView->targetx;
+	sim->targety = gameView->targety;
 
 	//if either STKM or STK2 isn't out, reset it's selected element. Defaults to PT_DUST unless right selected is something else
 	//This won't run if the stickmen dies in a frame, since it respawns instantly

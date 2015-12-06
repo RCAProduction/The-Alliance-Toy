@@ -160,6 +160,8 @@ GameView::GameView():
 	elCount(false),
 	FPSGvar(false),
 	INFOvar(false),
+	invertvar(false),
+	fired(false),
 	superDebug(false),
 	zoomEnabled(false),
 	zoomCursorFixed(false),
@@ -238,6 +240,11 @@ GameView::GameView():
 	pa3 = 0;
 	pa2 = 0;
 	pa1 = 0;
+	
+	targetx = 0;
+	targety = 0;
+	accelcount = 0;
+	acceltimer = 0;
 	
 	factor = 1;
 	
@@ -1518,6 +1525,19 @@ void GameView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		else
 			showHud = !showHud;
 		break;
+		
+	case KEY_LEFT:
+		targetxadd = true;
+	break;
+	case KEY_RIGHT:
+		targetxsubtract = true;
+	break;
+	case KEY_DOWN:
+		targetyadd = true;
+	break;
+	case KEY_UP:
+		targetysubtract = true;
+	break;
 	case 'd':
 		if(ctrl)
 		{
@@ -1620,9 +1640,21 @@ void GameView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		break;
 	case 'i':
 		if(ctrl)
-			c->Install();
+		{
+			if(shift)
+				invertvar=!invertvar;
+			else
+				c->Install();
+		}
+		else if(invertvar==true)
+		{
+			targetfire=true;
+			fired=true;
+		}
 		else
+		{
 			c->InvertAirSim();
+		}
 		break;
 	case ';':
 		if (ctrl)
@@ -1681,6 +1713,23 @@ void GameView::OnKeyRelease(int key, Uint16 character, bool shift, bool ctrl, bo
 		if(!zoomCursorFixed && !alt)
 			c->SetZoomEnabled(false);
 		break;
+		
+	case KEY_LEFT:
+		targetxadd = false;
+	break;
+	case KEY_RIGHT:
+		targetxsubtract = false;
+	break;
+	case KEY_DOWN:
+		targetyadd = false;
+	break;
+	case KEY_UP:
+		targetysubtract = false;
+	break;
+	case 'i':
+		fired=false;
+		targetfire=false;
+	break;
 	}
 }
 
@@ -2342,7 +2391,78 @@ g->draw_line(568, 371-FPS3, 588, 371-FPS4, 0, 255, 255, 255);
 g->draw_line(588, 371-FPS4, 608, 371-FPS5, 0, 255, 255, 255);
 }
 
+if (invertvar==true)
+{
+	if (accelcount<=10)
+		accel = 1;
+	if (accelcount>=11 && accelcount<=20)
+		accel = 2;
+	if (accelcount>=21 && accelcount<=30)
+		accel = 3;
+	if (accelcount>=31 && accelcount<=40)
+		accel = 4;
+	if (accelcount>=41)
+		accel = 5;
+	
+	if (acceltimer>=2)
+		accelcount = 0;
+	
+	if (targetxadd==true)
+		{
+			targetx = targetx-accel;
+			accelcount++;
+			acceltimer = 0;
+		}
+	if (targetxsubtract==true)
+		{
+			targetx = targetx+accel;
+			accelcount++;
+			acceltimer = 0;
+		}
+	if (targetyadd==true)
+		{
+			targety = targety+accel;
+			accelcount++;
+			acceltimer = 0;
+		}
+	if (targetysubtract==true)
+		{
+			targety = targety-accel;
+			accelcount++;
+			acceltimer = 0;
+		}
+	acceltimer++;
+		
+	if (targetx>=612)
+		targetx=612;
+	if (targetx<=0)
+		targetx=0;
+	if (targety>=384)
+		targety=384;
+	if (targety<=0)
+		targety=0;
+	g->draw_line(targetx+3, targety, targetx+1, targety, 255, 0, 0, 150);
+	g->draw_line(targetx-3, targety, targetx-1, targety, 255, 0, 0, 150);
+	g->draw_line(targetx, targety-3, targetx, targety-1, 255, 0, 0, 150);
+	g->draw_line(targetx, targety+3, targetx, targety+1, 255, 0, 0, 150);
+	g->addpixel(targetx, targety+1, 255, 0, 0, 255);
+	g->addpixel(targetx, targety-1, 255, 0, 0, 255);
+	g->addpixel(targetx+1, targety, 255, 0, 0, 255);
+	g->addpixel(targetx-1, targety, 255, 0, 0, 255);
+	g->addpixel(targetx, targety+5, 255, 0, 0, 255);
+	g->addpixel(targetx, targety-5, 255, 0, 0, 255);
+	g->addpixel(targetx+5, targety, 255, 0, 0, 255);
+	g->addpixel(targetx-5, targety, 255, 0, 0, 255);
+}
 frameCount = frameCount + 1;
+
+if (fired==true)
+{
+	g->draw_line(targetx+5, targety+5, targetx-5, targety+5, 0, 255, 0, 150);
+	g->draw_line(targetx-5, targety-5, targetx-5, targety+5, 0, 255, 0, 150);
+	g->draw_line(targetx-5, targety-5, targetx+5, targety-5, 0, 255, 0, 150);
+	g->draw_line(targetx+5, targety-5, targetx+5, targety+5, 0, 255, 0, 150);	
+}
 
 if(INFOvar==true)
 {

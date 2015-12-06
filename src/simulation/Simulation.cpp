@@ -14,7 +14,7 @@
 #include "Gravity.h"
 #include "elements/Element.h"
 #include "CoordStack.h"
-//#include "gui/game/GameView.h"
+#include "gui/game/GameView.h"
 
 //#include "graphics/Renderer.h"
 //#include "graphics/Graphics.h"
@@ -4721,12 +4721,31 @@ void Simulation::CheckStacking()
 //updates pmap, gol, and some other simulation stuff (but not particles)
 void Simulation::UpdateSim()
 {
+if (targetfire==false)
+{
+	oneshot=0;
+}
+	
+if (targetfire==true && oneshot==0)
+	{
+		create_part(-2, targetx, targety, PT_TLRY);
+		oneshot=1;
+	}
+	
 count = count + 1;
 if(REALvar==true && count>=20)
 	{
 		count = 0;
-		for (int i = 0; i < parts_lastActiveIndex; i++) { parts[i].temp = elements[parts[i].type].Temperature; }
+		for (int i = 0; i < parts_lastActiveIndex; i++) { 
+			parts[i].temp = elements[parts[i].type].Temperature; 
+			if (parts[i].type==PT_WTRV)
+				{
+					parts[i].temp = 300;
+					create_part(PT_WTRV, parts[i].x, parts[i].y, PT_WATR);	
+				}
+			}
 		parts[1].temp = elements[1].Temperature;		
+		
 	}
 
 	int i, x, y, t;
@@ -4795,7 +4814,7 @@ if(REALvar==true && count>=20)
 					if (!pmap[y][x] || (t!=PT_INVIS && t!= PT_FILT))
 						pmap[y][x] = t|(i<<8);
 					// (there are a few exceptions, including energy particles - currently no limit on stacking those)
-					if (t!=PT_THDR && t!=PT_EMBR && t!=PT_FIGH && t!=PT_PLSM)
+					if (t!=PT_THDR && t!=PT_EMBR && t!=PT_FIGH && t!=PT_PLSM && t!=PT_U && t!=PT_PU && t!=PT_HE && t!=PT_H && t!=PT_KR && t!=PT_BA)
 						pmap_count[y][x]++;
 				}
 			}
@@ -5028,12 +5047,16 @@ Simulation::Simulation():
 	replaceModeSelected(0),
 	replaceModeFlags(0),
 	REALvar(false),
-	LinkVar(false)
+	LinkVar(false),
+	targetfire(false)
 
 {
 	int count = 0;
+	int targetx = 0;
+	int targety = 0;
     int tportal_rx[] = {-1, 0, 1, 1, 1, 0,-1,-1};
     int tportal_ry[] = {-1,-1,-1, 0, 1, 1, 1, 0};
+	int oneshot=0;
     
     memcpy(portal_rx, tportal_rx, sizeof(tportal_rx));   
     memcpy(portal_ry, tportal_ry, sizeof(tportal_ry));
