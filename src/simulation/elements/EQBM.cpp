@@ -58,17 +58,21 @@ int Element_EQBM::update(UPDATE_FUNC_ARGS)
 		r = pmap[y + ry][x + rx];
 		if (!r)
 			continue;
-		ave_temp = (parts[i].temp + parts[r>>8].temp) / 2;
-//if a random number from 1 to f(average temp) = 1 and touching EQBM then set both types to EQB2 and increase temperature.
-		someVariable = (floor(ave_temp / 10));
-		if (someVariable != 0)
+		if (parts[r>>8].type == 187)
 		{
-			if (floor(rand() % (someVariable)) == 0 && parts[r>>8].type == 187 && parts[i].type==187)
+			ave_temp = (parts[i].temp + parts[r>>8].temp) / 2;
+			//if a random number from 1 to f(average temp) = 1 and touching EQBM then set both types to EQB2 and increase temperature.
+			someVariable = (floor(ave_temp/10));
+			if (ave_temp > 50)
 			{
-				sim->part_change_type(r>>8, x + rx, y + ry, 188);
-				sim->part_change_type(i, x, y, 188);
-				parts[i].temp = parts[i].temp + 1;
-				parts[r>>8].temp = parts[r>>8].temp + 1;
+				if (floor(rand() % (someVariable)) == 1)
+				{
+					sim->part_change_type(r>>8, x + rx, y + ry, 188);
+					sim->part_change_type(i, x, y, 188);
+					parts[i].temp++;
+					parts[r >> 8].temp++;
+					parts[i].tmp = ave_temp;
+				}
 			}
 		}
 	}
