@@ -28,7 +28,7 @@ Element_LAQR::Element_LAQR()
 	
 	Temperature = R_TEMP+0.0f +273.15f;
 	HeatConduct = 5;
-	Description = "Lacquer. Combine with CRBN under pressure and heat to make CBNF.";
+	Description = "Lacquer. Combine with different elements to create special types. E.g. CRBN+LAQR=CBNF.";
 	
 	State = ST_LIQUID;
 	Properties = TYPE_LIQUID;
@@ -60,6 +60,11 @@ int r, rx, ry;
 				{
 					sim->part_change_type(r>>8,x,y,PT_CBNF);
 					sim->part_change_type(i,x,y,PT_CBNF);
+				}
+				if(parts[r>>8].type==PT_LAVA && parts[r>>8].ctype==PT_GLAS)
+				{
+					parts[r>>8].ctype = PT_CGLS;
+					sim->kill_part(i);
 				}
 			}
 	return 0;
