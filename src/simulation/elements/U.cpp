@@ -51,14 +51,14 @@ int Element_U::update(UPDATE_FUNC_ARGS)
  {
 int r, rx, ry, nb, v, angle, createcount;
 if (parts[i].tmp==0)
-	parts[i].tmp=235;
+	parts[i].tmp=238;
 if (parts[i].tmp==236)
 {
 	sim->pv[y/CELL][x/CELL] = 175;
 	if ((rand()%2)>=1)
 	{
-		parts[i].tmp = 92;
 		sim->create_part(i, x, y, PT_KR);
+		parts[i].tmp = 92;
 	}
 	else
 	{
@@ -74,7 +74,7 @@ if (parts[i].tmp==236)
 		nb = sim->create_part(-3, x, y, PT_N0);
 		parts[nb].temp = MAX_TEMP/2;
 		angle = rand()*2.0f*M_PI/RAND_MAX;
-		v = (float)(rand())*5.0f/RAND_MAX;
+		v = (float)(rand())*5.0f/RAND_MAX+1;
 		parts[nb].vx = v*cosf(angle);
 		parts[nb].vy = v*sinf(angle);
 	}
@@ -88,6 +88,10 @@ if (parts[i].tmp==236)
 							continue;
 						parts[r>>8].temp = 9000;
 					}
+}
+if (parts[i].tmp==239)
+{
+	sim->create_part(i, x, y, PT_PU);
 }
 	return 0;
 }

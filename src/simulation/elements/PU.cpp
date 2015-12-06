@@ -53,17 +53,48 @@ int angle, v, nb;
 
 if (parts[i].tmp==0)
 	parts[i].tmp=239;
-if ((rand()%14000)==1)
+	
+if (parts[i].tmp==239)
 {
-	sim->create_part(i, x, y, PT_U);
+	
+	if ((rand()%48000000)==1)
+	{
+		sim->create_part(i, x, y, PT_U);
+		nb = sim->create_part(-3, x, y, PT_HE);
+		parts[nb].temp = 9000;
+		parts[nb].temp = MAX_TEMP/2;
+		angle = rand()*2.0f*M_PI/RAND_MAX;
+		v = (float)(rand())*5.0f/RAND_MAX;
+		parts[nb].vx = v*cosf(angle);
+		parts[nb].vy = v*sinf(angle);
+		sim->pv[y/CELL][x/CELL] = 175;
+	}
+}
+if (parts[i].tmp==244)
+{
+	sim->create_part(i, x, y, PT_BA);
 	nb = sim->create_part(-3, x, y, PT_HE);
-	parts[nb].life = 2000;
-	parts[nb].temp = MAX_TEMP/2;
+	parts[nb].temp = 9000;
+	angle = rand()*2.0f*M_PI/RAND_MAX;
+	v = (float)(rand())*5.0f/RAND_MAX;
+	parts[nb].vx = v*cosf(angle);
+	parts[nb].vy = v*sinf(angle);
+	sim->pv[y/CELL][x/CELL] = 175;
+	
+	nb = sim->create_part(-3, x, y, PT_U);
+	parts[nb].temp = 9000;
+	parts[nb].tmp = 235;
 	angle = rand()*2.0f*M_PI/RAND_MAX;
 	v = (float)(rand())*5.0f/RAND_MAX;
 	parts[nb].vx = v*cosf(angle);
 	parts[nb].vy = v*sinf(angle);
 	
+	nb = sim->create_part(-3, x, y, PT_KR);
+	parts[nb].temp = 9000;
+	angle = rand()*2.0f*M_PI/RAND_MAX;
+	v = (float)(rand())*5.0f/RAND_MAX;
+	parts[nb].vx = v*cosf(angle);
+	parts[nb].vy = v*sinf(angle);
 }
 	return 0;
 }

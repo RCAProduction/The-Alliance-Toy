@@ -51,8 +51,8 @@ int Element_HE::update(UPDATE_FUNC_ARGS)
  {
 int rx, ry, r, nb, v, angle;
 parts[i].life=0;
-	for (rx=-6; rx<7; rx++) 
-		for (ry=-6; ry<7; ry++)
+	for (rx=-1; rx<2; rx++) 
+		for (ry=-1; ry<2; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
 			{
 				r = pmap[y+ry][x+rx];
@@ -61,12 +61,16 @@ parts[i].life=0;
 				if (parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY)
 				{
 					nb = sim->create_part(-3, x, y, PT_PHOT);
-					parts[nb].ctype=536870914;
+					parts[nb].ctype=1065611327;
 					parts[nb].temp = 999;
 					angle = rand()*2.0f*M_PI/RAND_MAX;
 					v = (float)(rand())*5.0f/RAND_MAX;
 					parts[nb].vx = v*cosf(angle);
 					parts[nb].vy = v*sinf(angle);
+				}
+				if (parts[r>>8].type==PT_PU && parts[r>>8].tmp==240)
+				{
+					parts[r>>8].tmp=244; //Make Curium
 				}
 			}
 	return 0;

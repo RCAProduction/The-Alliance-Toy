@@ -50,6 +50,14 @@ Element_N0::Element_N0()
 int Element_N0::update(UPDATE_FUNC_ARGS)
  {
 	int r, rx, ry;
+	
+	if (parts[i].vx<=5 && parts[i].vx>=-5)
+		parts[i].vx = parts[i].vx*5;
+	
+	if (parts[i].vy<=5 && parts[i].vy>=-5)
+		parts[i].vy = parts[i].vy*5;
+		
+		
 	int pressureFactor = 3 + (int)sim->pv[y/CELL][x/CELL];
 	for (rx=-1; rx<2; rx++)
 		for (ry=-1; ry<2; ry++)
@@ -66,7 +74,19 @@ int Element_N0::update(UPDATE_FUNC_ARGS)
 					case PT_U:
 						if (parts[r>>8].tmp==235)
 							parts[r>>8].tmp = 236;
+						if (parts[r>>8].tmp==238)
+						{
+							if ((rand()%4)>=3)
+								parts[r>>8].tmp = 239;
+						}
+						sim->kill_part(i);
 					break;
+					case PT_PU:
+						if (parts[r>>8].tmp==239)
+						{
+							if ((rand()%4)>=3)
+								parts[r>>8].tmp = 240;
+						}
 				}
 			}
 	return 0;
