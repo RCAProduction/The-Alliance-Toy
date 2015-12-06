@@ -4,7 +4,7 @@ Element_H::Element_H()
 {
 	Identifier = "DEFAULT_PT_H";
 	Name = "H";
-	Colour = PIXPACK(0x707020);
+	Colour = PIXPACK(0x382F39);
 	MenuVisible = 1;
 	MenuSection = SC_ALLY;
 	Enabled = 1;
@@ -61,7 +61,7 @@ parts[i].life=0;
 				if (parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY)
 				{
 					nb = sim->create_part(-3, x, y, PT_PHOT);
-					parts[nb].ctype=536870914;
+					parts[nb].ctype = 1065402431;
 					parts[nb].temp = 999;
 					angle = rand()*2.0f*M_PI/RAND_MAX;
 					v = (float)(rand())*5.0f/RAND_MAX;

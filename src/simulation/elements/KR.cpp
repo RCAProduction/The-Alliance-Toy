@@ -4,7 +4,7 @@ Element_KR::Element_KR()
 {
 	Identifier = "DEFAULT_PT_KR";
 	Name = "KR";
-	Colour = PIXPACK(0xB98D9C);
+	Colour = PIXPACK(0x1F3C3C);
 	MenuVisible = 1;
 	MenuSection = SC_ALLY;
 	Enabled = 1;
@@ -75,7 +75,7 @@ if (parts[i].tmp==92 && (rand()%2)>=1)
 				if (parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY)
 				{
 					nb = sim->create_part(-3, x, y, PT_PHOT);
-					parts[nb].ctype=10656113;
+					parts[nb].ctype = 2013782271;
 					parts[nb].temp = 999;
 					angle = rand()*2.0f*M_PI/RAND_MAX;
 					v = (float)(rand())*5.0f/RAND_MAX;
