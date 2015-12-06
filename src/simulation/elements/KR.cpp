@@ -50,6 +50,7 @@ Element_KR::Element_KR()
 int Element_KR::update(UPDATE_FUNC_ARGS)
  {
 int rx, ry, r, nb, v, angle;
+parts[i].life=0;
 	for (rx=-6; rx<7; rx++) 
 		for (ry=-6; ry<7; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
@@ -60,13 +61,7 @@ int rx, ry, r, nb, v, angle;
 				if (parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY)
 				{
 					nb = sim->create_part(-3, x, y, PT_PHOT);
-					parts[nb].ctype=2;
-					
-					if ((rand()%2)>=1)
-					{
-						parts[nb].ctype=536870912;
-					}
-					
+					parts[nb].ctype=536870914;
 					parts[nb].temp = 999;
 					angle = rand()*2.0f*M_PI/RAND_MAX;
 					v = (float)(rand())*5.0f/RAND_MAX;
