@@ -31,7 +31,7 @@ Element_H::Element_H()
 	Description = "Hydrogen. H-1/100 H-2/0 H-3/0";
 	
 	State = ST_GAS;
-	Properties = TYPE_GAS | PROP_RADIOACTIVE | PROP_CONDUCTS;
+	Properties = TYPE_GAS | PROP_RADIOACTIVE | PROP_CONDUCTS | PROP_LIFE_DEC;
 	
 	LowPressure = IPL;
 	LowPressureTransition = NT;
@@ -50,7 +50,13 @@ Element_H::Element_H()
 int Element_H::update(UPDATE_FUNC_ARGS)
  {
 int rx, ry, r, nb, v, angle;
-parts[i].life=0;
+
+if (parts[i].tmp2!=0)
+{
+	parts[i].tmp2--;
+	parts[i].life = 5;
+}
+
 	for (rx=-6; rx<7; rx++) 
 		for (ry=-6; ry<7; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
@@ -58,8 +64,9 @@ parts[i].life=0;
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				if (parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY)
+				if ((parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY) && parts[i].tmp2==0)
 				{
+					parts[i].tmp2 = 20;
 					nb = sim->create_part(-3, x, y, PT_PHOT);
 					parts[nb].ctype = 1065402431;
 					parts[nb].temp = 999;

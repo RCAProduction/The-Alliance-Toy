@@ -31,7 +31,7 @@ Element_HE::Element_HE()
 	Description = "Helium. He-4/100";
 	
 	State = ST_GAS;
-	Properties = TYPE_GAS | PROP_RADIOACTIVE | PROP_CONDUCTS;
+	Properties = TYPE_GAS | PROP_RADIOACTIVE | PROP_CONDUCTS | PROP_LIFE_DEC;
 	
 	LowPressure = IPL;
 	LowPressureTransition = NT;
@@ -50,7 +50,13 @@ Element_HE::Element_HE()
 int Element_HE::update(UPDATE_FUNC_ARGS)
  {
 int rx, ry, r, nb, v, angle;
-parts[i].life=0;
+
+if (parts[i].tmp2!=0)
+{
+	parts[i].tmp2--;
+	parts[i].life = 5;
+}
+
 	for (rx=-1; rx<2; rx++) 
 		for (ry=-1; ry<2; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
@@ -58,8 +64,9 @@ parts[i].life=0;
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				if (parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY)
+				if ((parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY) && parts[i].tmp2==0)
 				{
+					parts[i].tmp2 = 20;
 					nb = sim->create_part(-3, x, y, PT_PHOT);
 					parts[nb].ctype = 1072693248;
 					parts[nb].temp = 999;

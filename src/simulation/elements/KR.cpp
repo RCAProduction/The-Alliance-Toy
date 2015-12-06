@@ -31,7 +31,7 @@ Element_KR::Element_KR()
 	Description = "Krypton. Kr-78/.35 Kr-86/17.3 Kr-84/57.0 Kr-82/11.58 Kr-83/13.8";
 	
 	State = ST_GAS;
-	Properties = TYPE_GAS | PROP_RADIOACTIVE | PROP_CONDUCTS;
+	Properties = TYPE_GAS | PROP_RADIOACTIVE | PROP_CONDUCTS | PROP_LIFE_DEC;
 	
 	LowPressure = IPL;
 	LowPressureTransition = NT;
@@ -50,7 +50,7 @@ Element_KR::Element_KR()
 int Element_KR::update(UPDATE_FUNC_ARGS)
  {
 int rx, ry, r, nb, v, angle;
-parts[i].life=0;
+
 if (parts[i].tmp==0)
 	parts[i].tmp=83;
 	
@@ -65,15 +65,22 @@ if (parts[i].tmp==92 && (rand()%2)>=1)
 	sim->create_part(i, x, y, PT_RB);
 }
 
-	for (rx=-6; rx<7; rx++) 
-		for (ry=-6; ry<7; ry++)
+if (parts[i].tmp2!=0)
+{
+	parts[i].tmp2--;
+	parts[i].life = 5;
+}
+
+	for (rx=-1; rx<2; rx++) 
+		for (ry=-1; ry<2; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
 			{
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				if (parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY)
+				if ((parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY) && parts[i].tmp2==0)
 				{
+					parts[i].tmp2 = 20;
 					nb = sim->create_part(-3, x, y, PT_PHOT);
 					parts[nb].ctype = 2013782271;
 					parts[nb].temp = 999;
