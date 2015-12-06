@@ -57,7 +57,7 @@ if (parts[i].tmp==0)
 if (parts[i].tmp==239)
 {
 	
-	if ((rand()%48000000)==1)
+	if ((rand()%175200000)==1)
 	{
 		sim->create_part(i, x, y, PT_U);
 		nb = sim->create_part(-3, x, y, PT_HE);

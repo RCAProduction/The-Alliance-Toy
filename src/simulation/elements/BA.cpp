@@ -50,7 +50,7 @@ Element_BA::Element_BA()
 int Element_BA::update(UPDATE_FUNC_ARGS)
  {
 int angle, nb, v;
-if (parts[i].tmp==141)
+/*if (parts[i].tmp==141 && (rand()%2)>=1)
 {
 	nb = sim->create_part(-3, x, y, PT_ELEC);
 	parts[nb].temp = MAX_TEMP/2;
@@ -59,7 +59,7 @@ if (parts[i].tmp==141)
 	parts[nb].vx = v*cosf(angle);
 	parts[nb].vy = v*sinf(angle);
 	sim->part_change_type(i,x,y,PT_RB);
-}
+}*/
 	return 0;
 }
 
