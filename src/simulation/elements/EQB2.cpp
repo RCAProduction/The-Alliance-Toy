@@ -53,25 +53,28 @@ int Element_EQB2::update(UPDATE_FUNC_ARGS)
 	for (rx=-1; rx<2; rx++)
 	for (ry=-1; ry<2; ry++)
 	if (BOUNDS_CHECK && (rx || ry))
+	{
+		r = pmap[y + ry][x + rx];
+		if (!r)
+			continue;
+		if (parts[r>>8].type == 188)
 		{
-			r = pmap[y+ry][x+rx];
-			if (!r)
-				continue;
 			ave_temp = (parts[i].temp + parts[r>>8].temp) / 2;
 			//if a random number from 1 to f(average temp) = 1 and touching EQB2 then set both types to EQBM and decrease temperature.
-			someVariable = (floor(1000+(ave_temp / -10)));
-			parts[i].tmp = someVariable;
-			if (someVariable != 0)
+			someVariable = (floor((ave_temp/ 10)-50));
+			if (ave_temp > 50)
 			{
-				if (floor(rand() % (someVariable)) == 0 && parts[r>>8].type == 188)
+				if (floor(rand() % (someVariable)) == 1)
 				{
 					sim->part_change_type(r>>8, x + rx, y + ry, 187);
 					sim->part_change_type(i, x, y, 187);
-					parts[i].temp = parts[i].temp - 10;
-					parts[r>>8].temp = parts[r>>8].temp - 10;
+					parts[i].temp--;
+					parts[r >> 8].temp--;
+					parts[i].tmp = someVariable;
 				}
 			}
 		}
+	}
 	return 0;
 }
 //#TPT-Directive ElementHeader Element_EQB2 static int graphics(GRAPHICS_FUNC_ARGS)
