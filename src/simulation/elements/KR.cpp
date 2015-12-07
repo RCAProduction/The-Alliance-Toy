@@ -71,7 +71,7 @@ if (parts[i].tmp2!=0)
 	parts[i].life = 5;
 }
 
-if (parts[i].tmp==92 && (rand()%2)>=1)
+if (parts[i].tmp==92)
 {
 	nb = sim->create_part(-3, x, y, PT_ELEC);
 	parts[nb].temp = MAX_TEMP/2;
