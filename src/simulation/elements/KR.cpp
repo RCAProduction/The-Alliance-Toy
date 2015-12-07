@@ -62,7 +62,7 @@ if (parts[i].tmp==92 && (rand()%2)>=1)
 	parts[nb].vx = v*cosf(angle);
 	parts[nb].vy = v*sinf(angle);
 	
-	sim->create_part(i, x, y, PT_RB);
+	parts[i].type = PT_RB;
 }
 
 if (parts[i].tmp2!=0)
