@@ -50,7 +50,7 @@ Element_SR::Element_SR()
 int Element_SR::update(UPDATE_FUNC_ARGS)
  {
 int angle, nb, v;
-if (parts[i].tmp==141)
+if (parts[i].tmp==92 && (rand()%3)==1)
 {
 	nb = sim->create_part(-3, x, y, PT_ELEC);
 	parts[nb].temp = MAX_TEMP/2;

@@ -50,7 +50,7 @@ Element_Y::Element_Y()
 int Element_Y::update(UPDATE_FUNC_ARGS)
  {
 int angle, nb, v;
-if (parts[i].tmp==141)
+if (parts[i].tmp==92  && (rand()%4)==1)
 {
 	parts[i].tmp=140;
 	nb = sim->create_part(-3, x, y, PT_ELEC);
