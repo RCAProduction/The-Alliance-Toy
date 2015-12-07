@@ -58,12 +58,12 @@ if (parts[i].tmp==236)
 	if ((rand()%2)>=1)
 	{
 		parts[i].tmp = 92;
-		sim->part_change_type(i,x,y,PT_KR);
+		parts[i].type = PT_KR;
 	}
 	else
 	{
 		parts[i].tmp = 141;
-		sim->part_change_type(i,x,y,PT_BA);
+		parts[i].type = PT_BA;
 	}
 	
 	createcount=0;

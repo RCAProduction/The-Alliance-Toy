@@ -1,9 +1,9 @@
 #include "simulation/Elements.h"
-//#TPT-Directive ElementClass Element_ELEC PT_ELEC 136
-Element_ELEC::Element_ELEC()
+//#TPT-Directive ElementClass Element_E1 PT_E1 209
+Element_E1::Element_E1()
 {
-	Identifier = "DEFAULT_PT_ELEC";
-	Name = "ELEC";
+	Identifier = "DEFAULT_PT_E1";
+	Name = "E1";
 	Colour = PIXPACK(0xDFEFFF);
 	MenuVisible = 1;
 	MenuSection = SC_NUCLEAR;
@@ -28,7 +28,7 @@ Element_ELEC::Element_ELEC()
 	
 	Temperature = R_TEMP+200.0f+273.15f;
 	HeatConduct = 251;
-	Description = "Electrons. Sparks electronics, reacts with NEUT and WATR.";
+	Description = "E1trons. Sparks E1tronics, reacts with NEUT and WATR.";
 	
 	State = ST_GAS;
 	Properties = TYPE_ENERGY|PROP_LIFE_DEC|PROP_LIFE_KILL_DEC;
@@ -42,12 +42,12 @@ Element_ELEC::Element_ELEC()
 	HighTemperature = ITH;
 	HighTemperatureTransition = NT;
 	
-	Update = &Element_ELEC::update;
-	Graphics = &Element_ELEC::graphics;
+	Update = &Element_E1::update;
+	Graphics = &Element_E1::graphics;
 }
 
-//#TPT-Directive ElementHeader Element_ELEC static int update(UPDATE_FUNC_ARGS)
-int Element_ELEC::update(UPDATE_FUNC_ARGS)
+//#TPT-Directive ElementHeader Element_E1 static int update(UPDATE_FUNC_ARGS)
+int Element_E1::update(UPDATE_FUNC_ARGS)
  {
 	int r, rt, rx, ry, nb, rrx, rry;
 	for (rx=-2; rx<=2; rx++)
@@ -118,7 +118,7 @@ int Element_ELEC::update(UPDATE_FUNC_ARGS)
 					parts[r>>8].tmp2 += 5;
 					parts[r>>8].life = 1000;
 					break;
-				case PT_NONE: //seems to speed up ELEC even if it isn't used
+				case PT_NONE: //seems to speed up E1 even if it isn't used
 					break;
 				default:
 					if ((sim->elements[rt].Properties & PROP_CONDUCTS) && (rt!=PT_NBLE||parts[i].temp<2273.15))
@@ -133,8 +133,8 @@ int Element_ELEC::update(UPDATE_FUNC_ARGS)
 	return 0;
 }
 
-//#TPT-Directive ElementHeader Element_ELEC static int graphics(GRAPHICS_FUNC_ARGS)
-int Element_ELEC::graphics(GRAPHICS_FUNC_ARGS)
+//#TPT-Directive ElementHeader Element_E1 static int graphics(GRAPHICS_FUNC_ARGS)
+int Element_E1::graphics(GRAPHICS_FUNC_ARGS)
 
 {
 	*firea = 70;
@@ -147,4 +147,4 @@ int Element_ELEC::graphics(GRAPHICS_FUNC_ARGS)
 }
 
 
-Element_ELEC::~Element_ELEC() {}
+Element_E1::~Element_E1() {}

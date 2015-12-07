@@ -53,7 +53,7 @@ int angle, nb, v;
 if (parts[i].tmp==100000)
 {
 	parts[i].tmp=140;
-	nb = sim->create_part(-3, x, y, PT_ELEC);
+	nb = sim->create_part(-3, x, y, PT_E1);
 	parts[nb].temp = MAX_TEMP/2;
 	angle = rand()*2.0f*M_PI/RAND_MAX;
 	v = (float)(rand())*5.0f/RAND_MAX+10;

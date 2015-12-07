@@ -1,9 +1,9 @@
 #include "simulation/Elements.h"
-//#TPT-Directive ElementClass Element_BA PT_BA 198
-Element_BA::Element_BA()
+//#TPT-Directive ElementClass Element_PR PT_PR 207
+Element_PR::Element_PR()
 {
-	Identifier = "DEFAULT_PT_BA";
-	Name = "BA";
+	Identifier = "DEFAULT_PT_PR";
+	Name = "PR";
 	Colour = PIXPACK(0x798898);
 	MenuVisible = 1;
 	MenuSection = SC_ALLY;
@@ -28,7 +28,7 @@ Element_BA::Element_BA()
 	
 	Temperature = R_TEMP+30.0f+273.15f;
 	HeatConduct = 251;
-	Description = "Barium. Ba-138/71.698 Ba-141/0 Ba-137/11.232 Ba-136/7.854 Ba-135/6.592";
+	Description = "PRrium. PR-138/71.698 PR-141/0 PR-137/11.232 PR-136/7.854 PR-135/6.592";
 	
 	State = ST_SOLID;
 	Properties = TYPE_PART | PROP_RADIOACTIVE;
@@ -42,15 +42,15 @@ Element_BA::Element_BA()
 	HighTemperature = ITH;
 	HighTemperatureTransition = NT;
 	
-	Update = &Element_BA::update;
+	Update = &Element_PR::update;
 	
 }
 
-//#TPT-Directive ElementHeader Element_BA static int update(UPDATE_FUNC_ARGS)
-int Element_BA::update(UPDATE_FUNC_ARGS)
+//#TPT-Directive ElementHeader Element_PR static int update(UPDATE_FUNC_ARGS)
+int Element_PR::update(UPDATE_FUNC_ARGS)
  {
 int angle, nb, v;
-if (parts[i].tmp==141 && (rand()%2)>=1)
+/*if (parts[i].tmp==141 && (rand()%2)>=1)
 {
 	nb = sim->create_part(-3, x, y, PT_E1);
 	parts[nb].temp = MAX_TEMP/2;
@@ -58,10 +58,10 @@ if (parts[i].tmp==141 && (rand()%2)>=1)
 	v = (float)(rand())*5.0f/RAND_MAX+10;
 	parts[nb].vx = v*cosf(angle);
 	parts[nb].vy = v*sinf(angle);
-	sim->part_change_type(i,x,y,PT_LA);
-}
+	sim->part_change_type(i,x,y,PT_RB);
+}*/
 	return 0;
 }
 
 
-Element_BA::~Element_BA() {}
+Element_PR::~Element_PR() {}
