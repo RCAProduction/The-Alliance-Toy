@@ -6,7 +6,7 @@ Element_E1::Element_E1()
 	Name = "E1";
 	Colour = PIXPACK(0xDFEFFF);
 	MenuVisible = 1;
-	MenuSection = SC_NUCLEAR;
+	MenuSection = SC_ALLY;
 	Enabled = 1;
 	
 	Advection = 0.0f;
@@ -15,8 +15,8 @@ Element_E1::Element_E1()
 	Loss = 1.00f;
 	Collision = -0.99f;
 	Gravity = 0.0f;
-	Diffusion = 0.00f;
-	HotAir = 0.000f	* CFDS;
+	Diffusion = 0.01f;
+	HotAir = 0.002f	* CFDS;
 	Falldown = 0;
 	
 	Flammable = 0;
@@ -26,12 +26,12 @@ Element_E1::Element_E1()
 	
 	Weight = -1;
 	
-	Temperature = R_TEMP+200.0f+273.15f;
-	HeatConduct = 251;
-	Description = "E1trons. Sparks E1tronics, reacts with NEUT and WATR.";
+	Temperature = R_TEMP+4.0f	+273.15f;
+	HeatConduct = 60;
+	Description = "Electrons. E-";
 	
 	State = ST_GAS;
-	Properties = TYPE_ENERGY|PROP_LIFE_DEC|PROP_LIFE_KILL_DEC;
+	Properties = TYPE_ENERGY;
 	
 	LowPressure = IPL;
 	LowPressureTransition = NT;
@@ -49,7 +49,13 @@ Element_E1::Element_E1()
 //#TPT-Directive ElementHeader Element_E1 static int update(UPDATE_FUNC_ARGS)
 int Element_E1::update(UPDATE_FUNC_ARGS)
  {
-	int r, rt, rx, ry, nb, rrx, rry;
+	 int r, rt, rx, ry, nb, rrx, rry, angle, v;
+	 
+	angle = rand()*2.0f*M_PI/RAND_MAX;
+	v = (float)(rand())*5.0f/RAND_MAX+5;
+	parts[i].vx = v*cosf(angle);
+	parts[i].vy = v*sinf(angle);
+	
 	for (rx=-2; rx<=2; rx++)
 		for (ry=-2; ry<=2; ry++)
 			if (BOUNDS_CHECK) {

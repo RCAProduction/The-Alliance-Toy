@@ -28,7 +28,7 @@ Element_ALFA::Element_ALFA()
 	
 	Temperature = R_TEMP+4.0f	+273.15f;
 	HeatConduct = 60;
-	Description = "Neutrons. N-0.";
+	Description = "Alpha Particles. HE-4 0E";
 	
 	State = ST_GAS;
 	Properties = TYPE_PART;

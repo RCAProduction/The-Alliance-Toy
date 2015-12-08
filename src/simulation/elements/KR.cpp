@@ -56,7 +56,7 @@ if (parts[i].tmp==0)
 	
 if (parts[i].tmp==92 && (rand()%2)>=1)
 {
-	nb = sim->create_part(-3, x, y, PT_ELEC);
+	nb = sim->create_part(-3, x, y, PT_E1);
 	angle = rand()*2.0f*M_PI/RAND_MAX;
 	v = (float)(rand())*5.0f/RAND_MAX;
 	parts[nb].vx = v*cosf(angle);
@@ -69,17 +69,6 @@ if (parts[i].tmp2!=0)
 {
 	parts[i].tmp2--;
 	parts[i].life = 5;
-}
-
-if (parts[i].tmp==92)
-{
-	nb = sim->create_part(-3, x, y, PT_E1);
-	parts[nb].temp = MAX_TEMP/2;
-	angle = rand()*2.0f*M_PI/RAND_MAX;
-	v = (float)(rand())*5.0f/RAND_MAX+10;
-	parts[nb].vx = v*cosf(angle);
-	parts[nb].vy = v*sinf(angle);
-	sim->part_change_type(i,x,y,PT_RB);
 }
 
 	for (rx=-1; rx<2; rx++) 
