@@ -57,14 +57,14 @@ if (parts[i].tmp2!=0)
 	parts[i].life = 5;
 }
 
-	for (rx=-6; rx<7; rx++) 
-		for (ry=-6; ry<7; ry++)
+	for (rx=-1; rx<2; rx++) 
+		for (ry=-1; ry<2; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
 			{
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				if ((parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY) && parts[i].tmp2==0)
+				if ((parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY) && parts[i].tmp2<=0)
 				{
 					parts[i].tmp2 = 20;
 					nb = sim->create_part(-3, x, y, PT_PHOT);

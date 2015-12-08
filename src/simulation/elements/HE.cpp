@@ -64,7 +64,7 @@ if (parts[i].tmp2!=0)
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				if ((parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY) && parts[i].tmp2==0)
+				if ((parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_BTRY) && parts[i].tmp2<=0)
 				{
 					parts[i].tmp2 = 20;
 					nb = sim->create_part(-3, x, y, PT_PHOT);
