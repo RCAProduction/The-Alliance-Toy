@@ -15,7 +15,7 @@ Element_E1::Element_E1()
 	Loss = 1.00f;
 	Collision = -0.99f;
 	Gravity = 0.0f;
-	Diffusion = 0.01f;
+	Diffusion = 1.0f;
 	HotAir = 0.002f	* CFDS;
 	Falldown = 0;
 	
@@ -51,10 +51,23 @@ int Element_E1::update(UPDATE_FUNC_ARGS)
  {
 	 int r, rt, rx, ry, nb, rrx, rry, angle, v;
 	 
-	angle = rand()*2.0f*M_PI/RAND_MAX;
+if ((parts[i].vx*parts[i].vy)<25 && (parts[i].vx*parts[i].vy)>-25)
+{
+	angle = rand()%360;
+	v = (float)(rand())*5.0f/RAND_MAX+15;
+	parts[i].vx = v*cosf(angle);
+	parts[i].vy = v*sinf(angle);
+}
+		
+if (parts[i].tmp3!=1)
+{
+	angle = rand()%360;
 	v = (float)(rand())*5.0f/RAND_MAX+5;
 	parts[i].vx = v*cosf(angle);
 	parts[i].vy = v*sinf(angle);
+	
+	parts[i].tmp3 = 1;
+}
 	
 	for (rx=-2; rx<=2; rx++)
 		for (ry=-2; ry<=2; ry++)

@@ -28,10 +28,10 @@ Element_PR::Element_PR()
 	
 	Temperature = R_TEMP+30.0f+273.15f;
 	HeatConduct = 251;
-	Description = "PRrium. PR-138/71.698 PR-141/0 PR-137/11.232 PR-136/7.854 PR-135/6.592";
+	Description = "Praseodymium. 59";
 	
 	State = ST_SOLID;
-	Properties = TYPE_PART | PROP_RADIOACTIVE;
+	Properties = TYPE_PART;
 	
 	LowPressure = IPL;
 	LowPressureTransition = NT;

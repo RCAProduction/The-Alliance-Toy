@@ -172,6 +172,13 @@ int Simulation::Load(int fullX, int fullY, GameSave * save)
 				}
 			}
 		}
+		
+			if (parts[i].type==PT_ANAR)
+	{
+		anarx = parts[i].x;
+		anary = parts[i].y;
+	}
+		
 	}
 	parts_lastActiveIndex = NPART-1;
 	force_stacking_check = 1;
@@ -1976,6 +1983,8 @@ void Simulation::init_can_move()
 		if (destinationType != PT_DMND && destinationType != PT_INSL && destinationType != PT_VOID && destinationType != PT_PVOD && destinationType != PT_VIBR && destinationType != PT_BVBR && destinationType != PT_PRTI && destinationType != PT_PRTO)
 		{
 			can_move[PT_PROT][destinationType] = 2;
+			//can_move[PT_ALFA][destinationType] = 2;
+			can_move[PT_N0][destinationType] = 2;
 			can_move[PT_GRVT][destinationType] = 2;
 		}
 	}
@@ -4814,7 +4823,7 @@ if(REALvar==true && count>=20)
 					if (!pmap[y][x] || (t!=PT_INVIS && t!= PT_FILT))
 						pmap[y][x] = t|(i<<8);
 					// (there are a few exceptions, including energy particles - currently no limit on stacking those)
-					if (t!=PT_THDR && t!=PT_EMBR && t!=PT_FIGH && t!=PT_PLSM && t!=PT_U && t!=PT_PU && t!=PT_HE && t!=PT_H && t!=PT_KR && t!=PT_BA && t!=PT_RB && t!=PT_SR && t!=PT_Y && t!=PT_ZR)
+					if (t!=PT_THDR && t!=PT_EMBR && t!=PT_FIGH && t!=PT_PLSM && t!=PT_U && t!=PT_PU && t!=PT_HE && t!=PT_H && t!=PT_KR && t!=PT_BA && t!=PT_RB && t!=PT_SR && t!=PT_Y && t!=PT_ZR && t!=PT_LA && t!=PT_CE && t!=PT_PR && t!=PT_ALFA && t!=PT_E1)
 						pmap_count[y][x]++;
 				}
 			}
@@ -5048,7 +5057,9 @@ Simulation::Simulation():
 	replaceModeFlags(0),
 	REALvar(false),
 	LinkVar(false),
-	targetfire(false)
+	targetfire(false),
+	anarx(0),
+	anary(0)
 
 {
 	int count = 0;

@@ -246,6 +246,9 @@ GameView::GameView():
 	accelcount = 0;
 	acceltimer = 0;
 	
+	int anarx = 0;
+	int anary = 0;
+	
 	factor = 1;
 	
 	//Set up UI
@@ -2659,6 +2662,23 @@ g->drawtext(16+xMove, 15, asctime(timeinfo), 0, 255, 68, 255);
 std::stringstream parts;
 parts << "Parts:" << sample.NumParts;
 g->drawtext(160+xMove, 15, parts.str(), 0, 255, 255, 255);
+
+
+/*g->draw_line(196, 200, 204, 200, 255, 0, 0, 255);
+g->draw_line(200, 196, 200, 204, 255, 0, 0, 255);
+g->draw_line(200, 196, 204, 196, 255, 0, 0, 255);
+g->draw_line(204, 200, 204, 204, 255, 0, 0, 255);
+g->draw_line(200, 204, 196, 204, 255, 0, 0, 255);
+g->draw_line(196, 200, 196, 196, 255, 0, 0, 255);
+
+
+g->draw_line(anarx-4, anary, anarx+4, anary, 255, 0, 0, 255);
+g->draw_line(anarx, anary-4, anarx, anary+4, 255, 0, 0, 255);
+g->draw_line(anarx, anary-4, anarx+4, anary-4, 255, 0, 0, 255);
+g->draw_line(anarx+4, anary, anarx+4, anary+4, 255, 0, 0, 255);
+g->draw_line(anarx, anary+4, anarx-4, anary+4, 255, 0, 0, 255);
+g->draw_line(anarx-4, anary, anarx-4, anary-4, 255, 0, 0, 255);*/
+
 
 /*std::stringstream pavg;
 pavg << sample.particle.pavg[0];

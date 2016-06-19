@@ -28,7 +28,7 @@ Element_LA::Element_LA()
 	
 	Temperature = R_TEMP+30.0f+273.15f;
 	HeatConduct = 251;
-	Description = "LArium. LA-138/71.698 LA-141/0 LA-137/11.232 LA-136/7.854 LA-135/6.592";
+	Description = "Lanthanum. 57";
 	
 	State = ST_SOLID;
 	Properties = TYPE_PART | PROP_RADIOACTIVE;

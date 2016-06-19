@@ -55,16 +55,23 @@ if (parts[i].tmp==0)
 if (parts[i].tmp==236)
 {
 	sim->pv[y/CELL][x/CELL] = 175;
-	if ((rand()%2)>=1)
-	{
-		parts[i].tmp = 92;
-		parts[i].type = PT_KR;
-	}
-	else
-	{
-		parts[i].tmp = 141;
-		parts[i].type = PT_BA;
-	}
+	nb = sim->create_part(-3, x, y, PT_KR);
+	parts[nb].temp = MAX_TEMP/2;
+	parts[nb].tmp=92;
+	angle = rand()*2.0f*M_PI/RAND_MAX;
+	v = (float)(rand())*5.0f/RAND_MAX+1;
+	parts[nb].vx = v*cosf(angle);
+	parts[nb].vy = v*sinf(angle);
+	
+	nb = sim->create_part(-3, x, y, PT_BA);
+	parts[nb].temp = MAX_TEMP/2;
+	parts[nb].tmp=141;
+	angle = rand()*2.0f*M_PI/RAND_MAX;
+	v = (float)(rand())*5.0f/RAND_MAX+1;
+	parts[nb].vx = v*cosf(angle);
+	parts[nb].vy = v*sinf(angle);
+	
+	sim->kill_part(i);
 	
 	createcount=0;
 	

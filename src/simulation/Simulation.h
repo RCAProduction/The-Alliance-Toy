@@ -48,6 +48,8 @@ public:
 	int targetx;
 	int targety;
 	int oneshot;
+	int anary;
+	int anarx;
 
 	bool getSim;
 

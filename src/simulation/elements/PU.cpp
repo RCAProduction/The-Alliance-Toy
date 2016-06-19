@@ -72,9 +72,9 @@ if (parts[i].tmp==239)
 }
 if (parts[i].tmp==244)
 {
-	sim->part_change_type(i,x,y,PT_BA);
 	nb = sim->create_part(-3, x, y, PT_ALFA);
 	parts[nb].temp = 9000;
+	parts[nb].tmp = 141;
 	angle = rand()*2.0f*M_PI/RAND_MAX;
 	v = (float)(rand())*5.0f/RAND_MAX;
 	parts[nb].vx = v*cosf(angle);
@@ -91,10 +91,14 @@ if (parts[i].tmp==244)
 	
 	nb = sim->create_part(-3, x, y, PT_KR);
 	parts[nb].temp = 9000;
+	parts[nb].tmp = 92;
 	angle = rand()*2.0f*M_PI/RAND_MAX;
 	v = (float)(rand())*5.0f/RAND_MAX;
 	parts[nb].vx = v*cosf(angle);
 	parts[nb].vy = v*sinf(angle);
+	
+	parts[i].tmp = 141;
+	sim->part_change_type(i,x,y,PT_BA);
 }
 	return 0;
 }

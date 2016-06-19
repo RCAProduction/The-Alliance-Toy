@@ -28,7 +28,7 @@ Element_CE::Element_CE()
 	
 	Temperature = R_TEMP+30.0f+273.15f;
 	HeatConduct = 251;
-	Description = "CErium. CE-138/71.698 CE-141/0 CE-137/11.232 CE-136/7.854 CE-135/6.592";
+	Description = "Cerium. 58";
 	
 	State = ST_SOLID;
 	Properties = TYPE_PART | PROP_RADIOACTIVE;

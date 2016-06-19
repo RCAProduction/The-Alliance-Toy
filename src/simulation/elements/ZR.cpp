@@ -50,7 +50,7 @@ Element_ZR::Element_ZR()
 int Element_ZR::update(UPDATE_FUNC_ARGS)
  {
 int angle, nb, v;
-if (parts[i].tmp==100000)
+/*if (parts[i].tmp==100000)
 {
 	parts[i].tmp=140;
 	nb = sim->create_part(-3, x, y, PT_E1);
@@ -60,7 +60,7 @@ if (parts[i].tmp==100000)
 	parts[nb].vx = v*cosf(angle);
 	parts[nb].vy = v*sinf(angle);
 	sim->part_change_type(i,x,y,PT_ZR);
-}
+}*/
 	return 0;
 }
 
