@@ -215,6 +215,8 @@ void Label::copySelection()
 		copyText = currentText.substr(selectionIndex0, selectionIndex1-selectionIndex0).c_str();
 	else if(selectionIndex0 > selectionIndex1)
 		copyText = currentText.substr(selectionIndex1, selectionIndex0-selectionIndex1).c_str();
+	else if (!currentText.length())
+		return;
 	else
 		copyText = currentText.c_str();
 	ClipboardPush(format::CleanString(copyText, false, true, false));
@@ -230,6 +232,11 @@ void Label::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool al
 	if(ctrl && key == 'c')
 	{
 		copySelection();
+	}
+	if(ctrl && key == 'a')
+	{
+		selectAll();
+		return;
 	}
 }
 
@@ -275,6 +282,13 @@ void Label::ClearSelection()
 	selecting = false;
 	selectionIndex0 = -1;
 	selectionIndex1 = -1;
+	updateSelection();
+}
+
+void Label::selectAll()
+{
+	selectionIndex0 = 0;
+	selectionIndex1 = text.length();
 	updateSelection();
 }
 

@@ -4,9 +4,8 @@
 #include <cmath>
 
 #include "Config.h"
-#include "Misc.h"
+#include "Platform.h"
 #include "gui/interface/Window.h"
-#include "gui/interface/Platform.h"
 #include "gui/interface/Engine.h"
 #include "graphics/Graphics.h"
 
@@ -17,6 +16,7 @@ Engine::Engine():
 	FpsLimit(60.0f),
 	Scale(1),
 	Fullscreen(false),
+	Depth3d(0),
 	FrameIndex(0),
 	lastBuffer(NULL),
 	prevBuffers(stack<pixel*>()),
@@ -180,7 +180,7 @@ void Engine::Tick()
 		state_->DoTick(dt);
 
 
-	lastTick = gettime();
+	lastTick = Platform::GetTime();
 
 	/*if(statequeued_ != NULL)
 	{

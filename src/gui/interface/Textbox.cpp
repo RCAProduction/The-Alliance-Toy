@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 #include "Config.h"
+#include "Platform.h"
 #include "Format.h"
 #include "gui/interface/Point.h"
 #include "gui/interface/Textbox.h"
@@ -145,8 +146,11 @@ void Textbox::cutSelection()
 	}
 	else
 	{
+		if (!backingText.length())
+			return;
 		ClipboardPush(format::CleanString(backingText, false, true, false));
 		backingText.clear();
+		cursor = 0;
 	}
 	ClearSelection();
 
@@ -178,13 +182,6 @@ void Textbox::cutSelection()
 		actionCallback->TextChangedCallback(this);
 }
 
-void Textbox::selectAll()
-{
-	selectionIndex0 = 0;
-	selectionIndex1 = text.length();
-	updateSelection();
-}
-
 void Textbox::pasteIntoSelection()
 {
 	std::string newText = format::CleanString(ClipboardPull(), true, true, inputType != Multiline, inputType == Number || inputType == Numeric);
@@ -209,7 +206,7 @@ void Textbox::pasteIntoSelection()
 		else
 			newText = "";
 	}
-	else if (!multiline && Graphics::textwidth((char*)std::string(backingText+newText).c_str()) > regionWidth)
+	if (!multiline && Graphics::textwidth((char*)std::string(backingText+newText).c_str()) > regionWidth)
 	{
 		int pLimit = regionWidth - Graphics::textwidth((char*)backingText.c_str());
 		int cIndex = Graphics::CharIndexAtPosition((char *)newText.c_str(), pLimit, 0);
@@ -259,8 +256,10 @@ bool Textbox::CharacterValid(Uint16 character)
 {
 	switch(inputType)
 	{
-		case Number:
 		case Numeric:
+			if (character == '-' && cursor == 0 && backingText[0] != '-')
+				return true;
+		case Number:
 			return (character >= '0' && character <= '9');
 		case Multiline:
 			if (character == '\n')
@@ -280,10 +279,10 @@ void Textbox::Tick(float dt)
 		keyDown = 0;
 		characterDown = 0;
 	}
-	if ((keyDown || characterDown) && repeatTime <= gettime())
+	if ((keyDown || characterDown) && repeatTime <= Platform::GetTime())
 	{
 		OnVKeyPress(keyDown, characterDown, false, false, false);
-		repeatTime = gettime()+30;
+		repeatTime = Platform::GetTime()+30;
 	}
 }
 
@@ -297,7 +296,7 @@ void Textbox::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool 
 {
 	characterDown = character;
 	keyDown = key;
-	repeatTime = gettime()+300;
+	repeatTime = Platform::GetTime()+300;
 	OnVKeyPress(key, character, shift, ctrl, alt);
 }
 
@@ -413,7 +412,7 @@ void Textbox::OnVKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 					regionWidth -= 13;
 				regionWidth -= Appearance.Margin.Left;
 				regionWidth -= Appearance.Margin.Right;
-				if ((limit==std::string::npos || backingText.length() < limit) && (Graphics::textwidth((char*)std::string(backingText+char(character)).c_str()) <= regionWidth || multiline || limit!=std::string::npos))
+				if ((limit==std::string::npos || backingText.length() < limit) && (Graphics::textwidth((char*)std::string(backingText+char(character)).c_str()) <= regionWidth || multiline))
 				{
 					if (cursor == (int)backingText.length())
 					{

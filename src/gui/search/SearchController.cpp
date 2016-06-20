@@ -8,7 +8,7 @@
 #include "gui/dialogues/ErrorMessage.h"
 #include "gui/preview/PreviewController.h"
 #include "client/Client.h"
-#include "Misc.h"
+#include "Platform.h"
 #include "tasks/Task.h"
 #include "tasks/TaskWindow.h"
 
@@ -19,9 +19,9 @@ public:
 	OpenCallback(SearchController * cc_) { cc = cc_; }
 	virtual void ControllerExit()
 	{
-		if(cc->activePreview->GetDoOpen() && cc->activePreview->GetSave())
+		if(cc->activePreview->GetDoOpen() && cc->activePreview->GetSaveInfo())
 		{
-			cc->searchModel->SetLoadedSave(cc->activePreview->GetSave());
+			cc->searchModel->SetLoadedSave(cc->activePreview->GetSaveInfo());
 		}
 		else
 		{
@@ -69,7 +69,7 @@ void SearchController::Update()
 			doRefresh = false;
 		}
 	}
-	else if (!nextQueryDone && nextQueryTime < gettime())
+	else if (!nextQueryDone && nextQueryTime < Platform::GetTime())
 	{
 		if (searchModel->UpdateSaveList(1, nextQuery))
 			nextQueryDone = true;
@@ -115,7 +115,7 @@ void SearchController::DoSearch(std::string query, bool now)
 	nextQuery = query;
 	if (!now)
 	{
-		nextQueryTime = gettime()+600;
+		nextQueryTime = Platform::GetTime()+600;
 		nextQueryDone = false;
 	}
 	else
@@ -268,8 +268,8 @@ void SearchController::removeSelectedC()
 				if (Client::Ref().DeleteSave(saves[i])!=RequestOkay)
 				{
  					std::stringstream saveIDF;
- 					saveIDF << "\boFailed to delete [" << saves[i] << "] ...";
-					notifyStatus(saveIDF.str());
+					saveIDF << "\boFailed to delete [" << saves[i] << "]: " << Client::Ref().GetLastError();
+					notifyError(saveIDF.str());
 					c->Refresh();
 					return false;
 				}
@@ -350,7 +350,10 @@ void SearchController::unpublishSelectedC(bool publish)
 				if (!ret)
 				{
 					std::stringstream error;
-					error << "\boFailed to " << (publish ? "Publish" : "Unpublish") << " [" << saves[i] << "], is this save yours?";
+					if (publish) // uses html page so error message will be spam
+						error << "\boFailed to publish [" << saves[i] << "], is this save yours?";
+					else
+						error << "\boFailed to unpublish [" << saves[i] << "]: " + Client::Ref().GetLastError();
 					notifyError(error.str());
 					c->Refresh();
 					return false;
@@ -383,7 +386,7 @@ void SearchController::FavouriteSelected()
 				if (Client::Ref().FavouriteSave(saves[i], true)!=RequestOkay)
 				{
 					std::stringstream saveIDF;
-					saveIDF << "\boFailed to favourite [" << saves[i] << "], are you logged in?";
+					saveIDF << "\boFailed to favourite [" << saves[i] << "]: " + Client::Ref().GetLastError();
 					notifyError(saveIDF.str());
 					return false;
 				}
@@ -408,7 +411,7 @@ void SearchController::FavouriteSelected()
 				if (Client::Ref().FavouriteSave(saves[i], false)!=RequestOkay)
 				{
 					std::stringstream saveIDF;
-					saveIDF << "\boFailed to unfavourite [" << saves[i] << "], are you logged in?";
+					saveIDF << "\boFailed to unfavourite [" << saves[i] << "]: " + Client::Ref().GetLastError();
 					notifyError(saveIDF.str());
 					return false;
 				}

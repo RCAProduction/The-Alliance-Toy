@@ -66,6 +66,7 @@ public:
 	bool blackDecorations;
 	bool debugLines;
 	pixel sampleColor;
+	int findingElement;
 
 	//Mouse position for debug information
 	ui::Point mousePos;

@@ -17,7 +17,7 @@ class ourSpawn:
 		startupinfo = subprocess.STARTUPINFO()
 		startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 		proc = subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE, startupinfo=startupinfo, shell = False, env = env)
+			stderr=subprocess.PIPE, startupinfo=startupinfo, shell=False, env=env)
 		data, err = proc.communicate()
 		rv = proc.wait()
 		if rv:
@@ -95,11 +95,11 @@ if msvc and platform != "Windows":
 
 #Create SCons Environment
 if GetOption('msvc'):
-	env = Environment(tools = ['default'], ENV = {'PATH' : os.environ['PATH'], 'TMP' : os.environ['TMP']}, TARGET_ARCH = 'x86')
+	env = Environment(tools=['default'], ENV={'PATH' : os.environ['PATH'], 'TMP' : os.environ['TMP']}, TARGET_ARCH='x86')
 elif platform == "Windows" and not GetOption('msvc'):
-	env = Environment(tools = ['mingw'], ENV = {'PATH' : os.environ['PATH']})
+	env = Environment(tools=['mingw'], ENV={'PATH' : os.environ['PATH']})
 else:
-	env = Environment(tools = ['default'], ENV = {'PATH' : os.environ['PATH']})
+	env = Environment(tools=['default'], ENV={'PATH' : os.environ['PATH']})
 
 #attempt to automatically find cross compiler
 if not tool and compilePlatform == "Linux" and compilePlatform != platform:
@@ -127,6 +127,10 @@ if tool:
 	env['STRIP'] = tool+'strip'
 	if os.path.isdir("/usr/{0}/bin".format(tool[:-1])):
 		env['ENV']['PATH'] = "/usr/{0}/bin:{1}".format(tool[:-1], os.environ['PATH'])
+	if platform == "Darwin":
+		sdlconfigpath = "/usr/lib/apple/SDKs/MacOSX10.5.sdk/usr/bin"
+		if os.path.isdir(sdlconfigpath):
+			env['ENV']['PATH'] = "{0}:{1}".format(sdlconfigpath, env['ENV']['PATH'])
 
 #copy environment variables because scons doesn't do this by default
 for var in ["CC","CXX","LD","LIBPATH"]:
@@ -231,20 +235,23 @@ def findLibs(env, conf):
 		if not conf.CheckLib('SDLmain'):
 			FatalError("libSDLmain not found or not installed")
 
-	if platform == "Darwin":
-		if not conf.CheckFramework("SDL"):
-			FatalError("SDL framework not found or not installed")
-	elif not GetOption('renderer'):
-		if platform != "Darwin":
-			#Look for SDL
-			if not conf.CheckLib("SDL"):
-				FatalError("SDL development library not found or not installed")
-			if platform == "Linux" or compilePlatform == "Linux":
-				try:
-					env.ParseConfig('sdl-config --cflags')
+	if not GetOption('renderer'):
+		#Look for SDL
+		runSdlConfig = platform == "Linux" or compilePlatform == "Linux"
+		if platform == "Darwin" and conf.CheckFramework("SDL"):
+			runSdlConfig = False
+		elif not conf.CheckLib("SDL"):
+			FatalError("SDL development library not found or not installed")
+
+		if runSdlConfig:
+			try:
+				env.ParseConfig('sdl-config --cflags')
+				if GetOption('static'):
+					env.ParseConfig('sdl-config --static-libs')
+				else:
 					env.ParseConfig('sdl-config --libs')
-				except:
-					pass
+			except:
+				pass
 
 	#look for SDL.h
 	if not GetOption('renderer') and not conf.CheckCHeader('SDL.h'):
@@ -382,6 +389,8 @@ if not msvc:
 	else:
 		env.Append(CXXFLAGS=['-std=c++98'])
 	env.Append(CXXFLAGS=['-Wno-invalid-offsetof'])
+	if platform == "Linux":
+		env.Append(CXXFLAGS=['-Wno-unused-result'])
 
 
 #Add platform specific flags and defines
@@ -441,6 +450,7 @@ if GetOption('debugging'):
 			env.Append(CCFLAGS=['/MDd'])
 	else:
 		env.Append(CCFLAGS=['-Wall', '-g'])
+		env.Append(CPPDEFINES=['DEBUG'])
 elif GetOption('release'):
 	if msvc:
 		env.Append(CCFLAGS=['/O2', '/fp:fast'])

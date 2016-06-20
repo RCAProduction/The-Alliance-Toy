@@ -83,9 +83,9 @@ void Button::Draw(const Point& screenPos)
 	ui::Colour borderColour = Appearance.BorderInactive;
 	ui::Colour backgroundColour = Appearance.BackgroundInactive;
 
-	if(Enabled)
+	if (Enabled)
 	{
-		if(isButtonDown || (isTogglable && toggle))
+		if (isButtonDown || (isTogglable && toggle))
 		{
 			textColour = Appearance.TextActive;
 			borderColour = Appearance.BorderActive;
@@ -161,6 +161,13 @@ void Button::OnMouseUnclick(int x, int y, unsigned int button)
 			DoAltAction();
 		}
 	}
+}
+
+void Button::OnMouseUp(int x, int y, unsigned int button)
+{
+	// mouse was unclicked, reset variables in case the unclick happened outside
+	isButtonDown = false;
+	isAltButtonDown = false;
 }
 
 void Button::OnMouseClick(int x, int y, unsigned int button)

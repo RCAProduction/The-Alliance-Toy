@@ -452,7 +452,13 @@ AnyType TPTScriptInterface::tptS_create(std::deque<std::string> * words)
 	if(tempPoint.X<0 || tempPoint.Y<0 || tempPoint.Y >= YRES || tempPoint.X >= XRES)
 				throw GeneralException("Invalid position");
 
-	int returnValue = sim->create_part(-1, tempPoint.X, tempPoint.Y, type);
+	int v = -1;
+	if (type>>8)
+	{
+		v = type>>8;
+		type = type&0xFF;
+	}
+	int returnValue = sim->create_part(-1, tempPoint.X, tempPoint.Y, type, v);
 
 	return NumberType(returnValue);
 }
@@ -560,14 +566,7 @@ AnyType TPTScriptInterface::tptS_reset(std::deque<std::string> * words)
 	}
 	else if (resetStr == "sparks")
 	{
-		for (int i = 0; i < NPART; i++)
-		{
-			if (sim->parts[i].type == PT_SPRK)
-			{
-				sim->parts[i].type = sim->parts[i].ctype;
-				sim->parts[i].life = 4;
-			}
-		}
+		c->ResetSpark();
 	}
 	else if (resetStr == "temp")
 	{

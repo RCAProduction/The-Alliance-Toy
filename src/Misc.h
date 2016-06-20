@@ -22,8 +22,6 @@ __asm__ __volatile ("cpuid":\
 	"=a" (af), "=b" (bf), "=c" (cf), "=d" (df) : "a" (func));
 #endif
 
-char *exe_name(void);
-
 //Linear interpolation
 template <typename T> inline T LinearInterpolate(T val1, T val2, T lowerCoord, T upperCoord, T coord)
 {
@@ -56,10 +54,6 @@ void save_presets(int do_update);
 
 void load_presets(void);
 
-void save_string(FILE *f, char *str);
-
-int load_string(FILE *f, char *str, int max);
-
 void strcaturl(char *dst, const char *src);
 
 void strappend(char *dst, const char *src);
@@ -68,19 +62,11 @@ void *file_load(char *fn, int *size);
 
 extern char *clipboard_text;
 
-int cpu_check(void);
-
 void HSV_to_RGB(int h,int s,int v,int *r,int *g,int *b);
 
 void RGB_to_HSV(int r,int g,int b,int *h,int *s,int *v);
 
-void OpenURI(std::string uri);
-
 void membwand(void * dest, void * src, size_t destsize, size_t srcsize);
-
-void millisleep(long int t);
-
-long unsigned int gettime();
 
 // a b
 // c d

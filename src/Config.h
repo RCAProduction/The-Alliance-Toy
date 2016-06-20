@@ -12,15 +12,15 @@
 
 //VersionInfoStart
 #ifndef SAVE_VERSION
-#define SAVE_VERSION 90
+#define SAVE_VERSION 91
 #endif
 
 #ifndef MINOR_VERSION
-#define MINOR_VERSION 2
+#define MINOR_VERSION 3
 #endif
 
 #ifndef BUILD_NUM
-#define BUILD_NUM 322
+#define BUILD_NUM 328
 #endif
 
 #ifndef SNAPSHOT_ID
@@ -30,7 +30,9 @@
 
 #define IGNORE_UPDATES //uncomment this for mods, to not get any update notifications
 
+#if !(defined(MACOSX) && defined(DEBUG))
 #define HIGH_QUALITY_RESAMPLE			//High quality image resampling, slower but much higher quality than my terribad linear interpolation
+#endif
 
 #if defined(SNAPSHOT)
 #define IDENT_RELTYPE "S"
@@ -181,11 +183,14 @@ std::string STATICSERVER = "static.powdertoy.co.uk"
 #define TPT_INLINE inline
 #endif
 
-#if defined(WIN) && defined(__GNUC__)
-#define TH_ENTRY_POINT __attribute__((force_align_arg_pointer)) 
-#else
-#define TH_ENTRY_POINT
+// old Platform.h stuff, maybe we should have a file for these kinds of things
+typedef unsigned short Uint16;
+
+#ifndef NULL
+# define NULL 0
 #endif
+
+#include <climits>
 
 #define SDEUT
 //#define REALHEAT

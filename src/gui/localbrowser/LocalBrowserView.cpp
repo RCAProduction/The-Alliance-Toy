@@ -22,7 +22,7 @@ LocalBrowserView::LocalBrowserView():
 	pageCount(0)
 {
 	nextButton = new ui::Button(ui::Point(WINDOWW-52, WINDOWH-18), ui::Point(50, 16), "Next \x95");
-	previousButton = new ui::Button(ui::Point(1, WINDOWH-18), ui::Point(50, 16), "\x96 Prev");
+	previousButton = new ui::Button(ui::Point(2, WINDOWH-18), ui::Point(50, 16), "\x96 Prev");
 	undeleteButton = new ui::Button(ui::Point(WINDOWW-122, WINDOWH-18), ui::Point(60, 16), "Rescan");
 	AddComponent(nextButton);
 	AddComponent(previousButton);
@@ -246,12 +246,16 @@ void LocalBrowserView::NotifySelectedChanged(LocalBrowserModel * sender)
 		}
 	}
 
-	if(selected.size())
+	if (selected.size())
 	{
 		removeSelected->Visible = true;
+		pageLabel->Visible = pageCountLabel->Visible = pageTextbox->Visible = false;
 	}
-	else
+	else if (removeSelected->Visible)
+	{
 		removeSelected->Visible = false;
+		pageLabel->Visible = pageCountLabel->Visible = pageTextbox->Visible = true;
+	}
 }
 
 void LocalBrowserView::OnMouseWheel(int x, int y, int d)

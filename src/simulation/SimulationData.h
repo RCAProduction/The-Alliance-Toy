@@ -50,16 +50,17 @@
 #define WL_DESTROYALL	7
 #define WL_WALL			8
 #define WL_ALLOWAIR		9
-#define WL_ALLOWSOLID	10
+#define WL_ALLOWPOWDER	10
 #define WL_ALLOWALLELEC	11
 #define WL_EHOLE		12
 #define WL_ALLOWGAS		13
 #define WL_GRAV			14
 #define WL_ALLOWENERGY	15
 #define WL_BLOCKAIR		16
+#define WL_ERASEALL		17
 #define WL_FLOODHELPER	255
 
-#define UI_WALLCOUNT 17
+#define UI_WALLCOUNT 18
 
 #define OLD_SPC_AIR 236
 #define SPC_AIR 256

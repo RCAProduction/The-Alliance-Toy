@@ -34,6 +34,7 @@ class GameView: public ui::Window
 {
 private:
 	bool isMouseDown;
+	bool skipDraw;
 	bool zoomEnabled;
 	bool zoomCursorFixed;
 	bool mouseInZoom;
@@ -43,8 +44,10 @@ private:
 	bool altBehaviour;
 	bool showHud;
 	bool showDebug;
+	int delayedActiveMenu;
 	bool wallBrush;
 	bool toolBrush;
+	bool decoBrush;
 	bool windTool;
 	int toolIndex;
 	int currentSaveType;
@@ -67,7 +70,7 @@ private:
 	int screenshotIndex;
 	int recordingIndex;
 
-	queue<ui::Point> pointQueue;
+	ui::Point currentPoint, lastPoint;
 	GameController * c;
 	Renderer * ren;
 	Brush * activeBrush;
@@ -96,7 +99,6 @@ private:
 	vector<ToolButton*> colourPresets;
 
 	DrawMode drawMode;
-	bool drawModeReset;
 	ui::Point drawPoint1;
 	ui::Point drawPoint2;
 
@@ -122,10 +124,11 @@ private:
 	void enableShiftBehaviour();
 	void disableShiftBehaviour();
 	void enableCtrlBehaviour();
-	void enableCtrlBehaviour(bool isHighlighted);
 	void disableCtrlBehaviour();
 	void enableAltBehaviour();
 	void disableAltBehaviour();
+	void UpdateDrawMode();
+	void UpdateToolStrength();
 public:
 	GameView();
 	virtual ~GameView();
@@ -139,6 +142,7 @@ public:
 	bool GetDebugHUD();
 	bool GetPlacingSave();
 	bool GetPlacingZoom();
+	void SetActiveMenuDelayed(int activeMenu) { delayedActiveMenu = activeMenu; }
 	bool CtrlBehaviour(){ return ctrlBehaviour; }
 	bool ShiftBehaviour(){ return shiftBehaviour; }
 	bool AltBehaviour(){ return altBehaviour; }
@@ -211,6 +215,7 @@ public:
 	void BeginStampSelection();
 
 	//all of these are only here for one debug lines
+	bool GetMouseDown() { return isMouseDown; }
 	bool GetDrawingLine() { return drawMode == DrawLine && isMouseDown; }
 	bool GetDrawSnap() { return drawSnap; }
 	ui::Point GetLineStartCoords() { return drawPoint1; }

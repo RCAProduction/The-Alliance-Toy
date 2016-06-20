@@ -53,30 +53,24 @@ GameModel::GameModel():
 	ren->SetColourMode(0);
 
 	//Load config into renderer
-	try
+	ren->SetColourMode(Client::Ref().GetPrefUInteger("Renderer.ColourMode", 0));
+
+	tempArray = Client::Ref().GetPrefUIntegerArray("Renderer.DisplayModes");
+	if(tempArray.size())
 	{
-		ren->SetColourMode(Client::Ref().GetPrefUInteger("Renderer.ColourMode", 0));
-
-		vector<unsigned int> tempArray = Client::Ref().GetPrefUIntegerArray("Renderer.DisplayModes");
-		if(tempArray.size())
-		{
-			std::vector<unsigned int> displayModes(tempArray.begin(), tempArray.end());
-			ren->SetDisplayMode(displayModes);
-		}
-
-		tempArray = Client::Ref().GetPrefUIntegerArray("Renderer.RenderModes");
-		if(tempArray.size())
-		{
-			std::vector<unsigned int> renderModes(tempArray.begin(), tempArray.end());
-			ren->SetRenderMode(renderModes);
-		}
-
-		ren->gravityFieldEnabled = Client::Ref().GetPrefBool("Renderer.GravityField", false);
-		ren->decorations_enable = Client::Ref().GetPrefBool("Renderer.Decorations", true);
+		std::vector<unsigned int> displayModes(tempArray.begin(), tempArray.end());
+		ren->SetDisplayMode(displayModes);
 	}
-	catch(json::Exception & e)
+
+	tempArray = Client::Ref().GetPrefUIntegerArray("Renderer.RenderModes");
+	if(tempArray.size())
 	{
+		std::vector<unsigned int> renderModes(tempArray.begin(), tempArray.end());
+		ren->SetRenderMode(renderModes);
 	}
+
+	ren->gravityFieldEnabled = Client::Ref().GetPrefBool("Renderer.GravityField", false);
+	ren->decorations_enable = Client::Ref().GetPrefBool("Renderer.Decorations", true);
 
 	//Load config into simulation
 	edgeMode = Client::Ref().GetPrefInteger("Simulation.EdgeMode", 0);
@@ -143,16 +137,16 @@ GameModel::~GameModel()
 	Client::Ref().SetPref("Renderer.ColourMode", ren->GetColourMode());
 
 	std::vector<unsigned int> displayModes = ren->GetDisplayMode();
-	Client::Ref().SetPref("Renderer.DisplayModes", std::vector<unsigned int>(displayModes.begin(), displayModes.end()));
+	Client::Ref().SetPref("Renderer.DisplayModes", std::vector<Json::Value>(displayModes.begin(), displayModes.end()));
 
 	std::vector<unsigned int> renderModes = ren->GetRenderMode();
-	Client::Ref().SetPref("Renderer.RenderModes", std::vector<unsigned int>(renderModes.begin(), renderModes.end()));
+	Client::Ref().SetPref("Renderer.RenderModes", std::vector<Json::Value>(renderModes.begin(), renderModes.end()));
 
 	Client::Ref().SetPref("Renderer.GravityField", (bool)ren->gravityFieldEnabled);
 	Client::Ref().SetPref("Renderer.Decorations", (bool)ren->decorations_enable);
 	Client::Ref().SetPref("Renderer.DebugMode", ren->debugLines); //These two should always be equivalent, even though they are different things
 
-	Client::Ref().SetPref("Simulation.EdgeMode", sim->edgeMode);
+	Client::Ref().SetPref("Simulation.EdgeMode", edgeMode);
 	Client::Ref().SetPref("Simulation.NewtonianGravity", sim->grav->ngrav_enable);
 	Client::Ref().SetPref("Simulation.AmbientHeat", sim->aheat_enable);
 	Client::Ref().SetPref("Simulation.PrettyPowder", sim->pretty_powder);
@@ -294,7 +288,7 @@ void GameModel::BuildMenus()
 	//Build other menus from wall data
 	for(int i = 0; i < UI_WALLCOUNT; i++)
 	{
-		Tool * tempTool = new WallTool(i, "", std::string(sim->wtypes[i].descs), PIXR(sim->wtypes[i].colour), PIXG(sim->wtypes[i].colour), PIXB(sim->wtypes[i].colour), "DEFAULT_WL_"+format::NumberToString<int>(i), sim->wtypes[i].textureGen);
+		Tool * tempTool = new WallTool(i, "", std::string(sim->wtypes[i].descs), PIXR(sim->wtypes[i].colour), PIXG(sim->wtypes[i].colour), PIXB(sim->wtypes[i].colour), sim->wtypes[i].identifier, sim->wtypes[i].textureGen);
 		menuList[SC_WALL]->AddTool(tempTool);
 		//sim->wtypes[i]
 	}
@@ -319,13 +313,14 @@ void GameModel::BuildMenus()
 	menuList[SC_STAT]->AddTool(new LinkTool(1, "LINK", "Creates links between elements.", 0, 255, 255, "DEFAULT_TOOL_LINK"));
 
 	//Add decoration tools to menu
-	menuList[SC_DECO]->AddTool(new DecorationTool(DECO_ADD, "ADD", "Colour blending: Add.", 0, 0, 0, "DEFAULT_DECOR_ADD"));
-	menuList[SC_DECO]->AddTool(new DecorationTool(DECO_SUBTRACT, "SUB", "Colour blending: Subtract.", 0, 0, 0, "DEFAULT_DECOR_SUB"));
-	menuList[SC_DECO]->AddTool(new DecorationTool(DECO_MULTIPLY, "MUL", "Colour blending: Multiply.", 0, 0, 0, "DEFAULT_DECOR_MUL"));
-	menuList[SC_DECO]->AddTool(new DecorationTool(DECO_DIVIDE, "DIV", "Colour blending: Divide." , 0, 0, 0, "DEFAULT_DECOR_DIV"));
-	menuList[SC_DECO]->AddTool(new DecorationTool(DECO_SMUDGE, "SMDG", "Smudge tool, blends surrounding deco together.", 0, 0, 0, "DEFAULT_DECOR_SMDG"));
-	menuList[SC_DECO]->AddTool(new DecorationTool(DECO_CLEAR, "CLR", "Erase any set decoration.", 0, 0, 0, "DEFAULT_DECOR_CLR"));
-	menuList[SC_DECO]->AddTool(new DecorationTool(DECO_DRAW, "SET", "Draw decoration (No blending).", 0, 0, 0, "DEFAULT_DECOR_SET"));
+	menuList[SC_DECO]->AddTool(new DecorationTool(ren, DECO_ADD, "ADD", "Colour blending: Add.", 0, 0, 0, "DEFAULT_DECOR_ADD"));
+	menuList[SC_DECO]->AddTool(new DecorationTool(ren, DECO_SUBTRACT, "SUB", "Colour blending: Subtract.", 0, 0, 0, "DEFAULT_DECOR_SUB"));
+	menuList[SC_DECO]->AddTool(new DecorationTool(ren, DECO_MULTIPLY, "MUL", "Colour blending: Multiply.", 0, 0, 0, "DEFAULT_DECOR_MUL"));
+	menuList[SC_DECO]->AddTool(new DecorationTool(ren, DECO_DIVIDE, "DIV", "Colour blending: Divide." , 0, 0, 0, "DEFAULT_DECOR_DIV"));
+	menuList[SC_DECO]->AddTool(new DecorationTool(ren, DECO_SMUDGE, "SMDG", "Smudge tool, blends surrounding deco together.", 0, 0, 0, "DEFAULT_DECOR_SMDG"));
+	menuList[SC_DECO]->AddTool(new DecorationTool(ren, DECO_CLEAR, "CLR", "Erase any set decoration.", 0, 0, 0, "DEFAULT_DECOR_CLR"));
+	menuList[SC_DECO]->AddTool(new DecorationTool(ren, DECO_DRAW, "SET", "Draw decoration (No blending).", 0, 0, 0, "DEFAULT_DECOR_SET"));
+	SetColourSelectorColour(colour); // update tool colors
 	decoToolset[0] = GetToolFromIdentifier("DEFAULT_DECOR_SET");
 	decoToolset[1] = GetToolFromIdentifier("DEFAULT_DECOR_CLR");
 	decoToolset[2] = GetToolFromIdentifier("DEFAULT_UI_SAMPLE");
@@ -581,7 +576,6 @@ void GameModel::SetSave(SaveInfo * newSave)
 			sim->grav->start_grav_async();
 		else
 			sim->grav->stop_grav_async();
-		sim->SetEdgeMode(0);
 		sim->clear_sim();
 		ren->ClearAccumulation();
 		sim->Load(saveData);
@@ -930,13 +924,14 @@ GameSave * GameModel::GetPlaceSave()
 	return placeSave;
 }
 
-void GameModel::Log(string message)
+void GameModel::Log(string message, bool printToFile)
 {
 	consoleLog.push_front(message);
 	if(consoleLog.size()>100)
 		consoleLog.pop_back();
 	notifyLogChanged(message);
-	std::cout << message << std::endl;
+	if (printToFile)
+		std::cout << message << std::endl;
 }
 
 deque<string> GameModel::GetLog()

@@ -23,7 +23,7 @@ extern int tptParts, tptPartsMeta, tptElementTransitions, tptPartsCData, tptPart
 void luacon_hook(lua_State *L, lua_Debug *ar);
 int luacon_step(int mx, int my);
 int luacon_mouseevent(int mx, int my, int mb, int event, int mouse_wheel);
-int luacon_keyevent(int key, int modifier, int event);
+int luacon_keyevent(int key, Uint16 character, int modifier, int event);
 int luacon_eval(const char *command);
 const char *luacon_geterror();
 void luacon_close();
@@ -106,6 +106,7 @@ int luatpt_register_mouseclick(lua_State* l);
 int luatpt_unregister_mouseclick(lua_State* l);
 int luatpt_input(lua_State* l);
 int luatpt_message_box(lua_State* l);
+int luatpt_confirm(lua_State* l);
 int luatpt_get_numOfParts(lua_State* l);
 int luatpt_start_getPartIndex(lua_State* l);
 int luatpt_next_getPartIndex(lua_State* l);
@@ -128,8 +129,6 @@ int luatpt_getscript(lua_State* l);
 int luatpt_setwindowsize(lua_State* l);
 
 int luatpt_screenshot(lua_State* l);
-int luatpt_getclip(lua_State* l);
-int luatpt_setclip(lua_State* l);
 
 
 #endif /* LUASCRIPTHELPER_H_ */

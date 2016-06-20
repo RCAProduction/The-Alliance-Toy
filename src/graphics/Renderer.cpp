@@ -628,6 +628,42 @@ VideoBuffer * Renderer::WallIcon(int wallID, int width, int height)
 			newTexture->SetPixel(-j+20, j, 0xFF, 0, 0, 255);
 		}
 	}
+	else if (wt == WL_ERASEALL)
+	{
+		for (int j = 0; j < height; j++)
+		{
+			int r = 100, g = 150, b = 50;
+			int rd = 1, gd = -1, bd = -1;
+			for (int i = 0; i < width; i++)
+			{
+				r += 15*rd;
+				g += 15*gd;
+				b += 15*bd;
+				if (r > 200) rd = -1;
+				if (g > 200) gd = -1;
+				if (b > 200) bd = -1;
+				if (r < 15) rd = 1;
+				if (g < 15) gd = 1;
+				if (b < 15) bd = 1;
+				int rc = std::min(150, std::max(0, r));
+				int gc = std::min(200, std::max(0, g));
+				int bc = std::min(200, std::max(0, b));
+				newTexture->SetPixel(i, j, rc, gc, bc, 255);
+			}
+		}
+		for (int j = 3; j < (width-4)/2; j++)
+		{
+			newTexture->SetPixel(j+0, j, 0xFF, 0, 0, 255);
+			newTexture->SetPixel(j+1, j, 0xFF, 0, 0, 255);
+			newTexture->SetPixel(-j+13, j, 0xFF, 0, 0, 255);
+			newTexture->SetPixel(-j+14, j, 0xFF, 0, 0, 255);
+
+			newTexture->SetPixel(j+11, j, 0xFF, 0, 0, 255);
+			newTexture->SetPixel(j+12, j, 0xFF, 0, 0, 255);
+			newTexture->SetPixel(-j+24, j, 0xFF, 0, 0, 255);
+			newTexture->SetPixel(-j+25, j, 0xFF, 0, 0, 255);
+		}
+	}
 	else if(wt == WL_STREAM)
 	{
 		for (j=0; j<height; j++)
@@ -699,6 +735,12 @@ void Renderer::DrawWalls()
 				unsigned char powered = sim->emap[y][x];
 				pixel pc = PIXPACK(sim->wtypes[wt].colour);
 				pixel gc = PIXPACK(sim->wtypes[wt].eglow);
+
+				if (findingElement)
+				{
+					pc = PIXRGB(PIXR(pc)/10,PIXG(pc)/10,PIXB(pc)/10);
+					gc = PIXRGB(PIXR(gc)/10,PIXG(gc)/10,PIXB(gc)/10);
+				}
 
 				switch (sim->wtypes[wt].drawstyle)
 				{
@@ -952,24 +994,27 @@ void Renderer::DrawSigns()
 			else
 				drawtext(x+3, y+3, text, 0, 191, 255, 255);
 				
-			int x = signs[i].x;
-			int y = signs[i].y;
-			int dx = 1 - signs[i].ju;
-			int dy = (signs[i].y > 18) ? -1 : 1;
-#ifdef OGLR
-			glBegin(GL_LINES);
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			glVertex2i(x, y);
-			glVertex2i(x+(dx*4), y+(dy*4));
-			glEnd();
-#else
-			for (int j = 0; j < 4; j++)
+			if (signs[i].ju != sign::None)
 			{
-				blendpixel(x, y, 192, 192, 192, 255);
-				x += dx;
-				y += dy;
-			}
+				int x = signs[i].x;
+				int y = signs[i].y;
+				int dx = 1 - signs[i].ju;
+				int dy = (signs[i].y > 18) ? -1 : 1;
+#ifdef OGLR
+				glBegin(GL_LINES);
+				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+				glVertex2i(x, y);
+				glVertex2i(x+(dx*4), y+(dy*4));
+				glEnd();
+#else
+				for (int j = 0; j < 4; j++)
+				{
+					blendpixel(x, y, 192, 192, 192, 255);
+					x += dx;
+					y += dy;
+				}
 #endif
+			}
 		}
 #ifdef OGLR
 	glTranslated(0, -MENUSIZE, 0);
@@ -1020,7 +1065,7 @@ void Renderer::render_fire()
 #ifndef OGLR
 	if(!(render_mode & FIREMODE))
 		return;
-	int i,j,x,y,r,g,b;
+	int i,j,x,y,r,g,b,a;
 	for (j=0; j<YRES/CELL; j++)
 		for (i=0; i<XRES/CELL; i++)
 		{
@@ -1030,7 +1075,12 @@ void Renderer::render_fire()
 			if (r || g || b)
 				for (y=-CELL; y<2*CELL; y++)
 					for (x=-CELL; x<2*CELL; x++)
-						addpixel(i*CELL+x, j*CELL+y, r, g, b, fire_alpha[y+CELL][x+CELL]);
+					{
+						a = fire_alpha[y+CELL][x+CELL];
+						if (findingElement)
+							a /= 2;
+						addpixel(i*CELL+x, j*CELL+y, r, g, b, a);
+					}
 			r *= 8;
 			g *= 8;
 			b *= 8;
@@ -1348,6 +1398,24 @@ void Renderer::render_parts()
 					}
 				}
 
+				if (findingElement)
+				{
+					if (findingElement == parts[i].type)
+					{
+						colr = firer = 255;
+						colg = fireg = colb = fireb = 0;
+					}
+					else
+					{
+						colr /= 10;
+						colg /= 10;
+						colb /= 10;
+						firer /= 5;
+						fireg /= 5;
+						fireb /= 5;
+					}
+				}
+
 				if (colour_mode & COLOUR_GRAD)
 				{
 					float frequency = 0.05;
@@ -1408,7 +1476,12 @@ void Renderer::render_parts()
 						drawtext(mousePos.X-8-2*(sim->parts[i].life<100)-2*(sim->parts[i].life<10), mousePos.Y-12, buff, 255, 255, 255, 255);
 					}
 
-					if (colour_mode!=COLOUR_HEAT)
+					if (findingElement == t)
+					{
+						colr = 255;
+						colg = colb = 0;
+					}
+					else if (colour_mode != COLOUR_HEAT)
 					{
 						if (cplayer->elem<PT_NUM && cplayer->elem > 0)
 						{
@@ -1432,6 +1505,7 @@ void Renderer::render_parts()
 							colb = 0xFF;
 						}
 					}
+
 #ifdef OGLR
 					glColor4f(((float)colr)/255.0f, ((float)colg)/255.0f, ((float)colb)/255.0f, 1.0f);
 					glBegin(GL_LINE_STRIP);
@@ -1475,7 +1549,18 @@ void Renderer::render_parts()
 					glVertex2f(cplayer->legs[12], cplayer->legs[13]);
 					glEnd();
 #else
-					if (t==PT_STKM2)
+					if (findingElement && findingElement == t)
+					{
+						legr = 255;
+						legg = legb = 0;
+					}
+					else if (colour_mode==COLOUR_HEAT)
+					{
+						legr = colr;
+						legg = colg;
+						legb = colb;
+					}
+					else if (t==PT_STKM2)
 					{
 						legr = 100;
 						legg = 100;
@@ -1488,11 +1573,14 @@ void Renderer::render_parts()
 						legb = 255;
 					}
 
-					if (colour_mode==COLOUR_HEAT)
+					if (findingElement && findingElement != t)
 					{
-						legr = colr;
-						legg = colg;
-						legb = colb;
+						colr /= 10;
+						colg /= 10;
+						colb /= 10;
+						legr /= 10;
+						legg /= 10;
+						legb /= 10;
 					}
 
 					//head
@@ -2368,6 +2456,8 @@ void Renderer::draw_air()
 					c  = PIXRGB(r, g, b);
 				}
 			}
+			if (findingElement)
+				c = PIXRGB(PIXR(c)/10,PIXG(c)/10,PIXB(c)/10);
 			for (j=0; j<CELL; j++)//draws the colors
 				for (i=0; i<CELL; i++)
 					vid[(x*CELL+i) + (y*CELL+j)*(VIDXRES)] = c;
@@ -2493,6 +2583,7 @@ Renderer::Renderer(Graphics * g, Simulation * sim):
 	blackDecorations(false),
 	debugLines(false),
 	sampleColor(0xFFFFFFFF),
+	findingElement(0),
 	mousePos(0, 0),
 	zoomWindowPosition(0, 0),
 	zoomScopePosition(0, 0),

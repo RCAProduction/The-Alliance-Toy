@@ -7,6 +7,7 @@
 #include "gui/dialogues/ErrorMessage.h"
 #include "gui/login/LoginController.h"
 #include "Controller.h"
+#include "Platform.h"
 
 PreviewController::PreviewController(int saveID, int saveDate, bool instant, ControllerCallback * callback):
 	saveId(saveID),
@@ -57,12 +58,13 @@ PreviewController::PreviewController(int saveID, bool instant, ControllerCallbac
 
 void PreviewController::Update()
 {
-	if(loginWindow && loginWindow->HasExited == true)
+	previewModel->Update();
+	if (loginWindow && loginWindow->HasExited == true)
 	{
 		delete loginWindow;
 		loginWindow = NULL;
 	}
-	if(previewModel->GetDoOpen() && previewModel->GetSave() && previewModel->GetSave()->GetGameSave())
+	if (previewModel->GetDoOpen() && previewModel->GetSaveInfo() && previewModel->GetSaveInfo()->GetGameSave())
 	{
 		Exit();
 	}
@@ -85,6 +87,7 @@ bool PreviewController::SubmitComment(std::string comment)
 		}
 		else
 		{
+			previewModel->CommentAdded();
 			previewModel->UpdateComments(1);
 		}
 	}
@@ -102,9 +105,9 @@ void PreviewController::NotifyAuthUserChanged(Client * sender)
 	previewModel->SetCommentBoxEnabled(sender->GetAuthUser().ID);
 }
 
-SaveInfo * PreviewController::GetSave()
+SaveInfo * PreviewController::GetSaveInfo()
 {
-	return previewModel->GetSave();
+	return previewModel->GetSaveInfo();
 }
 
 bool PreviewController::GetDoOpen()
@@ -125,16 +128,16 @@ void PreviewController::Report(std::string message)
 		new ErrorMessage("Information", "Report submitted"); //TODO: InfoMessage
 	}
 	else
-		new ErrorMessage("Error", "Unable file report");
+		new ErrorMessage("Error", "Unable file report: " + Client::Ref().GetLastError());
 }
 
 void PreviewController::FavouriteSave()
 {
-	if(previewModel->GetSave() && Client::Ref().GetAuthUser().ID)
+	if(previewModel->GetSaveInfo() && Client::Ref().GetAuthUser().ID)
 	{
 		try
 		{
-			if(previewModel->GetSave()->Favourite)
+			if(previewModel->GetSaveInfo()->Favourite)
 				previewModel->SetFavourite(false);
 			else
 				previewModel->SetFavourite(true);
@@ -150,7 +153,7 @@ void PreviewController::OpenInBrowser()
 {
 	std::stringstream uriStream;
 	uriStream << "http://" << SERVER << "/Browse/View.html?ID=" << saveId;
-	OpenURI(uriStream.str());
+	Platform::OpenURI(uriStream.str());
 }
 
 bool PreviewController::NextCommentPage()

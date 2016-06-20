@@ -25,6 +25,13 @@ std::string sign::getText(Simulation *sim)
 				pressure = sim->pv[y/CELL][x/CELL];
 			sprintf(buff, "Pressure: %3.2f", pressure);  //...pressure
 		}
+		else if (!strcmp(signText,"{aheat}"))
+		{
+			float aheat = 0.0f;
+			if (x>=0 && x<XRES && y>=0 && y<YRES)
+				aheat = sim->hv[y/CELL][x/CELL];
+			sprintf(buff, "%3.2f", aheat);
+		}
 		else if (!strcmp(signText,"{t}"))
 		{
 			if (x>=0 && x<XRES && y>=0 && y<YRES && sim->pmap[y][x])
@@ -56,8 +63,8 @@ void sign::pos(std::string signText, int & x0, int & y0, int & w, int & h)
 {
 	w = Graphics::textwidth(signText.c_str()) + 5;
 	h = 15;
-	x0 = (ju == 2) ? x - w :
-	      (ju == 1) ? x - w/2 : x;
+	x0 = (ju == Right) ? x - w :
+		  (ju == Left) ? x : x - w/2;
 	y0 = (y > 18) ? y - 18 : y + 4;
 }
 
