@@ -29,8 +29,7 @@ Element_ZR::Element_ZR()
 	Temperature = R_TEMP+0.0f	+273.15f;
 	HeatConduct = 240;
 	Description = "Zirconium.";
-	
-	State = ST_SOLID;
+
 	Properties = TYPE_SOLID;
 	
 	LowPressure = IPL;

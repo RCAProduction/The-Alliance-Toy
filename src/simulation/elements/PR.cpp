@@ -29,8 +29,7 @@ Element_PR::Element_PR()
 	Temperature = R_TEMP+30.0f+273.15f;
 	HeatConduct = 251;
 	Description = "Praseodymium. 59";
-	
-	State = ST_SOLID;
+
 	Properties = TYPE_PART;
 	
 	LowPressure = IPL;

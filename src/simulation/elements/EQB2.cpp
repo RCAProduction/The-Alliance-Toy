@@ -29,7 +29,6 @@ Element_EQB2::Element_EQB2()
 	HeatConduct = 164;
 	Description = "EQB2 - Equilibrium test element 2";
 	
-	State = ST_LIQUID;
 	Properties = TYPE_LIQUID|PROP_LIFE_DEC;
 	
 	LowPressure = IPL;

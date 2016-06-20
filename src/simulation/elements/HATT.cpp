@@ -30,7 +30,6 @@ Element_HATT::Element_HATT()
 	HeatConduct = 251;
 	Description = "Hattonite.";
 	
-	State = ST_LIQUID;
 	Properties = TYPE_LIQUID;
 	
 	LowPressure = IPL;

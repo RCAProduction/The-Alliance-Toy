@@ -1,5 +1,5 @@
 #include "simulation/Elements.h"
-//#TPT-Directive ElementClass Element_CRMC PT_CRMC 210
+//#TPT-Directive ElementClass Element_CRMC PT_CRMC 179
 Element_CRMC::Element_CRMC()
 {
 	Identifier = "DEFAULT_PT_CRMC";

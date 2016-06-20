@@ -30,7 +30,6 @@ Element_CBNF::Element_CBNF()
 	HeatConduct = 5;
 	Description = "Carbon Fiber.";
 	
-	State = ST_SOLID;
 	Properties = TYPE_SOLID;
 	
 	LowPressure = IPL;

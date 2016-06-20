@@ -30,7 +30,6 @@ Element_LA::Element_LA()
 	HeatConduct = 251;
 	Description = "Lanthanum. 57";
 	
-	State = ST_SOLID;
 	Properties = TYPE_PART | PROP_RADIOACTIVE;
 	
 	LowPressure = IPL;

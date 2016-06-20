@@ -30,7 +30,6 @@ Element_VSPK::Element_VSPK()
 	HeatConduct = 251;
 	Description = "Voltage Spark. Voltage set in life value.";
 	
-	State = ST_SOLID;
 	Properties = TYPE_SOLID|PROP_LIFE_DEC;
 	
 	LowPressure = IPL;

@@ -30,7 +30,6 @@ Element_GOTO::Element_GOTO()
 	HeatConduct = 251;
 	Description = "Similar to the sign tool. Set link ID in tmp. Enable/Disable with PSCN/NSCN.";
 	
-	State = ST_SOLID;
 	Properties = TYPE_SOLID|PROP_HOT_GLOW;
 	
 	LowPressure = IPL;

@@ -30,7 +30,6 @@ Element_CGLS::Element_CGLS()
 	HeatConduct = 150;
 	Description = "CGLSs. Like GLAS but doesn't affect PHOT.";
 	
-	State = ST_SOLID;
 	Properties = TYPE_SOLID | PROP_NEUTPASS | PROP_HOT_GLOW | PROP_SPARKSETTLE;
 	
 	LowPressure = IPL;

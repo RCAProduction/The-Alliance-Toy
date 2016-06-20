@@ -30,7 +30,6 @@ Element_PU::Element_PU()
 	HeatConduct = 251;
 	Description = "Plutonium. Pu-238/d Pu-239/d Pu-240/d";
 	
-	State = ST_SOLID;
 	Properties = TYPE_PART | PROP_RADIOACTIVE | PROP_NEUTPENETRATE;
 	
 	LowPressure = IPL;
@@ -99,6 +98,10 @@ if (parts[i].tmp==244)
 	
 	parts[i].tmp = 141;
 	sim->part_change_type(i,x,y,PT_BA);
+
+	//Energy released; Travels through surrounding particles, heating them. May cause reactions later.
+	
+
 }
 	return 0;
 }

@@ -30,7 +30,6 @@ Element_HE::Element_HE()
 	HeatConduct = 251;
 	Description = "Helium. He-4/100";
 	
-	State = ST_GAS;
 	Properties = TYPE_GAS | PROP_RADIOACTIVE | PROP_CONDUCTS | PROP_LIFE_DEC;
 	
 	LowPressure = IPL;

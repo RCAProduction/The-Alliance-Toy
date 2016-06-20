@@ -30,7 +30,6 @@ Element_N0::Element_N0()
 	HeatConduct = 60;
 	Description = "Neutrons. N-0.";
 	
-	State = ST_GAS;
 	Properties = TYPE_ENERGY;
 	
 	LowPressure = IPL;

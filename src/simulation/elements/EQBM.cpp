@@ -29,8 +29,7 @@ Element_EQBM::Element_EQBM()
 	Temperature = R_TEMP+20.0f+273.15f;
 	HeatConduct = 164;
 	Description = "EQBM - Equilibrium test element 1";
-	
-	State = ST_LIQUID;
+
 	Properties = TYPE_LIQUID|PROP_LIFE_DEC;
 	
 	LowPressure = IPL;

@@ -30,7 +30,6 @@ Element_U::Element_U()
 	HeatConduct = 251;
 	Description = "Uranium. U-234/.0054 U-235/.72 U-238/99.2746";
 	
-	State = ST_SOLID;
 	Properties = TYPE_PART | PROP_RADIOACTIVE | PROP_NEUTPENETRATE;
 	
 	LowPressure = IPL;

@@ -30,7 +30,6 @@ Element_CNON::Element_CNON()
 	HeatConduct = 186;
 	Description = "Cannon. Aim with mouse.";
 	
-	State = ST_SOLID;
 	Properties = TYPE_SOLID;
 	
 	LowPressure = IPL;

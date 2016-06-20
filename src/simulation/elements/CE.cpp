@@ -30,7 +30,6 @@ Element_CE::Element_CE()
 	HeatConduct = 251;
 	Description = "Cerium. 58";
 	
-	State = ST_SOLID;
 	Properties = TYPE_PART | PROP_RADIOACTIVE;
 	
 	LowPressure = IPL;

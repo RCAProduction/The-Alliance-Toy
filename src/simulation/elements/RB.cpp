@@ -29,8 +29,7 @@ Element_RB::Element_RB()
 	Temperature = R_TEMP+0.0f	+273.15f;
 	HeatConduct = 240;
 	Description = "Rubidium. Rb-92/?";
-	
-	State = ST_SOLID;
+
 	Properties = TYPE_SOLID;
 	
 	LowPressure = IPL;

@@ -30,7 +30,6 @@ Element_AERO::Element_AERO()
 	HeatConduct = 0;
 	Description = "Aerogel. Powerful heat insulator.";
 
-	State = ST_SOLID;
 	Properties = TYPE_SOLID;
 
 	LowPressure = IPL;

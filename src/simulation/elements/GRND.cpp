@@ -30,7 +30,6 @@ Element_GRND::Element_GRND()
 	HeatConduct = 211;
 	Description = "Grenade.";
 	
-	State = ST_SOLID;
 	Properties = TYPE_PART|PROP_CONDUCTS|PROP_LIFE_DEC|PROP_HOT_GLOW;
 	
 	LowPressure = IPL;

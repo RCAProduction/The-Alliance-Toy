@@ -29,8 +29,7 @@ Element_NBOT::Element_NBOT()
 	Temperature = R_TEMP+0.0f	+273.15f;
 	HeatConduct = 211;
 	Description = "Nanobots. Perform work, enable with PSCN.";
-	
-	State = ST_SOLID;
+
 	Properties = TYPE_PART|PROP_DRAWONCTYPE|PROP_LIFE_DEC;
 	
 	LowPressure = IPL;

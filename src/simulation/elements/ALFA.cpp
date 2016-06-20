@@ -30,7 +30,6 @@ Element_ALFA::Element_ALFA()
 	HeatConduct = 60;
 	Description = "Alpha Particles. HE-4 0E";
 	
-	State = ST_GAS;
 	Properties = TYPE_PART;
 	
 	LowPressure = IPL;

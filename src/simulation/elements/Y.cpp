@@ -30,7 +30,6 @@ Element_Y::Element_Y()
 	HeatConduct = 240;
 	Description = "Yttrium.";
 	
-	State = ST_SOLID;
 	Properties = TYPE_SOLID;
 	
 	LowPressure = IPL;

@@ -30,7 +30,6 @@ Element_BA::Element_BA()
 	HeatConduct = 251;
 	Description = "Barium. Ba-138/71.698 Ba-141/0 Ba-137/11.232 Ba-136/7.854 Ba-135/6.592";
 	
-	State = ST_SOLID;
 	Properties = TYPE_PART | PROP_RADIOACTIVE;
 	
 	LowPressure = IPL;

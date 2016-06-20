@@ -81,7 +81,7 @@ int Element_SPRK::update(UPDATE_FUNC_ARGS)
 	case PT_ETRD:
 		if (parts[i].life==1)
 		{
-			nearp = sim->nearest_part(i, PT_ETRD, -1);
+			nearp = Element_ETRD::nearestSparkablePart(sim, i);
 			if (nearp!=-1 && sim->parts_avg(i, nearp, PT_INSL)!=PT_INSL && sim->parts_avg(i, nearp, PT_CBNF)!=PT_CBNF)
 			{
 				sim->CreateLine(x, y, (int)(parts[nearp].x+0.5f), (int)(parts[nearp].y+0.5f), PT_PLSM);

@@ -1,5 +1,5 @@
 #include "simulation/Elements.h"
-//#TPT-Directive ElementClass Element_ZRNT PT_ZRNT 179
+//#TPT-Directive ElementClass Element_ZRNT PT_ZRNT 210
 Element_ZRNT::Element_ZRNT()
 {
 	Identifier = "DEFAULT_PT_ZRNT";
@@ -29,8 +29,7 @@ Element_ZRNT::Element_ZRNT()
 	Temperature = R_TEMP+0.0f	+273.15f;
 	HeatConduct = 251;
 	Description = "Zirconium Nitrade. Super conductor for VSPK.";
-	
-	State = ST_SOLID;
+
 	Properties = TYPE_SOLID|PROP_CONDUCTS|PROP_LIFE_DEC|PROP_HOT_GLOW;
 	
 	LowPressure = IPL;

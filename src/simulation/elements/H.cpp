@@ -30,7 +30,6 @@ Element_H::Element_H()
 	HeatConduct = 251;
 	Description = "Hydrogen. H-1/100 H-2/0 H-3/0";
 	
-	State = ST_GAS;
 	Properties = TYPE_GAS | PROP_RADIOACTIVE | PROP_CONDUCTS | PROP_LIFE_DEC;
 	
 	LowPressure = IPL;

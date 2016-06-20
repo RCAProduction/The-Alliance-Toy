@@ -30,7 +30,6 @@ Element_SR::Element_SR()
 	HeatConduct = 240;
 	Description = "Strontium.";
 	
-	State = ST_SOLID;
 	Properties = TYPE_SOLID;
 	
 	LowPressure = IPL;

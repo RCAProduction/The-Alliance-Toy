@@ -29,8 +29,7 @@ Element_LAQR::Element_LAQR()
 	Temperature = R_TEMP+0.0f +273.15f;
 	HeatConduct = 5;
 	Description = "Lacquer. Combine with different elements to create special types. E.g. CRBN+LAQR=CBNF.";
-	
-	State = ST_LIQUID;
+
 	Properties = TYPE_LIQUID;
 	
 	LowPressure = IPL;

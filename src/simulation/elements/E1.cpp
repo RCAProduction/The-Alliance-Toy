@@ -30,7 +30,6 @@ Element_E1::Element_E1()
 	HeatConduct = 60;
 	Description = "Electrons. E-";
 	
-	State = ST_GAS;
 	Properties = TYPE_ENERGY;
 	
 	LowPressure = IPL;
