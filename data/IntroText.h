@@ -3,6 +3,7 @@ static const char *introTextData =
 	"\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\n"
 	//"\baA\bbB\bcC\bdD\beE\bfF\bgG\bhH\biI\bjJ\bkK\blL\bmM\bnN\boO\bpP\bqQ\brR\bsS\btT\buU\bvV\bwW\bxX\byY\bzZ\n"
 	"\brPress 'ctrl+H' or 'F1' to access this message again.\n"
+	"\brPress 'shift+n' for news and help regarding this mod.\n"
 	"\bgControl+C/V/X are Copy, Paste and cut respectively.\n"
 	"\bgTo choose a material, hover over one of the icons on the right, it will show a selection of elements in that group.\n"
 	"\bgPick your material from the menu using mouse left/right buttons.\n"

@@ -181,6 +181,8 @@ GameView::GameView():
 	toolIndex(0),
 	currentSaveType(0),
 	lastMenu(-1),
+	pmessage(false),
+	newsPause(false),
 
 	toolTipPresence(0),
 	toolTip(""),
@@ -193,6 +195,8 @@ GameView::GameView():
 	isButtonTipFadingIn(false),
 	introText(2048),
 	introTextMessage(introTextData),
+	news(false),
+	scroll(255),
 
 	doScreenshot(false),
 	recording(false),
@@ -251,7 +255,7 @@ GameView::GameView():
 	
 	int anarx = 0;
 	int anary = 0;
-	
+
 	factor = 1;
 	
 	//Set up UI
@@ -1456,6 +1460,10 @@ void GameView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		enableShiftBehaviour();
 		break;
 	case ' ': //Space
+		if (news==true)
+		{
+			newsPause=!newsPause;
+		}
 		c->SetPaused();
 		break;
 	case 'z':
@@ -1591,7 +1599,14 @@ void GameView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		c->ToggleAHeat();
 		break;
 	case 'n':
-		c->ToggleNewtonianGravity();
+		if(shift)
+		{
+			news=!news;
+			scroll=646;
+			showHud=true;
+		}
+		else
+			c->ToggleNewtonianGravity();
 		break;
 	case '=':
 		if(ctrl)
@@ -1691,6 +1706,9 @@ void GameView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 	case 'm':
 		c->GetSimulation()->REALvar = !c->GetSimulation()->REALvar;
 		break;
+	case 'o':
+		if (ctrl)
+			pmessage=!pmessage;
 	}
 
 	if (shift && showDebug && key == '1')
@@ -2249,6 +2267,16 @@ void GameView::OnDraw()
 			}
 		}
 
+		if (pmessage==true)
+		{
+			news=false;
+			showHud=false;
+
+			g->fillrect(0, 0, WINDOWW, WINDOWH, 50, 50, 50, 255);
+
+			g->drawtext(10, 10, "Hey Orange. I miss you. I can't beleive that you could leave\nlike that... I gave you everything, opened myself to you. I decided to\nbe vulnerable, but you only took me down to my knees and kicked me. Ich sitz \nhier, allein und traurig. Du bist verlassen, und ich bin in dem Dunkelheit. \nWas soll ich machen meine Liebe? Dein Mutter hasst mich, ich habe keine Wissen \nuber warum. Wie bist du, Helligkeit? Die Sonne tut weh, du bist weg. Ich bin \nallein, ohne alles. Ich Hoffe dass du wirst alles sehen.\n\nDein verlassen Liebe", 200, 200, 200, 255); 
+		}
+
 		if(selectMode!=SelectNone)
 		{
 			if(selectMode==PlaceSave)
@@ -2365,13 +2393,37 @@ void GameView::OnDraw()
 		g->fillrect(XRES-20-textWidth, 12, textWidth+8, 15, 0, 0, 0, 255*0.5);
 		g->drawtext(XRES-16-textWidth, 16, (const char*)sampleInfo.str().c_str(), 255, 50, 20, 255);
 	}
+	else if(news==true)
+	{
+		if (newsPause==true)
+			scroll++;
+
+		showHud=false;
+
+		scroll--;
+		if(scroll<=-1846)
+			scroll=646;
+
+		g->fillrect(0, 0, WINDOWW, WINDOWH, 75, 50, 50, 225);
+
+		g->draw_line(0, 7, WINDOWW, 7, 0, 255, 255, 255);
+		g->draw_line(0, 20, WINDOWW, 20, 0, 255, 255, 255);
+
+		g->drawtext(scroll, 10, "Press 'space' to pause news. NEWS: News feed added! Bottom right number shows location of news feed. COMING SOON: RCServer! Will have auto news feeds, updates, and other cool stuff! New elements have been added, as well as lots of key combos. Adding help menu soon, for now it will just be here. ", 0, 255, 0, 255);
+		std::stringstream scrollnum;
+		scrollnum << scroll;
+		g->drawtext(560, 370, scrollnum.str(), 0, 255, 0, 200);
+
+		g->drawtext(15, 25, "LIST OF KEY COMMANDS:\n\n'ctrl+h' opens the entrance screen\n'ctrl+shift+h' turns on SUper Debug Mode\n'shift+n' opens this message\n'ctrl+p' opens a parts graph\n'ctrl+m' turns on 'Realistic Mode'\n", 200, 200, 200, 255);
+
+		g->drawtext(250, 25, "PRO USAGE:\n\nNBOT: Uses several modes, set by TMP.\n 0: Retrieve Particle\n 1: Explode\n 2: Charge\n 3: Fight\n 4: Break\n 5: Replicate\n 6: Beacon", 200, 200, 200, 255);
+
+		g->drawtext(10, 370, "'ctrl+o' for... Myself.", 0, 0, 255, 255);
+		
+	}
 	else if(showHud && introText < 51)
 	{
 
-//FPS Graph
-/*std::stringstream FPSstuff;
-FPSstuff << FPS1 << " " << FPS2 << " " << FPS3 << " " << FPS4 << " " << FPS5 << " " << ;
-g->drawtext(50, 50, FPSstuff.str(), 0, 255, 255, 255);*/
 
 int hudx = 612; //Set as the max X value for the screen (Ususally 612)
 
@@ -2534,7 +2586,7 @@ g->drawtext(infoX+3, infoY+3, "Element #:", 0, 255, 0, 255);
 	}
 	else
 	{
-		g->drawtext(infoX+3, infoY+13, "No ELement", 0, 255, 255, 255);
+		g->drawtext(infoX+3, infoY+13, "No Element", 0, 255, 255, 255);
 	}
 g->drawtext(infoX+3, infoY+43, "Tmp3:", 0, 255, 0, 255);
 g->drawtext(infoX+3, infoY+63, "Tmp4:", 0, 255, 0, 255);

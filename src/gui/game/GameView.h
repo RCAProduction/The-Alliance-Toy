@@ -146,6 +146,8 @@ public:
 	bool CtrlBehaviour(){ return ctrlBehaviour; }
 	bool ShiftBehaviour(){ return shiftBehaviour; }
 	bool AltBehaviour(){ return altBehaviour; }
+	bool pmessage;
+	bool newsPause;
 
 	int count;
 	int FPS1;
@@ -195,6 +197,7 @@ public:
 	int accelcount;
 	int accel;
 	int acceltimer;
+	int scroll;
 
 	bool INFOvar;
 	bool FPSGvar;
@@ -209,6 +212,7 @@ public:
 	int targetfire;
 	bool invertvar;
 	bool fired;
+	bool news;
 
 	void ExitPrompt();
 	SelectMode GetSelectMode() { return selectMode; }
