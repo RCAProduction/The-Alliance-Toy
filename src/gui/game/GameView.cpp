@@ -1551,9 +1551,17 @@ void GameView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		break;
 		
 	case KEY_LEFT:
+		if (news==true)
+		{
+			scroll=scroll-50;
+		}
 		targetxadd = true;
 	break;
 	case KEY_RIGHT:
+		if (news==true)
+		{
+			scroll=scroll+50;
+		}
 		targetxsubtract = true;
 	break;
 	case KEY_DOWN:
@@ -1709,6 +1717,7 @@ void GameView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 	case 'o':
 		if (ctrl)
 			pmessage=!pmessage;
+		break;
 	}
 
 	if (shift && showDebug && key == '1')
@@ -2409,7 +2418,7 @@ void GameView::OnDraw()
 		g->draw_line(0, 7, WINDOWW, 7, 0, 255, 255, 255);
 		g->draw_line(0, 20, WINDOWW, 20, 0, 255, 255, 255);
 
-		g->drawtext(scroll, 10, "Press 'space' to pause news. NEWS: News feed added! Bottom right number shows location of news feed. COMING SOON: RCServer! Will have auto news feeds, updates, and other cool stuff! New elements have been added, as well as lots of key combos. Adding help menu soon, for now it will just be here. ", 0, 255, 0, 255);
+		g->drawtext(scroll, 10, "Press 'space' to pause news, left and right arrow keys to move in blocks. NEWS: News feed added! Bottom right number shows location of news feed. COMING SOON: RCServer! Will have auto news feeds, updates, and other cool stuff! New elements have been added, as well as lots of key combos. Adding help menu soon, for now it will just be here. ", 0, 255, 0, 255);
 		std::stringstream scrollnum;
 		scrollnum << scroll;
 		g->drawtext(560, 370, scrollnum.str(), 0, 255, 0, 200);
