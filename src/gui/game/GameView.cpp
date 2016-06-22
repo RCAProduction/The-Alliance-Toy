@@ -26,6 +26,7 @@
 #include "DecorationTool.h"
 #include "gui/colourpicker/ColourPickerActivity.h"
 #include "simulation/Simulation.h"
+#include "gui/options/OptionsModel.h"
 
 class SplitButton;
 class SplitButtonAction
@@ -548,10 +549,11 @@ public:
 	{
 		v = _v;
 		menuID = menuID_;
-		if (menuID == SC_DECO)
+		/*if (menuID == SC_DECO)
 			needsClick = true;
 		else
-			needsClick = false;
+			needsClick = false;*/
+		needsClick=false;
 	}
 	void MouseEnterCallback(ui::Button * sender)
 	{
@@ -1382,6 +1384,7 @@ void GameView::OnMouseWheel(int x, int y, int d)
 	if (news==true)
 	{
 		scrolling=scrolling+(d*12);
+		return;
 	}
 	if (selectMode != SelectNone)
 	{
@@ -2428,7 +2431,7 @@ void GameView::OnDraw()
 		if (scrolling<0)
 			scrolling=0;
 
-		//391 lines available for info. Take line number, and multiply by 12 for location
+		//391 lines available for info. Take line number, and multiply by 12 then add 25 for location
 
 		scroll--;
 		if(scroll<=-1846)
@@ -2436,9 +2439,12 @@ void GameView::OnDraw()
 
 		g->fillrect(0, 0, WINDOWW, WINDOWH, 50, 50, 50, 255);
 
-		g->drawtext(15, 25-scrolling, "LIST OF KEY COMMANDS:\n\n'ctrl+h' opens the entrance screen\n'ctrl+shift+h' turns on SUper Debug Mode\n'shift+n' opens this message\n'ctrl+p' opens a parts graph\n'ctrl+m' turns on 'Realistic Mode'\n", 200, 200, 200, 255);
+		g->drawtext(240, 25-scrolling, "NEWS, HELP, INFO, AND REFERENCE GUIDE", 255, 255, 255, 255);
+		g->draw_line(15, 37-scrolling, 612, 37-scrolling, 255, 255, 0, 255);
 
-		g->drawtext(250, 25-scrolling, "PRO USAGE:\n\nNBOT: Uses several modes, set by TMP.\n 0: Retrieve Particle\n 1: Explode\n 2: Charge\n 3: Fight\n 4: Break\n 5: Replicate\n 6: Beacon", 200, 200, 200, 255);
+		g->drawtext(15, 49-scrolling, "LIST OF MOD KEY COMMANDS:\n\n'ctrl+h' opens the entrance screen\n'ctrl+shift+h' turns on Super Debug Mode\n'shift+n' opens this message\n'ctrl+p' opens a parts graph\n'ctrl+m' turns on 'Realistic Mode'\n", 200, 200, 200, 255);
+
+		g->drawtext(15, 145-scrolling, " EXTRA ELEMENT INFORMATION:\n\nNBOT: Uses several modes, set by TMP. Once activated by PSCN and charged, do what they are set to.\n 0: Retrieve Particle\n 1: Explode\n 2: Charge\n 3: Fight\n 4: Break\n 5: Replicate\n 6: Beacon", 200, 200, 200, 255);
 
 		g->drawtext(15, 4692-scrolling, "This is the last line.", 255, 0, 0, 255);
 

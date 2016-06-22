@@ -129,6 +129,8 @@ private:
 	void disableAltBehaviour();
 	void UpdateDrawMode();
 	void UpdateToolStrength();
+
+	bool menuClick;
 public:
 	GameView();
 	virtual ~GameView();
@@ -148,6 +150,7 @@ public:
 	bool AltBehaviour(){ return altBehaviour; }
 	bool pmessage;
 	bool newsPause;
+	bool SetMenu;
 
 	int count;
 	int FPS1;
