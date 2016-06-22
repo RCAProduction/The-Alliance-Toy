@@ -198,6 +198,8 @@ public:
 	int accel;
 	int acceltimer;
 	int scroll;
+	int scrolling;
+	int scrollbar;
 
 	bool INFOvar;
 	bool FPSGvar;

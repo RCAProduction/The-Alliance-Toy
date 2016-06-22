@@ -218,6 +218,8 @@ GameView::GameView():
 	placeSaveThumb(NULL),
 	lastOffset(0)
 {
+	scrolling=0;
+
 	FPS1=60;
 	FPS2=60;
 	FPS3=60;
@@ -1377,6 +1379,10 @@ void GameView::OnMouseWheel(int x, int y, int d)
 {
 	if (!d)
 		return;
+	if (news==true)
+	{
+		scrolling=scrolling+(d*12);
+	}
 	if (selectMode != SelectNone)
 	{
 		return;
@@ -1565,9 +1571,17 @@ void GameView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		targetxsubtract = true;
 	break;
 	case KEY_DOWN:
+		if (news==true)
+		{
+			scrolling=scrolling+290;
+		}
 		targetyadd = true;
 	break;
 	case KEY_UP:
+		if (news==true)
+		{
+			scrolling=scrolling-290;
+		}
 		targetysubtract = true;
 	break;
 	case 'd':
@@ -2409,25 +2423,40 @@ void GameView::OnDraw()
 
 		showHud=false;
 
+		if (scrolling>4332)
+			scrolling=4332;
+		if (scrolling<0)
+			scrolling=0;
+
+		//391 lines available for info. Take line number, and multiply by 12 for location
+
 		scroll--;
 		if(scroll<=-1846)
 			scroll=646;
 
-		g->fillrect(0, 0, WINDOWW, WINDOWH, 75, 50, 50, 225);
+		g->fillrect(0, 0, WINDOWW, WINDOWH, 50, 50, 50, 255);
+
+		g->drawtext(15, 25-scrolling, "LIST OF KEY COMMANDS:\n\n'ctrl+h' opens the entrance screen\n'ctrl+shift+h' turns on SUper Debug Mode\n'shift+n' opens this message\n'ctrl+p' opens a parts graph\n'ctrl+m' turns on 'Realistic Mode'\n", 200, 200, 200, 255);
+
+		g->drawtext(250, 25-scrolling, "PRO USAGE:\n\nNBOT: Uses several modes, set by TMP.\n 0: Retrieve Particle\n 1: Explode\n 2: Charge\n 3: Fight\n 4: Break\n 5: Replicate\n 6: Beacon", 200, 200, 200, 255);
+
+		g->drawtext(15, 4692-scrolling, "This is the last line.", 255, 0, 0, 255);
+
+		g->fillrect(0, 0, WINDOWW, 22, 50, 50, 50, 255);
+
+		g->drawtext(10, 370, "'ctrl+o' for... Myself.", 0, 0, 255, 255);
 
 		g->draw_line(0, 7, WINDOWW, 7, 0, 255, 255, 255);
 		g->draw_line(0, 20, WINDOWW, 20, 0, 255, 255, 255);
 
-		g->drawtext(scroll, 10, "Press 'space' to pause news, left and right arrow keys to move in blocks. NEWS: News feed added! Bottom right number shows location of news feed. COMING SOON: RCServer! Will have auto news feeds, updates, and other cool stuff! New elements have been added, as well as lots of key combos. Adding help menu soon, for now it will just be here. ", 0, 255, 0, 255);
+		g->drawtext(scroll, 10, "Press 'space' to pause news, left and right arrow keys to move in blocks, and up and down to block scroll. NEWS: News feed added! Bottom right number shows location of news feed. COMING SOON: RCServer! Will have auto news feeds, updates, and other cool stuff! New elements have been added, as well as lots of key combos. Adding help menu soon, for now it will just be here. ", 0, 255, 0, 255);
 		std::stringstream scrollnum;
 		scrollnum << scroll;
 		g->drawtext(560, 370, scrollnum.str(), 0, 255, 0, 200);
 
-		g->drawtext(15, 25, "LIST OF KEY COMMANDS:\n\n'ctrl+h' opens the entrance screen\n'ctrl+shift+h' turns on SUper Debug Mode\n'shift+n' opens this message\n'ctrl+p' opens a parts graph\n'ctrl+m' turns on 'Realistic Mode'\n", 200, 200, 200, 255);
+		scrollbar = 24+(scrolling/12);
 
-		g->drawtext(250, 25, "PRO USAGE:\n\nNBOT: Uses several modes, set by TMP.\n 0: Retrieve Particle\n 1: Explode\n 2: Charge\n 3: Fight\n 4: Break\n 5: Replicate\n 6: Beacon", 200, 200, 200, 255);
-
-		g->drawtext(10, 370, "'ctrl+o' for... Myself.", 0, 0, 255, 255);
+		g->draw_line(6, scrollbar, 6, scrollbar+12, 255, 255, 255, 255);
 		
 	}
 	else if(showHud && introText < 51)
