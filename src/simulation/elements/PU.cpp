@@ -99,9 +99,19 @@ if (parts[i].tmp==244)
 	parts[i].tmp = 141;
 	sim->part_change_type(i,x,y,PT_BA);
 
-	//Energy released; Travels through surrounding particles, heating them. May cause reactions later.
-	
+	//Energy released; Travels through surrounding particles, heating them. [[May cause reactions/ionization later.]]
 
+	int rx, ry, r;
+
+	for (rx=-5; rx<6; rx++) 
+		for (ry=-5; ry<6; ry++)
+			if (BOUNDS_CHECK && (rx || ry))
+			{
+				r = pmap[y+ry][x+rx];
+				if (!r)
+					continue;
+				parts[r>>8].temp = 9000;
+			}
 }
 	return 0;
 }

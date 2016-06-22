@@ -85,15 +85,20 @@ if (parts[i].tmp==236)
 		parts[nb].vy = v*sinf(angle);
 	}
 	
-	for (rx=-6; rx<7; rx++) 
-				for (ry=-6; ry<7; ry++)
-					if (BOUNDS_CHECK && (rx || ry))
-					{
-						r = pmap[y+ry][x+rx];
-						if (!r)
-							continue;
-						parts[r>>8].temp = 9000;
-					}
+	//Energy released; Travels through surrounding particles, heating them. [[May cause reactions/ionization later.]]
+
+	int rx, ry, r;
+
+	for (rx=-5; rx<6; rx++) 
+		for (ry=-5; ry<6; ry++)
+			if (BOUNDS_CHECK && (rx || ry))
+			{
+				r = pmap[y+ry][x+rx];
+				if (!r)
+					continue;
+				parts[r>>8].temp = 9000;
+			}
+
 }
 if (parts[i].tmp==239)
 {
