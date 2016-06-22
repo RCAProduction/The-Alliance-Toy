@@ -19,7 +19,7 @@ Element_RB::Element_RB()
 	HotAir = 0.000f	* CFDS;
 	Falldown = 0;
 	
-	Flammable = 0;
+	Flammable = 1000;
 	Explosive = 0;
 	Meltable = 0;
 	Hardness = 1;
@@ -30,7 +30,7 @@ Element_RB::Element_RB()
 	HeatConduct = 240;
 	Description = "Rubidium. Rb-92/?";
 
-	Properties = TYPE_SOLID;
+	Properties = TYPE_SOLID|PROP_CONDUCTS;
 	
 	LowPressure = IPL;
 	LowPressureTransition = NT;
@@ -59,6 +59,28 @@ if (parts[i].tmp==92 && (rand()%2)>=1)
 	parts[nb].vy = v*sinf(angle);
 	sim->part_change_type(i,x,y,PT_SR);
 }
+
+	//Reactions
+
+	int rx, ry, r;
+
+	for (rx=-1; rx<2; rx++) 
+		for (ry=-1; ry<2; ry++)
+			if (BOUNDS_CHECK && (rx || ry))
+			{
+				r = pmap[y+ry][x+rx];
+				if (!r)
+					continue;
+				
+				if(parts[r>>8].type==PT_WATR)
+				{
+					parts[r>>8].type = PT_FIRE;
+					parts[i].type = PT_FIRE;
+					parts[r>>8].life = 150;
+					parts[i].life = 150;
+				}
+			}
+
 	return 0;
 }
 Element_RB::~Element_RB() {}
