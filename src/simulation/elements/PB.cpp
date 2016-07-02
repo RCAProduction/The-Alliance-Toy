@@ -6,7 +6,7 @@ Element_PB::Element_PB()
 	Name = "PB";
 	Colour = PIXPACK(0x6d6a65);
 	MenuVisible = 1;
-	MenuSection = SC_SOLIDS;
+	MenuSection = SC_ALLY;
 	Enabled = 1;
 
 	Advection = 0.0f;
