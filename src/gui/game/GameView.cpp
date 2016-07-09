@@ -198,6 +198,7 @@ GameView::GameView():
 	introTextMessage(introTextData),
 	news(false),
 	scroll(255),
+	localServer(false),
 
 	doScreenshot(false),
 	recording(false),
@@ -1735,6 +1736,9 @@ void GameView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		if (ctrl)
 			pmessage=!pmessage;
 		break;
+	case 'a':
+		localServer=!localServer;
+		break;
 	}
 
 	if (shift && showDebug && key == '1')
@@ -2479,14 +2483,20 @@ RMBx = 77;
 RMBy = 27;
 
 //Changes Servers     (Size.X-177, Size.Y-16)
-if(serverButton->GetToggleState()==false){
+if((serverButton->GetToggleState()==false)&&(localServer==false)){
 	SERVER = "powdertoy.co.uk";
 	STATICSERVER = "static.powdertoy.co.uk";
 	}
-if(serverButton->GetToggleState()==true){
-	SERVER = "thepowdertoy.net";
-	STATICSERVER = "static.thepowdertoy.net";
+if((serverButton->GetToggleState()==true)&&(localServer==false)){
+	SERVER = "97.124.174.156:3000";
+	STATICSERVER = "97.124.174.156:3000";
 	}
+if(localServer==true)
+{
+	SERVER = "localhost:3000";
+	STATICSERVER = "localhost:3000";
+	g->drawtext(10, 100, "LocalHost Enabled", 255, 255, 255, 255);
+}
 
 if(FPSGvar==true)
 {
@@ -2721,7 +2731,7 @@ if (elCount==true)
 		
 		while (370-pixAmount<=0)
 		{
-			pixAmount = pixAmount/2;
+			pixAmount = (pixAmount/2)-185;
 			factor = factor+1;
 		}
 		pa1 = 370-pixAmount;
@@ -2746,6 +2756,28 @@ if (elCount==true)
 	g->draw_line(180+xx, pa18, 190+xx, pa19, 0, 255, 255, 255);
 	g->draw_line(190+xx, pa19, 200+xx, pa20, 0, 255, 255, 255);
 	g->draw_line(10+xx, 370, 200+xx, 370, 0, 255, 0, 255);
+
+	g->draw_line(10+xx, 0, 10+xx, 369, 255, 0, 0, 100);
+	g->draw_line(20+xx, 0, 20+xx, 369, 255, 0, 0, 100);
+	g->draw_line(30+xx, 0, 30+xx, 369, 255, 0, 0, 100);
+	g->draw_line(40+xx, 0, 40+xx, 369, 255, 0, 0, 100);
+	g->draw_line(50+xx, 0, 50+xx, 369, 255, 0, 0, 100);
+	g->draw_line(60+xx, 0, 60+xx, 369, 255, 0, 0, 100);
+	g->draw_line(70+xx, 0, 70+xx, 369, 255, 0, 0, 100);
+	g->draw_line(80+xx, 0, 80+xx, 369, 255, 0, 0, 100);
+	g->draw_line(90+xx, 0, 90+xx, 369, 255, 0, 0, 100);
+	g->draw_line(100+xx, 0, 100+xx, 369, 255, 0, 0, 100);
+	g->draw_line(110+xx, 0, 110+xx, 369, 255, 0, 0, 100);
+	g->draw_line(120+xx, 0, 120+xx, 369, 255, 0, 0, 100);
+	g->draw_line(130+xx, 0, 130+xx, 369, 255, 0, 0, 100);
+	g->draw_line(140+xx, 0, 140+xx, 369, 255, 0, 0, 100);
+	g->draw_line(150+xx, 0, 150+xx, 369, 255, 0, 0, 100);
+	g->draw_line(160+xx, 0, 160+xx, 369, 255, 0, 0, 100);
+	g->draw_line(170+xx, 0, 170+xx, 369, 255, 0, 0, 100);
+	g->draw_line(180+xx, 0, 180+xx, 369, 255, 0, 0, 100);
+	g->draw_line(190+xx, 0, 190+xx, 369, 255, 0, 0, 100);
+	g->draw_line(200+xx, 0, 200+xx, 369, 255, 0, 0, 100);
+
 	std::stringstream factors;
 	factors << "Factor: 2^" << factor;
 	g->drawtext(12+xx, 373, factors.str(), 255, 0, 0, 255);

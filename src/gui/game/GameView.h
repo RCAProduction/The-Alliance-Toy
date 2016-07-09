@@ -203,6 +203,7 @@ public:
 	int scroll;
 	int scrolling;
 	int scrollbar;
+	int targetfire;
 
 	bool INFOvar;
 	bool FPSGvar;
@@ -214,10 +215,10 @@ public:
 	bool targetxsubtract;
 	bool targetyadd;
 	bool targetysubtract;
-	int targetfire;
 	bool invertvar;
 	bool fired;
 	bool news;
+	bool localServer;
 
 	void ExitPrompt();
 	SelectMode GetSelectMode() { return selectMode; }
