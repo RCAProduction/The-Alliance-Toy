@@ -1,5 +1,5 @@
 static const char *introTextData =
-	"\blRCA's Mod - Version 0.2.0 - RCAProductionmaster@gmail.com, irc.freenode.net #powder\n"
+	"\blThe Alliance Toy - Version 0.2.0 - RCAProductionmaster@gmail.com, irc.freenode.net #powder username RCAProduction\n"
 	"\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\n"
 	//"\baA\bbB\bcC\bdD\beE\bfF\bgG\bhH\biI\bjJ\bkK\blL\bmM\bnN\boO\bpP\bqQ\brR\bsS\btT\buU\bvV\bwW\bxX\byY\bzZ\n"
 	"\brPress 'ctrl+H' or 'F1' to access this message again.\n"
@@ -25,7 +25,7 @@ static const char *introTextData =
 	"\bgLieuwe Mosch, Anthony Boot, Matthew \"me4502\", MaksProg, jacob1, mniip, RCAProduction, the_new_powder99999\n"
 	"\n"
 	"\bgTo use online features such as saving, you need to register at: \brhttp://powdertoy.co.uk/Register.html \bgor\n"
-	"\brhttp://ThePowderToy.net \bgdepending on your choice of servers.\n"
+	"\brhttp://97.124.174.156:3000/register \bgdepending on your choice of servers.\n"
 
 	"\n"
 	"\bt" MTOS(SAVE_VERSION) "." MTOS(MINOR_VERSION) "." MTOS(BUILD_NUM) " " IDENT_PLATFORM " "
