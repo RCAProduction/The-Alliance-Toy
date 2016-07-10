@@ -9,22 +9,22 @@ Element_PU::Element_PU()
 	MenuSection = SC_ALLY;
 	Enabled = 1;
 	
-	Advection = 0.4f;
-	AirDrag = 0.01f * CFDS;
-	AirLoss = 0.99f;
-	Loss = 0.95f;
+	Advection = 0.0f;
+	AirDrag = 0.00f * CFDS;
+	AirLoss = 0.90f;
+	Loss = 0.00f;
 	Collision = 0.0f;
-	Gravity = 0.4f;
+	Gravity = 0.0f;
 	Diffusion = 0.00f;
 	HotAir = 0.000f	* CFDS;
-	Falldown = 1;
-	
+	Falldown = 0;
+
 	Flammable = 0;
 	Explosive = 0;
-	Meltable = 0;
-	Hardness = 0;
+	Meltable = 1;
+	Hardness = 1;
 	
-	Weight = 90;
+	Weight = 240;
 	
 	Temperature = R_TEMP+30.0f+273.15f;
 	HeatConduct = 251;
@@ -69,6 +69,11 @@ if (parts[i].tmp==239)
 		sim->pv[y/CELL][x/CELL] = 175;
 	}
 }
+if (parts[i].tmp==240)
+{
+	if (sim->pv[y/CELL][x/CELL] >= 2)
+		parts[i].tmp = 244;
+}
 if (parts[i].tmp==244)
 {
 	nb = sim->create_part(-3, x, y, PT_ALFA);
@@ -103,14 +108,15 @@ if (parts[i].tmp==244)
 
 	int rx, ry, r;
 
-	for (rx=-5; rx<6; rx++) 
-		for (ry=-5; ry<6; ry++)
+	for (rx=-7; rx<8; rx++) 
+		for (ry=-7; ry<8; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
 			{
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				parts[r>>8].temp = 9000;
+				parts[r>>8].temp = 10000;
+				sim->pv[y/CELL][x/CELL] = 175;
 			}
 }
 	return 0;

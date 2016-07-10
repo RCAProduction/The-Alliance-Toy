@@ -9,22 +9,22 @@ Element_PR::Element_PR()
 	MenuSection = SC_ALLY;
 	Enabled = 1;
 	
-	Advection = 0.4f;
-	AirDrag = 0.01f * CFDS;
-	AirLoss = 0.99f;
-	Loss = 0.95f;
+	Advection = 0.0f;
+	AirDrag = 0.00f * CFDS;
+	AirLoss = 0.90f;
+	Loss = 0.00f;
 	Collision = 0.0f;
-	Gravity = 0.4f;
+	Gravity = 0.0f;
 	Diffusion = 0.00f;
 	HotAir = 0.000f	* CFDS;
-	Falldown = 1;
-	
+	Falldown = 0;
+
 	Flammable = 0;
 	Explosive = 0;
-	Meltable = 0;
-	Hardness = 0;
+	Meltable = 1;
+	Hardness = 1;
 	
-	Weight = 90;
+	Weight = 235;
 	
 	Temperature = R_TEMP+30.0f+273.15f;
 	HeatConduct = 251;

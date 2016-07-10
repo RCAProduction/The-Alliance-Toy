@@ -9,22 +9,22 @@ Element_BA::Element_BA()
 	MenuSection = SC_ALLY;
 	Enabled = 1;
 	
-	Advection = 0.4f;
-	AirDrag = 0.01f * CFDS;
-	AirLoss = 0.99f;
-	Loss = 0.95f;
+	Advection = 0.0f;
+	AirDrag = 0.00f * CFDS;
+	AirLoss = 0.90f;
+	Loss = 0.00f;
 	Collision = 0.0f;
-	Gravity = 0.4f;
+	Gravity = 0.0f;
 	Diffusion = 0.00f;
 	HotAir = 0.000f	* CFDS;
-	Falldown = 1;
-	
+	Falldown = 0;
+
 	Flammable = 0;
 	Explosive = 0;
-	Meltable = 0;
-	Hardness = 0;
+	Meltable = 1;
+	Hardness = 1;
 	
-	Weight = 90;
+	Weight = 235;
 	
 	Temperature = R_TEMP+30.0f+273.15f;
 	HeatConduct = 251;
@@ -58,6 +58,19 @@ if (parts[i].tmp==141 && (rand()%2)>=1)
 	parts[nb].vx = v*cosf(angle);
 	parts[nb].vy = v*sinf(angle);
 	sim->part_change_type(i,x,y,PT_LA);
+
+int rx, ry, r;
+
+	for (rx=-7; rx<8; rx++) 
+		for (ry=-7; ry<8; ry++)
+			if (BOUNDS_CHECK && (rx || ry))
+			{
+				r = pmap[y+ry][x+rx];
+				if (!r)
+					continue;
+				parts[r>>8].temp = 10000;
+				sim->pv[y/CELL][x/CELL] = 175;
+			}
 }
 	return 0;
 }
