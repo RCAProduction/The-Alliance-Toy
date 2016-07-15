@@ -2488,8 +2488,8 @@ if((serverButton->GetToggleState()==false)&&(localServer==false)){
 	STATICSERVER = "static.powdertoy.co.uk";
 	}
 if((serverButton->GetToggleState()==true)&&(localServer==false)){
-	SERVER = "97.124.174.156:3000";
-	STATICSERVER = "97.124.174.156:3000";
+	SERVER = "http://rcserver.hopto.org:3000";
+	STATICSERVER = "http://rcserver.hopto.org:3000";
 	}
 if(localServer==true)
 {
