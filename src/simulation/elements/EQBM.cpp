@@ -48,8 +48,12 @@ Element_EQBM::Element_EQBM()
 //#TPT-Directive ElementHeader Element_EQBM static int update(UPDATE_FUNC_ARGS)
 int Element_EQBM::update(UPDATE_FUNC_ARGS)
 {
-	int r, rx, ry, someVariable;
+	int r, rx, ry, some_variable;
 	int ave_temp;
+	if (parts[i].temp > 10000)
+	{
+		parts[i].temp = 10000;
+	}
 	for (rx = -1; rx<2; rx++)
 	for (ry = -1; ry<2; ry++)
 	if (BOUNDS_CHECK && (rx || ry))
@@ -59,21 +63,28 @@ int Element_EQBM::update(UPDATE_FUNC_ARGS)
 			continue;
 		if (parts[r>>8].type == 187)
 		{
-			ave_temp = (parts[i].temp + parts[r>>8].temp) / 2;
+			ave_temp = 10001-((parts[i].temp + parts[r>>8].temp) / 2);
 			//if a random number from 1 to f(average temp) = 1 and touching EQBM then set both types to EQB2 and increase temperature.
-			someVariable = (floor(ave_temp/10));
-			if (ave_temp > 50)
+			some_variable = (ceil(1*(ave_temp)));
 			{
-				if (floor(rand() % (someVariable)) == 1)
+				if (!floor(rand() % (some_variable)))
 				{
 					sim->part_change_type(r>>8, x + rx, y + ry, 188);
 					sim->part_change_type(i, x, y, 188);
-					parts[i].temp++;
-					parts[r >> 8].temp++;
-					parts[i].tmp = ave_temp;
+					parts[i].temp+=10;
+					parts[r>>8].temp+=10;
+					if (parts[r>>8].temp > 10000)
+					{
+						parts[r>>8].temp = 10000;
+					}
 				}
 			}
 		}
+	}
+
+	if (parts[i].temp > 10000)
+	{
+		parts[i].temp = 10000;
 	}
 	return 0;
 }
