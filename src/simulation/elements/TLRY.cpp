@@ -24,7 +24,7 @@ Element_TLRY::Element_TLRY()
 	Meltable = 2;
 	Hardness = 2;
 	
-	Weight = 50;
+	Weight = 90;
 	
 	Temperature = R_TEMP+0.0f	+273.15f;
 	HeatConduct = 211;
@@ -48,7 +48,17 @@ Element_TLRY::Element_TLRY()
 //#TPT-Directive ElementHeader Element_TLRY static int update(UPDATE_FUNC_ARGS)
 int Element_TLRY::update(UPDATE_FUNC_ARGS)
  {
-int r, rx, ry, sx, sy;
+int r, rx, ry, sx, sy, vxy;
+bool explosionPossible;
+
+vxy = (parts[i].vx+parts[i].vy);
+
+if (vxy >= 1)
+	explosionPossible=true;
+else
+	explosionPossible=false;
+
+
 	for (rx=-1; rx<2; rx++)
 		for (ry=-1; ry<2; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
@@ -56,8 +66,16 @@ int r, rx, ry, sx, sy;
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				if (parts[r>>8].type!=PT_TLRY && parts[r>>8].type!=PT_FIRE && parts[r>>8].type!=PT_PLSM)
+				
+				//other particles hitting TLRY
+				if ((parts[r>>8].vx+parts[r>>8].vy)>=2)
+					explosionPossible=true;
+					
+				//requirements for the explosion to occur
+				if (parts[r>>8].type!=PT_TLRY && parts[r>>8].type!=PT_FIRE && parts[r>>8].type!=PT_SMKE && parts[r>>8].type!=PT_PLSM && explosionPossible==true)
 				{
+
+					//explosion
 					for (sx=-5; sx<6; sx++)
 						for (sy=-5; sy<6; sy++)
 							if ((rand()%10)>=3)
