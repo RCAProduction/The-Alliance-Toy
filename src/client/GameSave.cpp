@@ -439,6 +439,11 @@ void GameSave::Transform(matrix2d transform, vector2d translate)
 	fanVelYPtr = (float*)fanVelYPtrNew;
 }
 
+void bson_error_handler(const char *err)
+{
+	throw ParseException(ParseException::Corrupt, "BSON error when parsing save");
+}
+
 void GameSave::readOPS(char * data, int dataLength)
 {
 	unsigned char * inputData = (unsigned char*)data, *bsonData = NULL, *partsData = NULL, *partsPosData = NULL, *fanData = NULL, *wallData = NULL, *soapLinkData = NULL;
@@ -501,7 +506,8 @@ void GameSave::readOPS(char * data, int dataLength)
 	if (BZ2_bzBuffToBuffDecompress((char*)bsonData, &bsonDataLen, (char*)(inputData+12), inputDataLen-12, 0, 0))
 		throw ParseException(ParseException::Corrupt, "Unable to decompress");
 
-	bson_init_data(&b, (char*)bsonData);
+	set_bson_err_handler(bson_error_handler);
+	bson_init_data_size(&b, (char*)bsonData, bsonDataLen);
 	bson_iterator_init(&iter, &b);
 
 	std::vector<sign> tempSigns;
@@ -741,7 +747,11 @@ void GameSave::readOPS(char * data, int dataLength)
 							fprintf(stderr, "Wrong type for %s\n", bson_iterator_key(&iter));
 					}
 				}
+#ifdef SNAPSHOT
+				if (major > FUTURE_SAVE_VERSION || (major == FUTURE_SAVE_VERSION && minor > FUTURE_MINOR_VERSION))
+#else
 				if (major > SAVE_VERSION || (major == SAVE_VERSION && minor > MINOR_VERSION))
+#endif
 				{
 					std::stringstream errorMessage;
 					errorMessage << "Save from a newer version: Requires version " << major << "." << minor;
@@ -2116,6 +2126,22 @@ char * GameSave::serialiseOPS(unsigned int & dataLength)
 				partsData[fieldDescLoc] = fieldDesc;
 				partsData[fieldDescLoc+1] = fieldDesc>>8;
 
+				if (particles[i].type == PT_RPEL && particles[i].ctype)
+				{
+					RESTRICTVERSION(91, 4);
+				}
+				else if (particles[i].type == PT_NWHL && particles[i].tmp)
+				{
+					RESTRICTVERSION(91, 5);
+				}
+#ifdef SNAPSHOT
+				if (particles[i].type == PT_E180 || particles[i].type == PT_E181)
+				{
+					RESTRICTVERSION(92, 0);
+					fromNewerVersion = true;
+				}
+#endif
+
 				//Get the pmap entry for the next particle in the same position
 				i = partsPosLink[i];
 			}
@@ -2175,6 +2201,7 @@ char * GameSave::serialiseOPS(unsigned int & dataLength)
 	bson_append_int(&b, "minorVersion", MINOR_VERSION);
 	bson_append_int(&b, "buildNum", BUILD_NUM);
 	bson_append_int(&b, "snapshotId", SNAPSHOT_ID);
+	bson_append_int(&b, "modId", MOD_ID);
 	bson_append_string(&b, "releaseType", IDENT_RELTYPE);
 	bson_append_string(&b, "platform", IDENT_PLATFORM);
 	bson_append_string(&b, "builtType", IDENT_BUILD);

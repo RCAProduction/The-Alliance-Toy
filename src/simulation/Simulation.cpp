@@ -34,8 +34,16 @@ int Simulation::Load(int fullX, int fullY, GameSave * save)
 {
 	int blockX, blockY, x, y, r;
 
-	if(!save) return 1;
-	save->Expand();
+	if (!save)
+		return 1;
+	try
+	{
+		save->Expand();
+	}
+	catch (ParseException)
+	{
+		return 1;
+	}
 
 	//Align to blockMap
 	blockX = (fullX + CELL/2)/CELL;
@@ -1928,8 +1936,10 @@ void Simulation::clear_sim(void)
 	fighcount = 0;
 	player.spwn = 0;
 	player.spawnID = -1;
+	player.rocketBoots = false;
 	player2.spwn = 0;
 	player2.spawnID = -1;
+	player2.rocketBoots = false;
 	//memset(pers_bg, 0, WINDOWW*YRES*PIXELSIZE);
 	//memset(fire_r, 0, sizeof(fire_r));
 	//memset(fire_g, 0, sizeof(fire_g));
@@ -2052,6 +2062,10 @@ void Simulation::init_can_move()
 			can_move[movingType][PT_VIBR] = 1;
 			can_move[movingType][PT_BVBR] = 1;
 		}
+
+		//E181 cannot be displaced by other powders
+		if (elements[movingType].Properties & TYPE_PART)
+			can_move[movingType][PT_E181] = 0;
 	}
 	//a list of lots of things PHOT can move through
 	// TODO: replace with property
@@ -2919,6 +2933,8 @@ int Simulation::create_part(int p, int x, int y, int t, int v)
 		{
 			//If an element has the PROP_DRAWONCTYPE property, and the element being drawn to it does not have PROP_NOCTYPEDRAW (Also some special cases), set the element's ctype
 			int drawOn = pmap[y][x]&0xFF;
+			if (drawOn == t)
+				return -1;
 			if (((elements[drawOn].Properties & PROP_DRAWONCTYPE) ||
 				 (drawOn == PT_STOR && !(elements[t].Properties & TYPE_SOLID)) ||
 				 (drawOn == PT_PCLN && t != PT_PSCN && t != PT_NSCN) ||
@@ -2934,7 +2950,7 @@ int Simulation::create_part(int p, int x, int y, int t, int v)
 						parts[pmap[y][x]>>8].tmp = v;
 				}
 			}
-			else if ((drawOn == PT_DTEC || (drawOn == PT_PSTN && t != PT_FRME) || drawOn == PT_DRAY) && drawOn != t)
+			else if (drawOn == PT_DTEC || (drawOn == PT_PSTN && t != PT_FRME) || drawOn == PT_DRAY)
 			{
 				parts[pmap[y][x]>>8].ctype = t;
 				if (t == PT_LIFE && v >= 0 && v < NGOL)
@@ -2945,7 +2961,7 @@ int Simulation::create_part(int p, int x, int y, int t, int v)
 						parts[pmap[y][x]>>8].ctype |= v<<8;
 				}
 			}
-			else if (drawOn == PT_CRAY && drawOn != t)
+			else if (drawOn == PT_CRAY)
 			{
 				parts[pmap[y][x]>>8].ctype = t;
 				if (t == PT_LIFE && v >= 0 && v < NGOL)

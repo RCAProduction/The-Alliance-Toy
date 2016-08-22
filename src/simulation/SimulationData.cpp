@@ -159,7 +159,8 @@ menu_section * LoadMenus(int & menuCount)
 		{"\xD2", "Game of Life", 0, 1},
 		{"\x9D", "Stats and Extras", 0, 1},
 		{"\xD7", "Tools", 0, 1},
-		{"\xE4", "Decoration Tools", 0, 1},
+		{"\xE7", "Favorites", 0, 1},
+		{"\xE4", "Decoration tools", 0, 1},
 		{"\xC8", "Cracker", 0, 0},
 		{"\xC8", "Cracker!", 0, 0},
 	};

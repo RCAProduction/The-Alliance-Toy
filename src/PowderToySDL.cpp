@@ -3,7 +3,7 @@
 #include "Config.h"
 #include <map>
 #include <string>
-#include <time.h>
+#include <ctime>
 #ifdef SDL_INC
 #include "SDL/SDL.h"
 #else
@@ -280,11 +280,11 @@ void blit(pixel * vid)
 			unsigned int red, green, blue;
 			pixel px, lastpx, nextpx;
 			SDL_PixelFormat *fmt = sdl_scrn->format;
-			for (j=0; j<h; j++)
+			if(depth3d)
 			{
-				for (i=0; i<w; i++)
+				for (j=0; j<h; j++)
 				{
-					if (depth3d)
+					for (i=0; i<w; i++)
 					{
 						lastpx = i >= depth3d && i < w+depth3d ? src[i-depth3d] : 0;
 						nextpx = i >= -depth3d && i < w-depth3d ? src[i+depth3d] : 0;
@@ -297,28 +297,37 @@ void blit(pixel * vid)
 						red = ((int)(PIXR(lastpx)*.69f+redshift*.3f)>>fmt->Rloss)<<fmt->Rshift;
 						green = ((int)(PIXG(nextpx)*.3f)>>fmt->Gloss)<<fmt->Gshift;
 						blue = ((int)(PIXB(nextpx)*.69f+blueshift*.3f)>>fmt->Bloss)<<fmt->Bshift;
+						dst[i] = red|green|blue;
 					}
-					else
+					dst+=sdl_scrn->pitch/PIXELSIZE;
+					src+=pitch;
+				}
+			}
+			else
+			{
+				for (j=0; j<h; j++)
+				{
+					for (i=0; i<w; i++)
 					{
 						px = src[i];
 						red = (PIXR(px)>>fmt->Rloss)<<fmt->Rshift;
 						green = (PIXG(px)>>fmt->Gloss)<<fmt->Gshift;
 						blue = (PIXB(px)>>fmt->Bloss)<<fmt->Bshift;
+						dst[i] = red|green|blue;
 					}
-					dst[i] = red|green|blue;
+					dst+=sdl_scrn->pitch/PIXELSIZE;
+					src+=pitch;
 				}
-				dst+=sdl_scrn->pitch/PIXELSIZE;
-				src+=pitch;
 			}
 		}
 		else
 		{
 			int i;
-			for (j=0; j<h; j++)
+			if(depth3d)
 			{
-				if (depth3d)
+				pixel lastpx, nextpx;
+				for (j=0; j<h; j++)
 				{
-					pixel lastpx, nextpx;
 					for (i=0; i<w; i++)
 					{
 						lastpx = i >= depth3d && i < w+depth3d ? src[i-depth3d] : 0;
@@ -331,11 +340,18 @@ void blit(pixel * vid)
 							blueshift = 255;
 						dst[i] = PIXRGB((int)(PIXR(lastpx)*.69f+redshift*.3f), (int)(PIXG(nextpx)*.3f), (int)(PIXB(nextpx)*.69f+blueshift*.3f));
 					}
+					dst+=sdl_scrn->pitch/PIXELSIZE;
+					src+=pitch;
 				}
-				else
+			}
+			else
+			{
+				for (j=0; j<h; j++)
+				{
 					memcpy(dst, src, w*PIXELSIZE);
-				dst+=sdl_scrn->pitch/PIXELSIZE;
-				src+=pitch;
+					dst+=sdl_scrn->pitch/PIXELSIZE;
+					src+=pitch;
+				}
 			}
 		}
 		if (SDL_MUSTLOCK(sdl_scrn))
@@ -504,6 +520,11 @@ void SetCursorEnabled(int enabled)
 	SDL_ShowCursor(enabled);
 }
 
+unsigned int GetTicks()
+{
+	return SDL_GetTicks();
+}
+
 std::map<std::string, std::string> readArguments(int argc, char * argv[])
 {
 	std::map<std::string, std::string> arguments;
@@ -572,24 +593,24 @@ SDLKey MapNumpad(SDLKey key)
 {
 	switch(key)
 	{
-	case KEY_NUM_UP:
-		return KEY_UP;
-	case KEY_NUM_DOWN:
-		return KEY_DOWN;
-	case KEY_NUM_RIGHT:
-		return KEY_RIGHT;
-	case KEY_NUM_LEFT:
-		return KEY_LEFT;
-	case KEY_NUM_HOME:
-		return KEY_HOME;
-	case KEY_NUM_END:
-		return KEY_END;
-	case KEY_NUM_PERIOD:
-		return KEY_DELETE;
-	case KEY_NUM_INS:
-	case KEY_NUM_PGUP:
-	case KEY_NUM_PGDOWN:
-		return KEY_UNKNOWN;
+	case SDLK_KP8:
+		return SDLK_UP;
+	case SDLK_KP2:
+		return SDLK_DOWN;
+	case SDLK_KP6:
+		return SDLK_RIGHT;
+	case SDLK_KP4:
+		return SDLK_LEFT;
+	case SDLK_KP7:
+		return SDLK_HOME;
+	case SDLK_KP1:
+		return SDLK_END;
+	case SDLK_KP_PERIOD:
+		return SDLK_DELETE;
+	case SDLK_KP0:
+	case SDLK_KP9:
+	case SDLK_KP3:
+		return SDLK_UNKNOWN;
 	default:
 		return key;
 	}
@@ -626,10 +647,10 @@ void EventProcess(SDL_Event event)
 			engine->Exit();
 		break;
 	case SDL_KEYDOWN:
-		engine->onKeyPress(event.key.keysym.sym, event.key.keysym.unicode, event.key.keysym.mod&KEY_MOD_SHIFT, event.key.keysym.mod&KEY_MOD_CONTROL, event.key.keysym.mod&KEY_MOD_ALT);
+		engine->onKeyPress(event.key.keysym.sym, event.key.keysym.unicode, event.key.keysym.mod&KMOD_SHIFT, event.key.keysym.mod&KMOD_CTRL, event.key.keysym.mod&KMOD_ALT);
 		break;
 	case SDL_KEYUP:
-		engine->onKeyRelease(event.key.keysym.sym, event.key.keysym.unicode, event.key.keysym.mod&KEY_MOD_SHIFT, event.key.keysym.mod&KEY_MOD_CONTROL, event.key.keysym.mod&KEY_MOD_ALT);
+		engine->onKeyRelease(event.key.keysym.sym, event.key.keysym.unicode, event.key.keysym.mod&KMOD_SHIFT, event.key.keysym.mod&KMOD_CTRL, event.key.keysym.mod&KMOD_ALT);
 		break;
 	case SDL_MOUSEMOTION:
 		engine->onMouseMove(event.motion.x*inputScale, event.motion.y*inputScale);
@@ -736,7 +757,6 @@ void DoubleScreenDialog()
 	{
 		Client::Ref().SetPref("Scale", 1);
 		engine->SetScale(1);
-		engine->CloseWindow();
 #ifdef WIN
 		LoadWindowPosition(1);
 #endif
@@ -1031,7 +1051,7 @@ int main(int argc, char * argv[])
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	//glScaled(2.0f, 2.0f, 1.0f);
 #endif
-#if defined(OGLI)
+#if defined(OGLI) && !defined(MACOSX)
 	int status = glewInit();
 	if(status != GLEW_OK)
 	{
@@ -1042,12 +1062,19 @@ int main(int argc, char * argv[])
 #if defined (USE_SDL) && defined(LIN) && defined(SDL_VIDEO_DRIVER_X11)
 	SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
 	SDL_VERSION(&sdl_wminfo.version);
-	SDL_GetWMInfo(&sdl_wminfo);
-	sdl_wminfo.info.x11.lock_func();
-	XA_CLIPBOARD = XInternAtom(sdl_wminfo.info.x11.display, "CLIPBOARD", 1);
-	XA_TARGETS = XInternAtom(sdl_wminfo.info.x11.display, "TARGETS", 1);
-	XA_UTF8_STRING = XInternAtom(sdl_wminfo.info.x11.display, "UTF8_STRING", 1);
-	sdl_wminfo.info.x11.unlock_func();
+	if(SDL_GetWMInfo(&sdl_wminfo) > 0)
+	{
+		sdl_wminfo.info.x11.lock_func();
+		XA_CLIPBOARD = XInternAtom(sdl_wminfo.info.x11.display, "CLIPBOARD", 1);
+		XA_TARGETS = XInternAtom(sdl_wminfo.info.x11.display, "TARGETS", 1);
+		XA_UTF8_STRING = XInternAtom(sdl_wminfo.info.x11.display, "UTF8_STRING", 1);
+		sdl_wminfo.info.x11.unlock_func();
+	} 
+	else
+	{
+		fprintf(stderr, "X11 setup failed, X11 window info not found");
+		exit(-1);
+	}
 #endif
 	ui::Engine::Ref().g = new Graphics();
 	ui::Engine::Ref().Scale = scale;
