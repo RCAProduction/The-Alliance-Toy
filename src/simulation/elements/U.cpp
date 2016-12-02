@@ -9,22 +9,22 @@ Element_U::Element_U()
 	MenuSection = SC_ALLY;
 	Enabled = 1;
 	
-	Advection = 0.0f;
-	AirDrag = 0.00f * CFDS;
-	AirLoss = 0.90f;
-	Loss = 0.00f;
-	Collision = 0.0f;
-	Gravity = 0.0f;
+	Advection = 0.4f;
+	AirDrag = 0.04f * CFDS;
+	AirLoss = 0.94f;
+	Loss = 0.95f;
+	Collision = -0.1f;
+	Gravity = 0.3f;
 	Diffusion = 0.00f;
 	HotAir = 0.000f	* CFDS;
-	Falldown = 0;
+	Falldown = 1;
 
 	Flammable = 0;
 	Explosive = 0;
-	Meltable = 1;
-	Hardness = 1;
-	
-	Weight = 235;
+	Meltable = 2;
+	Hardness = 2;
+
+	Weight = 90; //235
 	
 	Temperature = R_TEMP+30.0f+273.15f;
 	HeatConduct = 251;
@@ -102,7 +102,7 @@ if (parts[i].tmp==236)
 				if (!r)
 					continue;
 				parts[r>>8].temp = 10000;
-				sim->pv[y/CELL][x/CELL] = 175;
+				sim->pv[y/CELL][x/CELL] = 300;
 			}
 
 }

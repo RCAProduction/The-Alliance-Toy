@@ -82,10 +82,15 @@ else
 							{
 								sim->create_part(-1, x+sx, y+sy, PT_FIRE);
 							}
-							else
+							else if ((rand()%10)>=3)
 							{
 								sim->create_part(-1, x+sx, y+sy, PT_PLSM);
 							}
+							else
+							{
+								sim->create_part(-1, x+sx, y+sy, PT_BRMT);
+							}
+							
 							
 					sim->create_part(i, x, y, PT_FIRE);
 					sim->pv[y/CELL][x/CELL] = 50;
