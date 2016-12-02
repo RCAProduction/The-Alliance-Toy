@@ -1,7 +1,11 @@
 #include "simulation/Elements.h"
 //#TPT-Directive ElementClass Element_BLLT PT_BLLT 219
 Element_BLLT::Element_BLLT()
-{
+{Loss = 0.95f;
+	Collision = -0.1f;
+	Gravity = 0.3f;
+	Diffusion = 0.00f;
+	HotAir = 0.000f	* CFDS;
 	Identifier = "DEFAULT_PT_BLLT";
 	Name = "BLLT";
 	Colour = PIXPACK(0xA9724B);
@@ -12,11 +16,7 @@ Element_BLLT::Element_BLLT()
 		Advection = 0.4f;
 	AirDrag = 0.04f * CFDS;
 	AirLoss = 0.94f;
-	Loss = 0.95f;
-	Collision = -0.1f;
-	Gravity = 0.3f;
-	Diffusion = 0.00f;
-	HotAir = 0.000f	* CFDS;
+	
 	Falldown = 1;
 
 	Flammable = 0;
@@ -56,21 +56,40 @@ int Element_BLLT::update(UPDATE_FUNC_ARGS)
 					int r = pmap[y+ry][x+rx];
 					if (!r)
 						continue;
-					if (parts[r>>8].type==PT_SPRK)
+					if (parts[i].tmp!=1)
 					{
-						parts[i].type=PT_EMBR;
-						parts[i].life=100;
-						parts[i].temp=6000;
-						parts[i].vx=(rx*(-1))*100;
-						parts[i].vy=(ry*(-1))*100;
+						if (parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_FIRE)
+						{
+							parts[i].type=PT_EMBR;
+							parts[i].life=100;
+							parts[i].temp=6000;
+							parts[i].vx=(rx*(-1))*100;
+							parts[i].vy=(ry*(-1))*100;
+						}
+						else if (parts[i].type==PT_BLLT && parts[i].temp>=1000)
+						{
+							parts[i].temp=6000;
+							parts[i].type=PT_EMBR;
+							parts[i].life=200;
+							sim->pv[y/CELL][x/CELL] = 5;
+							parts[r>>8].temp=500;
+						}
 					}
-					else if (parts[i].type==PT_BLLT && parts[i].temp>=1000)
+					else
 					{
-						parts[i].temp=6000;
-						parts[i].type=PT_EMBR;
-						parts[i].life=200;
-						sim->pv[y/CELL][x/CELL] = 5;
-						parts[r>>8].temp=500;
+						parts[i].vx=0;
+						parts[i].vy=0;
+						
+						if (parts[r>>8].type==PT_SPRK || parts[r>>8].type==PT_FIRE)
+						{
+							int s = pmap[y+(ry*(-1))][x+(rx*(-1))];
+							
+							sim->create_part(-1, (rx*(-1)), (ry*(-1)), PT_EMBR);
+							parts[s].life=100;
+							parts[s].temp=6000;
+							parts[s].vx=(rx*(-1))*100;
+							parts[s].vy=(ry*(-1))*100;
+						}
 					}
 		}
 	}
