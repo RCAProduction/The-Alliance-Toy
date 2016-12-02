@@ -269,6 +269,7 @@ GameView::GameView():
 	
 	int anarx = 0;
 	int anary = 0;
+	int st;
 
 	factor = 1;
 	
@@ -1420,7 +1421,7 @@ void GameView::OnMouseWheel(int x, int y, int d)
 		return;
 	if (news==true)
 	{
-		scrolling=scrolling+(d*12);
+		scrolling=scrolling+(-d*12);
 		return;
 	}
 	if (selectMode != SelectNone)
@@ -2484,17 +2485,13 @@ void GameView::OnDraw()
 		g->drawtext(240, 25-scrolling, "NEWS, HELP, INFO, AND REFERENCE GUIDE", 255, 255, 255, 255);
 		g->draw_line(15, 37-scrolling, 612, 37-scrolling, 255, 255, 0, 255);
 
-		g->drawtext(15, 49-scrolling, "LIST OF MOD KEY COMMANDS:\n\n'ctrl+h' opens the entrance screen\n'ctrl+shift+h' turns on Super Debug Mode\n'shift+n' opens this message\n'ctrl+p' opens a parts graph\n'ctrl+m' turns on 'Realistic Mode'\n", 200, 200, 200, 255); //ln 3-10
-
-		g->drawtext(15, 145-scrolling, " EXTRA ELEMENT INFORMATION:\n\nNBOT: Uses several modes, set by TMP. Once activated by PSCN and charged, do what they are set to.\n 0: Retrieve Particle\n 1: Explode\n 2: Charge\n 3: Fight\n 4: Break\n 5: Replicate\n 6: Beacon", 200, 200, 200, 255); //ln 11-20
-
-		g->drawtext(15, 289-scrolling, "FILT: This table shows basic ctype values for electronics.\n 1\n 2\n 4\n 8\n 16\n 32\n 64\n 128\n 256\n 512\n 1024\n 2048\n 4096\n 8192\n 16384\n 32768\n 65536\n 131072\n 262144\n 524288\n 1048576\n 2097152\n 4194304\n 8388608\n 16777216\n 33554432\n 67108864\n 134217728\n 268435456\n 536870912", 200, 200, 200, 255); //ln 22-53
+		g->drawtext(15, 49-scrolling, "LIST OF MOD KEY COMMANDS:\n\n'ctrl+h' opens the entrance screen\n'ctrl+shift+n' turns on Super Debug Mode\n'shift+n' opens this message\n'ctrl+p' opens a parts graph\n'ctrl+m' turns on 'Realistic Mode'\nThere are various others which are not yet listed\n\n"/*Elements Help. Replace with help menu at some point.*/"EXTRA ELEMENT INFORMATION:\n\n"/*NBOT lists*/"NBOT: Uses several modes, set by TMP. Once activated by PSCN and charged, they do what they are set to.\n 0: Retrieve Particle\n 1: Explode\n 2: Charge\n 3: Fight\n 4: Break\n 5: Replicate\n 6: Beacon\n\n"/*Filter Section*/"FILT: This table shows basic ctype values for electronics.\n 1\n 2\n 4\n 8\n 16\n 32\n 64\n 128\n 256\n 512\n 1024\n 2048\n 4096\n 8192\n 16384\n 32768\n 65536\n 131072\n 262144\n 524288\n 1048576\n 2097152\n 4194304\n 8388608\n 16777216\n 33554432\n 67108864\n 134217728\n 268435456\n 536870912", 200, 200, 200, 255); 
 
 		g->drawtext(15, 4692-scrolling, "This is the last line.", 255, 0, 0, 255);
 
 		g->fillrect(0, 0, WINDOWW, 22, 50, 50, 50, 255);
 
-		g->drawtext(10, 370, "'ctrl+o' for... Myself.", 0, 0, 255, 255);
+		//g->drawtext(10, 370, "'ctrl+o' for... Myself.", 0, 0, 255, 255);
 
 		g->draw_line(0, 7, WINDOWW, 7, 0, 255, 255, 255);
 		g->draw_line(0, 20, WINDOWW, 20, 0, 255, 255, 255);
@@ -2526,14 +2523,16 @@ if((serverButton->GetToggleState()==false)&&(localServer==false)){
 	STATICSERVER = "static.powdertoy.co.uk";
 	}
 if((serverButton->GetToggleState()==true)&&(localServer==false)){
-	SERVER = "http://rcserver.hopto.org:3000";
-	STATICSERVER = "http://rcserver.hopto.org:3000";
+	SERVER = "FortCollinsB17.org:3000";
+	STATICSERVER = "FortCollinsB17:3000";
 	}
 if(localServer==true)
 {
-	SERVER = "localhost:3000";
-	STATICSERVER = "localhost:3000";
-	g->drawtext(10, 100, "LocalHost Enabled", 255, 255, 255, 255);
+SERVER = "192.168.0.64:3000";
+	STATICSERVER = "192.168.0.64:3000";
+	//SERVER = "localhost:3000";
+	//STATICSERVER = "localhost:3000";
+	g->drawtext(10, 100, "LocalHost Enabled 192.168.0.64", 255, 255, 255, 255);
 }
 
 if(FPSGvar==true)
@@ -2923,8 +2922,8 @@ if (showDebug)
 	if (ren->GetGridSize())
 		extraInfo << "[GRID: " << ren->GetGridSize() << "/9]";
 		
-	if (LinkVar==true)
-		extraInfo << "[LINK MODE]";
+	//if (LinkVar==true)
+	//	extraInfo << "[LINK MODE]";
 		
 	if (ren->findingElement)
 		extraInfo << " [FIND]";
@@ -2995,6 +2994,7 @@ if (showDebug)
 			g->drawtext(hudx-147-xMove, zoomMove+15, temp.str(), 0, 255, 255, 255);
 
 			int ctype = sample.particle.ctype;
+			int st=sample.particle.type;
 			
 			if (sample.particle.type == PT_PIPE || sample.particle.type == PT_PPIP)
 				ctype = sample.particle.tmp&0xFF;
@@ -3007,6 +3007,18 @@ if (showDebug)
 			if (sample.particle.type==PT_LAVA && sample.particle.ctype)
 			{
 				ptype << "Molten " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
+				g->drawtext(hudx-212-xMove, zoomMove+15, ptype.str(), 0, 255, 255, 255);
+				tmp << "Tmp:()";
+			}
+			else if (sample.particle.type == PT_GASS && sample.particle.ctype)
+			{
+				ptype << "Gasseous " << c->ElementResolve(sample.particle.ctype, sample.particle.type);
+				g->drawtext(hudx-212-xMove, zoomMove+15, ptype.str(), 0, 255, 255, 255);
+				tmp << "Tmp:()";
+			}
+			else if ((st==PT_SR) && sample.particle.tmp==1)
+			{
+				ptype << c->ElementResolve(sample.particle.type, sample.particle.ctype) << " Hydroxide";
 				g->drawtext(hudx-212-xMove, zoomMove+15, ptype.str(), 0, 255, 255, 255);
 				tmp << "Tmp:()";
 			}
