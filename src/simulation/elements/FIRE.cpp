@@ -127,6 +127,13 @@ int Element_FIRE::update(UPDATE_FUNC_ARGS)
 						}
 					}
 				}
+				
+				//This handles a change into a gasseous state.
+				
+				if (t==PT_LAVA && parts[i].tmp4<=parts[i].temp && parts[i].type==PT_SR)
+				{
+					parts[i].type=PT_GASS;
+				}
 
 				// LAVA(CLST) + LAVA(PQRT) + high enough temp = LAVA(CRMC) + LAVA(CRMC)
 				if (t == PT_LAVA && parts[i].ctype == PT_QRTZ && rt == PT_LAVA && parts[r>>8].ctype == PT_CLST)
