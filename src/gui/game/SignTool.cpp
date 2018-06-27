@@ -27,8 +27,8 @@ public:
 	virtual void DoMouseDown(int x, int y, unsigned button);
 	virtual void DoMouseUp(int x, int y, unsigned button) { if(!signMoving) ui::Window::DoMouseUp(x, y, button); }
 	virtual void DoMouseWheel(int x, int y, int d) { if(!signMoving) ui::Window::DoMouseWheel(x, y, d); }
-	virtual void DoKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt) { if(!signMoving) ui::Window::DoKeyPress(key, character, shift, ctrl, alt); }
-	virtual void DoKeyRelease(int key, Uint16 character, bool shift, bool ctrl, bool alt) { if(!signMoving) ui::Window::DoKeyRelease(key, character, shift, ctrl, alt); }
+	virtual void DoKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt) { if(!signMoving) ui::Window::DoKeyPress(key, scan, repeat, shift, ctrl, alt); }
+	virtual void DoKeyRelease(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt) { if(!signMoving) ui::Window::DoKeyRelease(key, scan, repeat, shift, ctrl, alt); }
 	virtual ~SignWindow() {}
 	virtual void OnTryExit(ui::Window::ExitMethod method);
 	class OkayAction: public ui::ButtonAction
@@ -38,7 +38,7 @@ public:
 		OkayAction(SignWindow * prompt_) { prompt = prompt_; }
 		void ActionCallback(ui::Button * sender)
 		{
-			ui::Engine::Ref().CloseWindow();		
+			prompt->CloseActiveWindow();
 			if(prompt->signID==-1 && prompt->textField->GetText().length())
 			{
 				prompt->sim->signs.push_back(sign(prompt->textField->GetText(), prompt->signPosition.X, prompt->signPosition.Y, (sign::Justification)prompt->justification->GetOption().second));
@@ -57,7 +57,7 @@ public:
 		DeleteAction(SignWindow * prompt_) { prompt = prompt_; }
 		void ActionCallback(ui::Button * sender)
 		{
-			ui::Engine::Ref().CloseWindow();
+			prompt->CloseActiveWindow();
 			if(prompt->signID!=-1)
 			{
 				prompt->sim->signs.erase(prompt->sim->signs.begin()+prompt->signID);
@@ -120,21 +120,21 @@ SignWindow::SignWindow(SignTool * tool_, Simulation * sim_, int signID_, ui::Poi
 	okayButton->SetActionCallback(new OkayAction(this));
 	AddComponent(okayButton);
 	SetOkayButton(okayButton);
-	
-	ui::Label * tempLabel = new ui::Label(ui::Point(8, 48), ui::Point(40, 15), "Justify:");
+
+	ui::Label * tempLabel = new ui::Label(ui::Point(8, 48), ui::Point(40, 15), "Pointer:");
 	okayButton->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
 	okayButton->Appearance.VerticalAlign = ui::Appearance::AlignMiddle;
 	AddComponent(tempLabel);
 
 	justification = new ui::DropDown(ui::Point(52, 48), ui::Point(50, 16));
 	AddComponent(justification);
-	justification->AddOption(std::pair<std::string, int>("\x9D Left", (int)sign::Left));
-	justification->AddOption(std::pair<std::string, int>("\x9E Middle", (int)sign::Middle));
-	justification->AddOption(std::pair<std::string, int>("\x9F Right", (int)sign::Right));
-	justification->AddOption(std::pair<std::string, int>("   None", (int)sign::None));
+	justification->AddOption(std::pair<String, int>(0xE020 + String(" Left"), (int)sign::Left));
+	justification->AddOption(std::pair<String, int>(0xE01E + String(" Middle"), (int)sign::Middle));
+	justification->AddOption(std::pair<String, int>(0xE01F + String(" Right"), (int)sign::Right));
+	justification->AddOption(std::pair<String, int>(0xE01D + String(" None"), (int)sign::None));
 	justification->SetOption(1);
 	justification->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
-	
+
 	textField = new ui::Textbox(ui::Point(8, 25), ui::Point(Size.X-16, 17), "", "[message]");
 	textField->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
 	textField->Appearance.VerticalAlign = ui::Appearance::AlignMiddle;
@@ -142,7 +142,7 @@ SignWindow::SignWindow(SignTool * tool_, Simulation * sim_, int signID_, ui::Poi
 	textField->SetActionCallback(new SignTextAction(this));
 	AddComponent(textField);
 	FocusComponent(textField);
-	
+
 	if(signID!=-1)
 	{
 		messageLabel->SetText("Edit sign");
@@ -166,12 +166,12 @@ SignWindow::SignWindow(SignTool * tool_, Simulation * sim_, int signID_, ui::Poi
 		AddComponent(deleteButton);
 	}
 
-	ui::Engine::Ref().ShowWindow(this);
+	MakeActiveWindow();
 }
 
 void SignWindow::OnTryExit(ui::Window::ExitMethod method)
 {
-	ui::Engine::Ref().CloseWindow();
+	CloseActiveWindow();
 	SelfDestruct();
 }
 
@@ -181,10 +181,10 @@ void SignWindow::DoDraw()
 	{
 		sign & currentSign = *iter;
 		int x, y, w, h, dx, dy;
-		char type = 0;
-		Graphics * g = ui::Engine::Ref().g;
-		std::string text = currentSign.getText(sim);
-		sign::splitsign(currentSign.text.c_str(), &type);
+		String::value_type type = 0;
+		Graphics * g = GetGraphics();
+		String text = currentSign.getText(sim);
+		sign::splitsign(currentSign.text, &type);
 		currentSign.pos(text, x, y, w, h);
 		g->clearrect(x, y, w+1, h);
 		g->drawrect(x, y, w+1, h, 192, 192, 192, 255);
@@ -251,8 +251,8 @@ void SignWindow::DoMouseDown(int x, int y, unsigned button)
 
 void SignWindow::OnDraw()
 {
-	Graphics * g = ui::Engine::Ref().g;
-	
+	Graphics * g = GetGraphics();
+
 	g->clearrect(Position.X-2, Position.Y-2, Size.X+3, Size.Y+3);
 	g->drawrect(Position.X, Position.Y, Size.X, Size.Y, 200, 200, 200, 255);
 }
@@ -268,8 +268,8 @@ VideoBuffer * SignTool::GetIcon(int toolID, int width, int height)
 			newTexture->SetPixel(x, y, PIXR(pc), PIXG(pc), PIXB(pc), 255);
 		}
 	}
-	newTexture->SetCharacter((width/2)-5, (height/2)-5, 0xA1, 32, 64, 128, 255);
-	newTexture->BlendCharacter((width/2)-5, (height/2)-5, 0xA0, 255, 255, 255, 255);
+	newTexture->AddCharacter((width/2)-5, (height/2)-5, 0xE021, 32, 64, 128, 255);
+	newTexture->BlendCharacter((width/2)-5, (height/2)-5, 0xE020, 255, 255, 255, 255);
 	return newTexture;
 }
 

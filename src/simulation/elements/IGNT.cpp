@@ -57,8 +57,8 @@ int Element_IGNT::update(UPDATE_FUNC_ARGS)
 					r = pmap[y+ry][x+rx];
 					if (!r)
 						continue;
-					rt = r&0xFF;
-					if (rt==PT_FIRE || rt==PT_PLSM || rt==PT_SPRK || rt==PT_LIGH || (rt==PT_IGNT && parts[r>>8].life==1))
+					rt = TYP(r);
+					if (rt==PT_FIRE || rt==PT_PLSM || rt==PT_SPRK || rt==PT_LIGH || (rt==PT_IGNT && parts[ID(r)].life==1))
 					{
 						parts[i].tmp = 1;
 					}
@@ -66,20 +66,20 @@ int Element_IGNT::update(UPDATE_FUNC_ARGS)
 	}
 	else if(parts[i].life > 0)
 	{
-		if(rand()%3)
+		if (RNG::Ref().chance(2, 3))
 		{
-			int nb = sim->create_part(-1, x+rand()%3-1, y+rand()%3-1, PT_EMBR);
+			int nb = sim->create_part(-1, x + RNG::Ref().between(-1, 1), y + RNG::Ref().between(-1, 1), PT_EMBR);
 			if (nb!=-1) {
 				parts[nb].tmp = 0;
 				parts[nb].life = 30;
-				parts[nb].vx = rand()%20-10;
-				parts[nb].vy = rand()%20-10;
+				parts[nb].vx = RNG::Ref().between(-10, 10);
+				parts[nb].vy = RNG::Ref().between(-10, 10);
 				parts[nb].temp = restrict_flt(parts[i].temp-273.15f+400.0f, MIN_TEMP, MAX_TEMP);
 			}
 		}
 		else
 		{
-			sim->create_part(-1, x+rand()%3-1, y+rand()%3-1, PT_FIRE);
+			sim->create_part(-1, x + RNG::Ref().between(-1, 1), y + RNG::Ref().between(-1, 1), PT_FIRE);
 		}
 		parts[i].life--;
 	}

@@ -1,5 +1,5 @@
-#include <sstream>
 #include <iostream>
+#include <algorithm>
 #include "FileBrowserActivity.h"
 #include "gui/interface/Label.h"
 #include "gui/interface/Textbox.h"
@@ -38,11 +38,11 @@ public:
 	}
 };
 
-//Currently, reading is done on another thread, we can't render outside the main thread due to some bullshit with OpenGL 
+//Currently, reading is done on another thread, we can't render outside the main thread due to some bullshit with OpenGL
 class LoadFilesTask: public Task
 {
-	std::string directory;
-	std::string search;
+	ByteString directory;
+	ByteString search;
 	std::vector<SaveFile*> saveFiles;
 
 	virtual void before()
@@ -57,11 +57,11 @@ class LoadFilesTask: public Task
 
 	virtual bool doWork()
 	{
-		std::vector<std::string> files = Client::Ref().DirectorySearch(directory, search, ".cps");
-
+		std::vector<ByteString> files = Client::Ref().DirectorySearch(directory, search, ".cps");
+		std::sort(files.rbegin(), files.rend(), [](ByteString a, ByteString b) { return a.ToLower() < b.ToLower(); });
 
 		notifyProgress(-1);
-		for(std::vector<std::string>::iterator iter = files.begin(), end = files.end(); iter != end; ++iter)
+		for(std::vector<ByteString>::iterator iter = files.begin(), end = files.end(); iter != end; ++iter)
 		{
 			SaveFile * saveFile = new SaveFile(*iter);
 			try
@@ -71,18 +71,9 @@ class LoadFilesTask: public Task
 				saveFile->SetGameSave(tempSave);
 				saveFiles.push_back(saveFile);
 
-				std::string filename = *iter;
-				size_t folderPos = filename.rfind(PATH_SEP);
-				if(folderPos!=std::string::npos && folderPos+1 < filename.size())
-				{
-					filename = filename.substr(folderPos+1);
-				}
-				size_t extPos = filename.rfind(".");
-				if(extPos!=std::string::npos)
-				{
-					filename = filename.substr(0, extPos);
-				}
-				saveFile->SetDisplayName(filename);
+				ByteString filename = (*iter).SplitFromEndBy(PATH_SEP).After();
+				filename = filename.SplitBy('.').Before();
+				saveFile->SetDisplayName(filename.FromUtf8());
 			}
 			catch(std::exception & e)
 			{
@@ -98,7 +89,7 @@ public:
 		return saveFiles;
 	}
 
-	LoadFilesTask(std::string directory, std::string search):
+	LoadFilesTask(ByteString directory, ByteString search):
 		directory(directory),
 		search(search)
 	{
@@ -112,11 +103,11 @@ public:
 	FileBrowserActivity * a;
 	SearchAction(FileBrowserActivity * a) : a(a) {}
 	virtual void TextChangedCallback(ui::Textbox * sender) {
-		a->DoSearch(sender->GetText());
+		a->DoSearch(sender->GetText().ToUtf8());
 	}
 };
 
-FileBrowserActivity::FileBrowserActivity(std::string directory, FileSelectedCallback * callback):
+FileBrowserActivity::FileBrowserActivity(ByteString directory, FileSelectedCallback * callback):
 	WindowActivity(ui::Point(-1, -1), ui::Point(450, 300)),
 	callback(callback),
 	directory(directory),
@@ -162,7 +153,7 @@ FileBrowserActivity::FileBrowserActivity(std::string directory, FileSelectedCall
 	loadDirectory(directory, "");
 }
 
-void FileBrowserActivity::DoSearch(std::string search)
+void FileBrowserActivity::DoSearch(ByteString search)
 {
 	if(!loadFiles)
 	{
@@ -179,7 +170,7 @@ void FileBrowserActivity::SelectSave(SaveFile * file)
 
 void FileBrowserActivity::DeleteSave(SaveFile * file)
 {
-	std::string deleteMessage = "Are you sure you want to delete " + file->GetDisplayName() + ".cps?";
+	String deleteMessage = "Are you sure you want to delete " + file->GetDisplayName() + ".cps?";
 	if (ConfirmPrompt::Blocking("Delete Save", deleteMessage))
 	{
 		remove(file->GetName().c_str());
@@ -189,7 +180,7 @@ void FileBrowserActivity::DeleteSave(SaveFile * file)
 
 void FileBrowserActivity::RenameSave(SaveFile * file)
 {
-	std::string newName = TextPrompt::Blocking("Rename", "Change save name", file->GetDisplayName(), "", 0);
+	ByteString newName = TextPrompt::Blocking("Rename", "Change save name", file->GetDisplayName(), "", 0).ToUtf8();
 	if (newName.length())
 	{
 		newName = directory + PATH_SEP + newName + ".cps";
@@ -203,7 +194,7 @@ void FileBrowserActivity::RenameSave(SaveFile * file)
 		ErrorMessage::Blocking("Error", "No save name given");
 }
 
-void FileBrowserActivity::loadDirectory(std::string directory, std::string search)
+void FileBrowserActivity::loadDirectory(ByteString directory, ByteString search)
 {
 	for (size_t i = 0; i < components.size(); i++)
 	{
@@ -327,7 +318,7 @@ void FileBrowserActivity::OnTick(float dt)
 
 void FileBrowserActivity::OnDraw()
 {
-	Graphics * g = ui::Engine::Ref().g;
+	Graphics * g = GetGraphics();
 
 	//Window Background+Outline
 	g->clearrect(Position.X-2, Position.Y-2, Size.X+4, Size.Y+4);

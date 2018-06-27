@@ -2,7 +2,8 @@
 #define SEARCHMODEL_H
 
 #include <vector>
-#include <string>
+#include "common/String.h"
+#include "common/tpt-minmax.h"
 #include "common/tpt-thread.h"
 #include <cmath>
 #include "client/SaveInfo.h"
@@ -15,13 +16,13 @@ class SearchModel
 {
 private:
 	SaveInfo * loadedSave;
-	string currentSort;
-	string lastQuery;
-	string lastError;
+	ByteString currentSort;
+	String lastQuery;
+	String lastError;
 	vector<int> selected;
 	vector<SearchView*> observers;
 	vector<SaveInfo*> saveList;
-	vector<pair<string, int> > tagList;
+	vector<pair<ByteString, int> > tagList;
 	int currentPage;
 	int resultCount;
 	int thResultCount;
@@ -56,21 +57,21 @@ public:
     void SetShowTags(bool show);
     bool GetShowTags();
 	void AddObserver(SearchView * observer);
-	bool UpdateSaveList(int pageNumber, std::string query);
+	bool UpdateSaveList(int pageNumber, String query);
 	vector<SaveInfo*> GetSaveList();
-	vector<pair<string, int> > GetTagList();
-	string GetLastError() { return lastError; }
+	vector<pair<ByteString, int> > GetTagList();
+	String GetLastError() { return lastError; }
 	int GetPageCount()
 	{
 		if (!showOwn && !showFavourite && currentSort == "best" && lastQuery == "")
-			return max(1, (int)(ceil(resultCount/20.0f))+1); //add one for front page (front page saves are repeated twice)
+			return std::max(1, (int)(ceil(resultCount/20.0f))+1); //add one for front page (front page saves are repeated twice)
 		else
-			return max(1, (int)(ceil(resultCount/20.0f)));
+			return std::max(1, (int)(ceil(resultCount/20.0f)));
 	}
 	int GetPageNum() { return currentPage; }
-	std::string GetLastQuery() { return lastQuery; }
-	void SetSort(string sort) { if(!updateSaveListWorking) { currentSort = sort; } notifySortChanged(); }
-	string GetSort() { return currentSort; }
+	String GetLastQuery() { return lastQuery; }
+	void SetSort(ByteString sort) { if(!updateSaveListWorking) { currentSort = sort; } notifySortChanged(); }
+	ByteString GetSort() { return currentSort; }
 	void SetShowOwn(bool show) { if(!updateSaveListWorking) { if(show!=showOwn) { showOwn = show; } } notifyShowOwnChanged();  }
 	bool GetShowOwn() { return showOwn; }
 	void SetShowFavourite(bool show) { if(show!=showFavourite && !updateSaveListWorking) { showFavourite = show; } notifyShowFavouriteChanged();  }

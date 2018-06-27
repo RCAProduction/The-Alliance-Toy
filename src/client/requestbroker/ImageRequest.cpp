@@ -5,7 +5,7 @@
 #include "graphics/Graphics.h"
 #include "client/HTTP.h"
 
-ImageRequest::ImageRequest(std::string url, int width, int height, ListenerHandle listener, int identifier):
+ImageRequest::ImageRequest(ByteString url, int width, int height, ListenerHandle listener, int identifier):
 	Request(Image, listener, identifier)
 {
 	URL = url;
@@ -24,14 +24,14 @@ RequestBroker::ProcessResponse ImageRequest::Process(RequestBroker & rb)
 	VideoBuffer * image = NULL;
 
 	//Have a look at the thumbnail cache
-	for(std::deque<std::pair<std::string, VideoBuffer*> >::iterator iter = rb.imageCache.begin(), end = rb.imageCache.end(); iter != end; ++iter)
+	for(std::deque<std::pair<ByteString, VideoBuffer*> >::iterator iter = rb.imageCache.begin(), end = rb.imageCache.end(); iter != end; ++iter)
 	{
 		if((*iter).first == URL)
 		{
 			image = (*iter).second;
-#ifdef DEBUG
+/*#ifdef DEBUG
 			std::cout << typeid(*this).name() << " " << URL << " found in cache" << std::endl;
-#endif
+#endif*/
 		}
 	}
 
@@ -45,6 +45,7 @@ RequestBroker::ProcessResponse ImageRequest::Process(RequestBroker & rb)
 				char * data;
 				int status, data_size, imgw, imgh;
 				data = http_async_req_stop(HTTPContext, &status, &data_size);
+				started = false;
 
 				if (status == 200 && data)
 				{
@@ -70,20 +71,20 @@ RequestBroker::ProcessResponse ImageRequest::Process(RequestBroker & rb)
 						delete rb.imageCache.front().second;
 						rb.imageCache.pop_front();
 					}
-					rb.imageCache.push_back(std::pair<std::string, VideoBuffer*>(URL, image));
+					rb.imageCache.push_back(std::pair<ByteString, VideoBuffer*>(URL, image));
 				}
 				else
 				{
-	#ifdef DEBUG
+#ifdef DEBUG
 					std::cout << typeid(*this).name() << " Request for " << URL << " failed with status " << status << std::endl;
-	#endif	
+#endif
 					free(data);
 
 					return RequestBroker::Failed;
 				}
 			}
 		}
-		else 
+		else
 		{
 			//Check for ongoing requests
 			for(std::vector<Request*>::iterator iter = rb.activeRequests.begin(), end = rb.activeRequests.end(); iter != end; ++iter)
@@ -93,9 +94,9 @@ RequestBroker::ProcessResponse ImageRequest::Process(RequestBroker & rb)
 				ImageRequest * otherReq = (ImageRequest*)(*iter);
 				if(otherReq->URL == URL && otherReq != this)
 				{
-	#ifdef DEBUG
+/*#ifdef DEBUG
 					std::cout << typeid(*this).name() << " Request for " << URL << " found, appending." << std::endl;
-	#endif
+#endif*/
 					//Add the current listener to the item already being requested
 					(*iter)->Children.push_back(this);
 					return RequestBroker::Duplicate;
@@ -103,14 +104,15 @@ RequestBroker::ProcessResponse ImageRequest::Process(RequestBroker & rb)
 			}
 
 			//If it's not already being requested, request it
-	#ifdef DEBUG
+/*#ifdef DEBUG
 			std::cout << typeid(*this).name() << " Creating new request for " << URL << std::endl;
-	#endif
+#endif*/
 			HTTPContext = http_async_req_start(NULL, (char *)URL.c_str(), NULL, 0, 0);
+			started = true;
 			RequestTime = time(NULL);
 		}
 	}
-	
+
 	if(image)
 	{
 
@@ -146,5 +148,11 @@ void ImageRequest::Cleanup()
 	{
 		delete ((VideoBuffer*)ResultObject);
 		ResultObject = NULL;
+	}
+	if (HTTPContext && started)
+	{
+		http_force_close(HTTPContext);
+		http_async_req_stop(HTTPContext, nullptr, nullptr);
+		started = false;
 	}
 }

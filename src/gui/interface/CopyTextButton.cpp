@@ -1,10 +1,11 @@
 #include "CopyTextButton.h"
 #include "Colour.h"
+#include "PowderToy.h"
 #include "gui/Style.h"
 
 namespace ui
 {
-	CopyTextButton::CopyTextButton(Point position, Point size, std::string buttonText, Label *copyTextLabel_):
+	CopyTextButton::CopyTextButton(Point position, Point size, String buttonText, Label *copyTextLabel_):
 		Button(position, size, buttonText)
 	{
 		copyTextLabel = copyTextLabel_;
@@ -19,7 +20,7 @@ namespace ui
 	void CopyTextButton::OnMouseClick(int x, int y, unsigned int button)
 	{
 		ui::Button::OnMouseClick(x, y, button);
-		ClipboardPush(ButtonText);
+		ClipboardPush(ButtonText.ToUtf8());
 
 		copyTextLabel->SetText("Copied!");
 

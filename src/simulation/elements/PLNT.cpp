@@ -1,4 +1,6 @@
+#include "common/tpt-minmax.h"
 #include "simulation/Elements.h"
+
 //#TPT-Directive ElementClass Element_PLNT PT_PLNT 20
 Element_PLNT::Element_PLNT()
 {
@@ -23,6 +25,7 @@ Element_PLNT::Element_PLNT()
 	Explosive = 0;
 	Meltable = 0;
 	Hardness = 10;
+	PhotonReflectWavelengths = 0x0007C000;
 
 	Weight = 100;
 
@@ -54,18 +57,18 @@ int Element_PLNT::update(UPDATE_FUNC_ARGS)
 			if (BOUNDS_CHECK && (rx || ry))
 			{
 				r = pmap[y+ry][x+rx];
-				switch (r&0xFF)
+				switch (TYP(r))
 				{
 				case PT_WATR:
-					if (!(rand()%50))
+					if (RNG::Ref().chance(1, 50))
 					{
-						np = sim->create_part(r>>8,x+rx,y+ry,PT_PLNT);
+						np = sim->create_part(ID(r),x+rx,y+ry,PT_PLNT);
 						if (np<0) continue;
 						parts[np].life = 0;
 					}
 					break;
 				case PT_LAVA:
-					if (!(rand()%50))
+					if (RNG::Ref().chance(1, 50))
 					{
 						sim->part_change_type(i,x,y,PT_FIRE);
 						parts[i].life = 4;
@@ -73,14 +76,14 @@ int Element_PLNT::update(UPDATE_FUNC_ARGS)
 					break;
 				case PT_SMKE:
 				case PT_CO2:
-					if (!(rand()%50))
+					if (RNG::Ref().chance(1, 50))
 					{
-						sim->kill_part(r>>8);
-						parts[i].life = rand()%60 + 60;
+						sim->kill_part(ID(r));
+						parts[i].life = RNG::Ref().between(60, 119);
 					}
 					break;
 				case PT_WOOD:
-					rndstore = rand();
+					rndstore = RNG::Ref().gen();
 					if (surround_space && !(rndstore%4) && parts[i].tmp==1)
 					{
 						rndstore >>= 3;

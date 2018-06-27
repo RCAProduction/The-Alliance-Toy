@@ -1,5 +1,5 @@
 HTTP API:
-	Make it OO, 
+	Make it OO,
 	Use STL (i.e std::string for url, etc)
 
 RequestBroker:
@@ -16,7 +16,8 @@ Interface General:
 	Move interfaces into separate folder
 
 Interface Elements:
-	Vertical Scrolling for Textbox, 
+
+	Vertical Scrolling for Textbox
 	
 Add http://bmnnet.tk:3001/  Or http://vps3.wolfy1330.tk:3001/ as server option
 
@@ -33,7 +34,5 @@ Add http://bmnnet.tk:3001/  Or http://vps3.wolfy1330.tk:3001/ as server option
 [04:27] <RCA> Yeah
 [04:27] <RCA> Maybe make it like LCRY
 [04:27] <RCA> Be able to turn on or off
-
-
 
 This is a random comment for myself. User kjusielvi on imgur. Vietnam

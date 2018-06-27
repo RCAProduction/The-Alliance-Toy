@@ -37,7 +37,7 @@ class TPTScriptInterface;
 class LuaScriptInterface: public CommandInterface
 {
 	int luacon_mousex, luacon_mousey, luacon_mousebutton;
-	std::string luacon_selectedl, luacon_selectedr, luacon_selectedalt, luacon_selectedreplace;
+	ByteString luacon_selectedl, luacon_selectedr, luacon_selectedalt, luacon_selectedreplace;
 	bool luacon_mousedown;
 	bool currentCommand;
 	TPTScriptInterface * legacy;
@@ -102,11 +102,13 @@ class LuaScriptInterface: public CommandInterface
 	static int simulation_elementCount(lua_State * l);
 	static int simulation_canMove(lua_State * l);
 	static int simulation_parts(lua_State * l);
+	static int simulation_brush(lua_State * l);
 	static int simulation_pmap(lua_State * l);
 	static int simulation_photons(lua_State * l);
 	static int simulation_neighbours(lua_State * l);
 	static int simulation_framerender(lua_State * l);
 	static int simulation_gspeed(lua_State * l);
+	static int simulation_takeSnapshot(lua_State *l);
 
 	//Renderer
 	void initRendererAPI();
@@ -169,6 +171,9 @@ public:
 	int tpt_index(lua_State *l);
 	int tpt_newIndex(lua_State *l);
 
+	static void LuaGetProperty(lua_State* l, StructProperty property, intptr_t propertyAddress);
+	static void LuaSetProperty(lua_State* l, StructProperty property, intptr_t propertyAddress, int stackPos);
+
 	ui::Window * Window;
 	lua_State *l;
 	LuaScriptInterface(GameController * c, GameModel * m);
@@ -177,14 +182,14 @@ public:
 	virtual bool OnMouseDown(int x, int y, unsigned button);
 	virtual bool OnMouseUp(int x, int y, unsigned button, char type);
 	virtual bool OnMouseWheel(int x, int y, int d);
-	virtual bool OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt);
-	virtual bool OnKeyRelease(int key, Uint16 character, bool shift, bool ctrl, bool alt);
+	virtual bool OnKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
+	virtual bool OnKeyRelease(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
 	virtual bool OnMouseTick();
 	virtual void OnTick();
 	virtual void Init();
 	virtual void SetWindow(ui::Window * window);
-	virtual int Command(std::string command);
-	virtual std::string FormatCommand(std::string command);
+	virtual int Command(String command);
+	virtual String FormatCommand(String command);
 	virtual ~LuaScriptInterface();
 };
 

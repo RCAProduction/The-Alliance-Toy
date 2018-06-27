@@ -23,6 +23,7 @@ Element_ACID::Element_ACID()
 	Explosive = 0;
 	Meltable = 0;
 	Hardness = 0;
+	PhotonReflectWavelengths = 0x1FE001FE;
 
 	Weight = 10;
 
@@ -56,35 +57,36 @@ int Element_ACID::update(UPDATE_FUNC_ARGS)
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				if ((r&0xFF)!=PT_ACID && (r&0xFF)!=PT_CAUS)
+				int rt = TYP(r);
+				if (rt != PT_ACID && rt != PT_CAUS)
 				{
-					if ((r&0xFF)==PT_PLEX || (r&0xFF)==PT_NITR || (r&0xFF)==PT_GUNP || (r&0xFF)==PT_RBDM || (r&0xFF)==PT_LRBD)
+					if (rt == PT_PLEX || rt == PT_NITR || rt == PT_GUNP || rt == PT_RBDM || rt == PT_LRBD)
 					{
 						sim->part_change_type(i,x,y,PT_FIRE);
-						sim->part_change_type(r>>8,x+rx,y+ry,PT_FIRE);
+						sim->part_change_type(ID(r),x+rx,y+ry,PT_FIRE);
 						parts[i].life = 4;
-						parts[r>>8].life = 4;
+						parts[ID(r)].life = 4;
 					}
-					else if ((r&0xFF)==PT_WTRV)
+					else if (rt == PT_WTRV)
 					{
-						if(!(rand()%250))
+						if (RNG::Ref().chance(1, 250))
 						{
 							sim->part_change_type(i, x, y, PT_CAUS);
-							parts[i].life = (rand()%50)+25;
-							sim->kill_part(r>>8);
+							parts[i].life = RNG::Ref().between(25, 74);
+							sim->kill_part(ID(r));
 						}
 					}
-					else if (((r&0xFF)!=PT_CLNE && (r&0xFF)!=PT_PCLN && sim->elements[r&0xFF].Hardness>(rand()%1000))&&parts[i].life>=50)
+					else if (rt != PT_CLNE && rt != PT_PCLN && parts[i].life >= 50 && RNG::Ref().chance(sim->elements[rt].Hardness, 1000.0))
 					{
-						if (sim->parts_avg(i, r>>8,PT_GLAS)!= PT_GLAS)//GLAS protects stuff from acid
+						if (sim->parts_avg(i, ID(r),PT_GLAS)!= PT_GLAS)//GLAS protects stuff from acid
 						{
-							float newtemp = ((60.0f-(float)sim->elements[r&0xFF].Hardness))*7.0f;
+							float newtemp = ((60.0f-(float)sim->elements[rt].Hardness))*7.0f;
 							if(newtemp < 0){
 								newtemp = 0;
 							}
 							parts[i].temp += newtemp;
 							parts[i].life--;
-							sim->kill_part(r>>8);
+							sim->kill_part(ID(r));
 						}
 					}
 					else if (parts[i].life<=50)
@@ -96,24 +98,24 @@ int Element_ACID::update(UPDATE_FUNC_ARGS)
 			}
 	for (trade = 0; trade<2; trade++)
 	{
-		rx = rand()%5-2;
-		ry = rand()%5-2;
+		rx = RNG::Ref().between(-2, 2);
+		ry = RNG::Ref().between(-2, 2);
 		if (BOUNDS_CHECK && (rx || ry))
 		{
 			r = pmap[y+ry][x+rx];
 			if (!r)
 				continue;
-			if ((r&0xFF)==PT_ACID && (parts[i].life>parts[r>>8].life) && parts[i].life>0)//diffusion
+			if (TYP(r) == PT_ACID && (parts[i].life > parts[ID(r)].life) && parts[i].life>0)//diffusion
 			{
-				int temp = parts[i].life - parts[r>>8].life;
-				if (temp==1)
+				int temp = parts[i].life - parts[ID(r)].life;
+				if (temp == 1)
 				{
-					parts[r>>8].life++;
+					parts[ID(r)].life++;
 					parts[i].life--;
 				}
 				else if (temp>0)
 				{
-					parts[r>>8].life += temp/2;
+					parts[ID(r)].life += temp/2;
 					parts[i].life -= temp/2;
 				}
 			}

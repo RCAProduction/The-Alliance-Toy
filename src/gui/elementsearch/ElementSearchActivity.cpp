@@ -1,4 +1,5 @@
 #include <algorithm>
+#include "common/String.h"
 #include "ElementSearchActivity.h"
 #include "gui/interface/Textbox.h"
 #include "gui/interface/Label.h"
@@ -27,9 +28,12 @@ ElementSearchActivity::ElementSearchActivity(GameController * gameController, st
 	firstResult(NULL),
 	gameController(gameController),
 	tools(tools),
+	toolTip(""),
+	toolTipPresence(0),
 	shiftPressed(false),
 	ctrlPressed(false),
 	altPressed(false),
+	isToolTipFadingIn(false),
 	exit(false)
 {
 	ui::Label * title = new ui::Label(ui::Point(4, 5), ui::Point(Size.X-8, 15), "Element Search");
@@ -88,7 +92,7 @@ ElementSearchActivity::ElementSearchActivity(GameController * gameController, st
 	searchTools("");
 }
 
-void ElementSearchActivity::searchTools(std::string query)
+void ElementSearchActivity::searchTools(String query)
 {
 	firstResult = NULL;
 	for(std::vector<ToolButton*>::iterator iter = toolButtons.begin(), end = toolButtons.end(); iter != end; ++iter) {
@@ -100,8 +104,7 @@ void ElementSearchActivity::searchTools(std::string query)
 	ui::Point viewPosition = searchField->Position + ui::Point(2+0, searchField->Size.Y+2+8);
 	ui::Point current = ui::Point(0, 0);
 
-	std::string queryLower = std::string(query);
-	std::transform(queryLower.begin(), queryLower.end(), queryLower.begin(), ::tolower);
+	ByteString queryLower = query.ToUtf8().ToLower();
 
 	std::vector<Tool *> matches;
 	std::vector<Tool *> frontmatches;
@@ -109,13 +112,12 @@ void ElementSearchActivity::searchTools(std::string query)
 
 	for(std::vector<Tool*>::const_iterator iter = tools.begin(), end = tools.end(); iter != end; ++iter)
 	{
-		std::string nameLower = std::string((*iter)->GetName());
-		std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
-		if(!strcmp(nameLower.c_str(), queryLower.c_str()))
+		ByteString nameLower = (*iter)->GetName().ToLower();
+		if(nameLower == queryLower)
 			exactmatches.push_back(*iter);
-		else if(!strncmp(nameLower.c_str(), queryLower.c_str(), queryLower.length()))
+		else if(nameLower.BeginsWith(queryLower))
 			frontmatches.push_back(*iter);
-		else if(strstr(nameLower.c_str(), queryLower.c_str()))
+		else if(nameLower.Contains(queryLower))
 			matches.push_back(*iter);
 	}
 
@@ -177,7 +179,7 @@ void ElementSearchActivity::SetActiveTool(int selectionState, Tool * tool)
 		gameController->RebuildFavoritesMenu();
 	}
 	else if (ctrlPressed && altPressed && !shiftPressed &&
-	         tool->GetIdentifier().find("DEFAULT_PT_") != tool->GetIdentifier().npos)
+	         tool->GetIdentifier().Contains("DEFAULT_PT_"))
 	{
 		gameController->SetActiveTool(3, tool);
 	}
@@ -188,21 +190,39 @@ void ElementSearchActivity::SetActiveTool(int selectionState, Tool * tool)
 
 void ElementSearchActivity::OnDraw()
 {
-	Graphics * g = ui::Engine::Ref().g;
+	Graphics * g = GetGraphics();
 	g->clearrect(Position.X-2, Position.Y-2, Size.X+3, Size.Y+3);
 	g->drawrect(Position.X, Position.Y, Size.X, Size.Y, 255, 255, 255, 255);
 
 	g->drawrect(Position.X+searchField->Position.X, Position.Y+searchField->Position.Y+searchField->Size.Y+8, searchField->Size.X, Size.Y-(searchField->Position.Y+searchField->Size.Y+8)-23, 255, 255, 255, 180);
+	if (toolTipPresence && toolTip.length())
+	{
+		g->drawtext(10, Size.Y+70, toolTip, 255, 255, 255, toolTipPresence>51?255:toolTipPresence*5);
+	}
 }
 
 void ElementSearchActivity::OnTick(float dt)
 {
 	if (exit)
 		Exit();
+	if (isToolTipFadingIn)
+	{
+		isToolTipFadingIn = false;
+		if (toolTipPresence < 120)
+			toolTipPresence += int(dt*2)>1?int(dt*2):2;
+	}
+	else if (toolTipPresence>0)
+	{
+		toolTipPresence -= int(dt)>0?int(dt):1;
+		if (toolTipPresence<0)
+			toolTipPresence = 0;
+	}
 }
 
-void ElementSearchActivity::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt)
+void ElementSearchActivity::OnKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt)
 {
+	if (repeat)
+		return;
 	switch (key)
 	{
 	case SDLK_KP_ENTER:
@@ -227,8 +247,10 @@ void ElementSearchActivity::OnKeyPress(int key, Uint16 character, bool shift, bo
 	}
 }
 
-void ElementSearchActivity::OnKeyRelease(int key, Uint16 character, bool shift, bool ctrl, bool alt)
+void ElementSearchActivity::OnKeyRelease(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt)
 {
+	if (repeat)
+		return;
 	switch (key)
 	{
 	case SDLK_LSHIFT:
@@ -244,6 +266,12 @@ void ElementSearchActivity::OnKeyRelease(int key, Uint16 character, bool shift, 
 		altPressed = false;
 		break;
 	}
+}
+
+void ElementSearchActivity::ToolTip(ui::Point senderPosition, String toolTip)
+{
+	this->toolTip = toolTip;
+	this->isToolTipFadingIn = true;
 }
 
 ElementSearchActivity::~ElementSearchActivity() {

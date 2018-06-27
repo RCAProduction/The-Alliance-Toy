@@ -1,4 +1,6 @@
+#include "common/tpt-minmax.h"
 #include "simulation/Elements.h"
+
 //#TPT-Directive ElementClass Element_VINE PT_VINE 114
 Element_VINE::Element_VINE()
 {
@@ -47,7 +49,7 @@ Element_VINE::Element_VINE()
 //#TPT-Directive ElementHeader Element_VINE static int update(UPDATE_FUNC_ARGS)
 int Element_VINE::update(UPDATE_FUNC_ARGS)
 {
-	int r, np, rx, ry, rndstore = rand();
+	int r, np, rx, ry, rndstore = RNG::Ref().gen();
 	rx = (rndstore % 3) - 1;
 	rndstore >>= 2;
 	ry = (rndstore % 3) - 1;

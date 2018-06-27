@@ -51,7 +51,7 @@ int Element_CBNW::update(UPDATE_FUNC_ARGS)
 	int r, rx, ry;
 	if (sim->pv[y/CELL][x/CELL]<=3)
 	{
-		if (sim->pv[y/CELL][x/CELL] <= -0.5 || !(rand()%4000))
+		if (sim->pv[y/CELL][x/CELL] <= -0.5 || RNG::Ref().chance(1, 4000))
 		{
 			sim->part_change_type(i,x,y,PT_CO2);
 			parts[i].ctype = 5;
@@ -61,15 +61,15 @@ int Element_CBNW::update(UPDATE_FUNC_ARGS)
 	if (parts[i].tmp2!=20) {
 		parts[i].tmp2 -= (parts[i].tmp2>20)?1:-1;
 	}
-	else if(!(rand()%200))
+	else if (RNG::Ref().chance(1, 200))
 	{
-		parts[i].tmp2 = rand()%40;
+		parts[i].tmp2 = RNG::Ref().between(0, 39);
 	}
-	 
+
 	if(parts[i].tmp>0)
 	{
 		//Explode
-		if(parts[i].tmp==1 && rand()%4)
+		if(parts[i].tmp==1 && RNG::Ref().chance(3, 4))
 		{
 			sim->part_change_type(i,x,y,PT_CO2);
 			parts[i].ctype = 5;
@@ -84,47 +84,48 @@ int Element_CBNW::update(UPDATE_FUNC_ARGS)
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				if ((sim->elements[r&0xFF].Properties&TYPE_PART) && parts[i].tmp == 0 && !(rand()%83))
+				if ((sim->elements[TYP(r)].Properties&TYPE_PART) && parts[i].tmp == 0 && RNG::Ref().chance(1, 83))
 				{
 					//Start explode
-					parts[i].tmp = rand()%25;//(rand()%100)+50;
+					parts[i].tmp = RNG::Ref().between(0, 24);
 				}
-				else if((sim->elements[r&0xFF].Properties&TYPE_SOLID) && (r&0xFF)!=PT_DMND && (r&0xFF)!=PT_GLAS && parts[i].tmp == 0 && (2-sim->pv[y/CELL][x/CELL])>(rand()%6667))
+				else if((sim->elements[TYP(r)].Properties&TYPE_SOLID) && TYP(r)!=PT_DMND && TYP(r)!=PT_GLAS && parts[i].tmp == 0 && RNG::Ref().chance(2 - sim->pv[y/CELL][x/CELL], 6667))
 				{
 					sim->part_change_type(i,x,y,PT_CO2);
 					parts[i].ctype = 5;
 					sim->pv[y/CELL][x/CELL] += 0.2f;
 				}
-				if ((r&0xFF)==PT_CBNW)
+				if (TYP(r)==PT_CBNW)
 				{
 					if(!parts[i].tmp)
 					{
-						if (parts[r>>8].tmp)
+						if (parts[ID(r)].tmp)
 						{
-							parts[i].tmp = parts[r>>8].tmp;
-							if((r>>8)>i) //If the other particle hasn't been life updated
+							parts[i].tmp = parts[ID(r)].tmp;
+							if((ID(r))>i) //If the other particle hasn't been life updated
 								parts[i].tmp--;
 						}
 					}
-					else if(!parts[r>>8].tmp)
+					else if(!parts[ID(r)].tmp)
 					{
-						parts[r>>8].tmp = parts[i].tmp;
-						if((r>>8)>i) //If the other particle hasn't been life updated
-							parts[r>>8].tmp++;
+						parts[ID(r)].tmp = parts[i].tmp;
+						if((ID(r))>i) //If the other particle hasn't been life updated
+							parts[ID(r)].tmp++;
 					}
 				}
-				else if ((r&0xFF)==PT_RBDM||(r&0xFF)==PT_LRBD)
+				else if (TYP(r)==PT_RBDM||TYP(r)==PT_LRBD)
 				{
-					if ((sim->legacy_enable||parts[i].temp>(273.15f+12.0f)) && !(rand()%166))
+					if ((sim->legacy_enable||parts[i].temp>(273.15f+12.0f)) && RNG::Ref().chance(1, 166))
 					{
 						sim->part_change_type(i,x,y,PT_FIRE);
 						parts[i].life = 4;
 						parts[i].ctype = PT_WATR;
 					}
 				}
-				else if ((r&0xFF)==PT_FIRE && parts[r>>8].ctype!=PT_WATR){
-					sim->kill_part(r>>8);
-					if(!(rand()%50)){
+				else if (TYP(r)==PT_FIRE && parts[ID(r)].ctype!=PT_WATR){
+					sim->kill_part(ID(r));
+					if (RNG::Ref().chance(1, 50))
+					{
 						sim->kill_part(i);
 						return 1;
 					}

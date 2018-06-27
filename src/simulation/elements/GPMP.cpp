@@ -69,12 +69,12 @@ int Element_GPMP::update(UPDATE_FUNC_ARGS)
 					r = pmap[y+ry][x+rx];
 					if (!r)
 						continue;
-					if ((r&0xFF)==PT_GPMP)
+					if (TYP(r)==PT_GPMP)
 					{
-						if (parts[r>>8].life<10&&parts[r>>8].life>0)
+						if (parts[ID(r)].life<10&&parts[ID(r)].life>0)
 							parts[i].life = 9;
-						else if (parts[r>>8].life==0)
-							parts[r>>8].life = 10;
+						else if (parts[ID(r)].life==0)
+							parts[ID(r)].life = 10;
 					}
 				}
 	}

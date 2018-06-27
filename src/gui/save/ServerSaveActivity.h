@@ -14,6 +14,7 @@ namespace ui
 
 class Task;
 class Thumbnail;
+class VideoBuffer;
 class ServerSaveActivity: public WindowActivity, public RequestListener, public TaskListener
 {
 public:
@@ -31,12 +32,13 @@ public:
 	virtual void Exit();
 	virtual void ShowPublishingInfo();
 	virtual void ShowRules();
-	virtual void CheckName(std::string newname);
+	virtual void CheckName(String newname);
 	virtual void OnDraw();
 	virtual void OnResponseReady(void * imagePtr, int identifier);
 	virtual void OnTick(float dt);
 	virtual ~ServerSaveActivity();
 protected:
+	void AddAuthorInfo();
 	virtual void NotifyDone(Task * task);
 	VideoBuffer * thumbnail;
 	SaveInfo save;

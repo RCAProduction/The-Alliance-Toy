@@ -55,15 +55,15 @@ int Element_RIME::update(UPDATE_FUNC_ARGS)
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				if ((r&0xFF)==PT_SPRK)
+				if (TYP(r)==PT_SPRK)
 				{
 					sim->part_change_type(i,x,y,PT_FOG);
-					parts[i].life = rand()%50 + 60;
+					parts[i].life = RNG::Ref().between(60, 119);
 				}
-				else if ((r&0xFF)==PT_FOG&&parts[r>>8].life>0)
+				else if (TYP(r)==PT_FOG&&parts[ID(r)].life>0)
 				{
 					sim->part_change_type(i,x,y,PT_FOG);
-					parts[i].life = parts[r>>8].life;
+					parts[i].life = parts[ID(r)].life;
 				}
 			}
 	return 0;

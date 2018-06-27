@@ -4,7 +4,8 @@
 
 SaveInfo::SaveInfo(SaveInfo & save):
 	id(save.id),
-	date(save.date),
+	createdDate(save.createdDate),
+	updatedDate(save.updatedDate),
 	votesUp(save.votesUp),
 	votesDown(save.votesDown),
 	vote(save.vote),
@@ -18,16 +19,17 @@ SaveInfo::SaveInfo(SaveInfo & save):
 	Published(save.Published),
 	gameSave(NULL)
 {
-	std::list<std::string> tagsSorted = save.tags;
+	std::list<ByteString> tagsSorted = save.tags;
 	tagsSorted.sort();
 	tags = tagsSorted;
 	if (save.gameSave)
 		gameSave = new GameSave(*save.gameSave);
 }
 
-SaveInfo::SaveInfo(int _id, int _date, int _votesUp, int _votesDown, std::string _userName, std::string _name):
+SaveInfo::SaveInfo(int _id, int _createdDate, int _updatedDate, int _votesUp, int _votesDown, ByteString _userName, String _name):
 	id(_id),
-	date(_date),
+	createdDate(_createdDate),
+	updatedDate(_updatedDate),
 	votesUp(_votesUp),
 	votesDown(_votesDown),
 	vote(0),
@@ -45,9 +47,10 @@ SaveInfo::SaveInfo(int _id, int _date, int _votesUp, int _votesDown, std::string
 
 }
 
-SaveInfo::SaveInfo(int _id, int date_, int _votesUp, int _votesDown, int _vote, std::string _userName, std::string _name, std::string description_, bool published_, std::list<std::string> tags_):
+SaveInfo::SaveInfo(int _id, int _createdDate, int _updatedDate, int _votesUp, int _votesDown, int _vote, ByteString _userName, String _name, String description_, bool published_, std::list<ByteString> tags_):
 	id(_id),
-	date(date_),
+	createdDate(_createdDate),
+	updatedDate(_updatedDate),
 	votesUp(_votesUp),
 	votesDown(_votesDown),
 	vote(_vote),
@@ -62,7 +65,7 @@ SaveInfo::SaveInfo(int _id, int date_, int _votesUp, int _votesDown, int _vote, 
 	tags(),
 	gameSave(NULL)
 {
-	std::list<std::string> tagsSorted = tags_;
+	std::list<ByteString> tagsSorted = tags_;
 	tagsSorted.sort();
 	tags=tagsSorted;
 }
@@ -75,20 +78,20 @@ SaveInfo::~SaveInfo()
 	}
 }
 
-void SaveInfo::SetName(std::string name)
+void SaveInfo::SetName(String name)
 {
 	this->name = name;
 }
-std::string SaveInfo::GetName()
+String SaveInfo::GetName()
 {
 	return name;
 }
 
-void SaveInfo::SetDescription(std::string description)
+void SaveInfo::SetDescription(String description)
 {
 	Description = description;
 }
-std::string SaveInfo::GetDescription()
+String SaveInfo::GetDescription()
 {
 	return Description;
 }
@@ -111,12 +114,12 @@ int SaveInfo::GetVote()
 	return vote;
 }
 
-void SaveInfo::SetUserName(std::string userName)
+void SaveInfo::SetUserName(ByteString userName)
 {
 	this->userName = userName;
 }
 
-std::string SaveInfo::GetUserName()
+ByteString SaveInfo::GetUserName()
 {
 	return userName;
 }
@@ -157,14 +160,14 @@ int SaveInfo::GetVersion()
 	return Version;
 }
 
-void SaveInfo::SetTags(std::list<std::string> tags)
+void SaveInfo::SetTags(std::list<ByteString> tags)
 {
-	std::list<std::string> tagsSorted = tags;
+	std::list<ByteString> tagsSorted = tags;
 	tagsSorted.sort();
 	this->tags=tagsSorted;
 }
 
-std::list<std::string> SaveInfo::GetTags()
+std::list<ByteString> SaveInfo::GetTags()
 {
 	return tags;
 }

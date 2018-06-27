@@ -80,31 +80,31 @@ int Element_VIBR::update(UPDATE_FUNC_ARGS) {
 	else //if it is exploding
 	{
 		//Release sparks before explode
-		rndstore = rand();
+		rndstore = RNG::Ref().gen();
 		if (parts[i].life < 300)
 		{
 			rx = rndstore%3-1;
 			ry = (rndstore>>2)%3-1;
 			rndstore = rndstore >> 4;
 			r = pmap[y+ry][x+rx];
-			if ((r&0xFF) && (r&0xFF) != PT_BREC && (sim->elements[r&0xFF].Properties&PROP_CONDUCTS) && !parts[r>>8].life)
+			if (TYP(r) && TYP(r) != PT_BREC && (sim->elements[TYP(r)].Properties&PROP_CONDUCTS) && !parts[ID(r)].life)
 			{
-				parts[r>>8].life = 4;
-				parts[r>>8].ctype = r&0xFF;
-				sim->part_change_type(r>>8,x+rx,y+ry,PT_SPRK);
+				parts[ID(r)].life = 4;
+				parts[ID(r)].ctype = TYP(r);
+				sim->part_change_type(ID(r),x+rx,y+ry,PT_SPRK);
 			}
 		}
 		//Release all heat
 		if (parts[i].life < 500)
 		{
-			rx = rndstore%7-1;
-			ry = (rndstore>>3)%7-1;
+			rx = rndstore%7-3;
+			ry = (rndstore>>3)%7-3;
 			if(BOUNDS_CHECK)
 			{
 				r = pmap[y+ry][x+rx];
-				if ((r&0xFF) && (r&0xFF)!=PT_VIBR  && (r&0xFF)!=PT_BVBR && sim->elements[r&0xFF].HeatConduct && ((r&0xFF)!=PT_HSWC||parts[r>>8].life==10))
+				if (TYP(r) && TYP(r)!=PT_VIBR  && TYP(r)!=PT_BVBR && sim->elements[TYP(r)].HeatConduct && (TYP(r)!=PT_HSWC||parts[ID(r)].life==10))
 				{
-					parts[r>>8].temp += parts[i].tmp*3;
+					parts[ID(r)].temp += parts[i].tmp*3;
 					parts[i].tmp = 0;
 				}
 			}
@@ -114,7 +114,7 @@ int Element_VIBR::update(UPDATE_FUNC_ARGS) {
 		{
 			if (!parts[i].tmp2)
 			{
-				rndstore = rand();
+				rndstore = RNG::Ref().gen();
 				int index = sim->create_part(-3,x+((rndstore>>4)&3)-1,y+((rndstore>>6)&3)-1,PT_ELEC);
 				if (index != -1)
 					parts[index].temp = 7000;
@@ -122,7 +122,7 @@ int Element_VIBR::update(UPDATE_FUNC_ARGS) {
 				if (index != -1)
 					parts[index].temp = 7000;
 				int rx = ((rndstore>>12)&3)-1;
-				rndstore = rand();
+				rndstore = RNG::Ref().gen();
 				index = sim->create_part(-1,x+rx-1,y+rndstore%3-1,PT_BREC);
 				if (index != -1)
 					parts[index].temp = 7000;
@@ -152,17 +152,17 @@ int Element_VIBR::update(UPDATE_FUNC_ARGS) {
 				if (parts[i].life)
 				{
 					//Makes EXOT around it get tmp to start exploding too
-					if (((r&0xFF)==PT_VIBR  || (r&0xFF)==PT_BVBR))
+					if ((TYP(r)==PT_VIBR  || TYP(r)==PT_BVBR))
 					{
-						if (!parts[r>>8].life)
-							parts[r>>8].tmp += 45;
-						else if (parts[i].tmp2 && parts[i].life > 75 && rand()%2)
+						if (!parts[ID(r)].life)
+							parts[ID(r)].tmp += 45;
+						else if (parts[i].tmp2 && parts[i].life > 75 && RNG::Ref().chance(1, 2))
 						{
-							parts[r>>8].tmp2 = 1;
+							parts[ID(r)].tmp2 = 1;
 							parts[i].tmp = 0;
 						}
 					}
-					else if ((r&0xFF)==PT_CFLM)
+					else if (TYP(r)==PT_CFLM)
 					{
 						parts[i].tmp2 = 1;
 						parts[i].tmp = 0;
@@ -171,14 +171,14 @@ int Element_VIBR::update(UPDATE_FUNC_ARGS) {
 				else
 				{
 					//Melts into EXOT
-					if ((r&0xFF) == PT_EXOT && !(rand()%25))
+					if (TYP(r) == PT_EXOT && RNG::Ref().chance(1, 25))
 					{
 						sim->part_change_type(i, x, y, PT_EXOT);
 						return 1;
 					}
 				}
 				//VIBR+ANAR=BVBR
-				if (parts[i].type != PT_BVBR && (r&0xFF) == PT_ANAR)
+				if (parts[i].type != PT_BVBR && TYP(r) == PT_ANAR)
 				{
 					sim->part_change_type(i,x,y,PT_BVBR);
 					sim->pv[y/CELL][x/CELL] -= 1;
@@ -187,7 +187,7 @@ int Element_VIBR::update(UPDATE_FUNC_ARGS) {
 	for (trade = 0; trade < 9; trade++)
 	{
 		if (!(trade%2))
-			rndstore = rand();
+			rndstore = RNG::Ref().gen();
 		rx = rndstore%7-3;
 		rndstore >>= 3;
 		ry = rndstore%7-3;
@@ -195,12 +195,12 @@ int Element_VIBR::update(UPDATE_FUNC_ARGS) {
 		if (BOUNDS_CHECK && (rx || ry))
 		{
 			r = pmap[y+ry][x+rx];
-			if ((r&0xFF) != PT_VIBR && (r&0xFF) != PT_BVBR)
+			if (TYP(r) != PT_VIBR && TYP(r) != PT_BVBR)
 				continue;
-			if (parts[i].tmp > parts[r>>8].tmp)
+			if (parts[i].tmp > parts[ID(r)].tmp)
 			{
-				transfer = parts[i].tmp - parts[r>>8].tmp;
-				parts[r>>8].tmp += transfer/2;
+				transfer = parts[i].tmp - parts[ID(r)].tmp;
+				parts[ID(r)].tmp += transfer/2;
 				parts[i].tmp -= transfer/2;
 				break;
 			}

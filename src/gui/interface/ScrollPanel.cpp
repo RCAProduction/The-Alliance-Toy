@@ -1,5 +1,7 @@
 #include <iostream>
 #include "ScrollPanel.h"
+#include "common/tpt-minmax.h"
+#include "graphics/Graphics.h"
 
 using namespace ui;
 
@@ -47,7 +49,7 @@ void ScrollPanel::Draw(const Point& screenPos)
 {
 	Panel::Draw(screenPos);
 
-	Graphics * g = ui::Engine::Ref().g;
+	Graphics * g = GetGraphics();
 
 	//Vertical scroll bar
 	if (maxOffset.Y>0 && InnerSize.Y>0)
@@ -92,7 +94,7 @@ void ScrollPanel::XOnMouseMoved(int x, int y, int dx, int dy)
 		{
 			scrollPos = float(Size.Y-scrollHeight)*(float(offsetY)/float(maxOffset.Y));
 		}
-		
+
 		if (scrollbarSelected)
 		{
 			if (x > 0)

@@ -52,7 +52,7 @@ int Element_PBCN::update(UPDATE_FUNC_ARGS)
 {
 	int r, rx, ry, rt;
 	if (!parts[i].tmp2 && sim->pv[y/CELL][x/CELL]>4.0f)
-		parts[i].tmp2 = rand()%40+80;
+		parts[i].tmp2 = RNG::Ref().between(80, 119);
 	if (parts[i].tmp2)
 	{
 		parts[i].vx += ADVECTION*sim->vx[y/CELL][x/CELL];
@@ -73,7 +73,7 @@ int Element_PBCN::update(UPDATE_FUNC_ARGS)
 						r = pmap[y+ry][x+rx];
 					if (!r)
 						continue;
-					rt = r&0xFF;
+					rt = TYP(r);
 					if (rt!=PT_CLNE && rt!=PT_PCLN &&
 					    rt!=PT_BCLN &&  rt!=PT_SPRK &&
 					    rt!=PT_NSCN && rt!=PT_PSCN &&
@@ -82,7 +82,7 @@ int Element_PBCN::update(UPDATE_FUNC_ARGS)
 					{
 						parts[i].ctype = rt;
 						if (rt==PT_LIFE || rt==PT_LAVA)
-							parts[i].tmp = parts[r>>8].ctype;
+							parts[i].tmp = parts[ID(r)].ctype;
 					}
 				}
 	if (parts[i].life!=10)
@@ -99,12 +99,12 @@ int Element_PBCN::update(UPDATE_FUNC_ARGS)
 					r = pmap[y+ry][x+rx];
 					if (!r)
 						continue;
-					if ((r&0xFF)==PT_PBCN)
+					if (TYP(r)==PT_PBCN)
 					{
-						if (parts[r>>8].life<10&&parts[r>>8].life>0)
+						if (parts[ID(r)].life<10&&parts[ID(r)].life>0)
 							parts[i].life = 9;
-						else if (parts[r>>8].life==0)
-							parts[r>>8].life = 10;
+						else if (parts[ID(r)].life==0)
+							parts[ID(r)].life = 10;
 					}
 				}
 		if (parts[i].ctype>0 && parts[i].ctype<PT_NUM && sim->elements[parts[i].ctype].Enabled)
@@ -132,9 +132,9 @@ int Element_PBCN::update(UPDATE_FUNC_ARGS)
 					for (ry=-1; ry<2; ry++)
 						sim->create_part(-1, x+rx, y+ry, PT_LIFE, parts[i].tmp);
 
-			else if (parts[i].ctype!=PT_LIGH || !(rand()%30))
+			else if (parts[i].ctype!=PT_LIGH || RNG::Ref().chance(1, 30))
 			{
-				int np = sim->create_part(-1, x+rand()%3-1, y+rand()%3-1, parts[i].ctype&0xFF);
+				int np = sim->create_part(-1, x + RNG::Ref().between(-1, 1), y + RNG::Ref().between(-1, 1), TYP(parts[i].ctype));
 				if (np>-1)
 				{
 					if (parts[i].ctype==PT_LAVA && parts[i].tmp>0 && parts[i].tmp<PT_NUM && sim->elements[parts[i].tmp].HighTemperatureTransition==PT_LAVA)

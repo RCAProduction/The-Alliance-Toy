@@ -1,23 +1,28 @@
-#include "gui/interface/Engine.h"
 #include "GameModel.h"
 #include "GameView.h"
-#include "simulation/Simulation.h"
-#include "simulation/Air.h"
 #include "ToolClasses.h"
-#include "graphics/Renderer.h"
-#include "gui/interface/Point.h"
 #include "Brush.h"
 #include "EllipseBrush.h"
 #include "TriangleBrush.h"
 #include "BitmapBrush.h"
-#include "client/Client.h"
-#include "client/GameSave.h"
-#include "client/SaveFile.h"
-#include "gui/game/DecorationTool.h"
 #include "QuickOptions.h"
 #include "GameModelException.h"
 #include "Format.h"
 #include "Favorite.h"
+
+#include "client/Client.h"
+#include "client/GameSave.h"
+#include "client/SaveFile.h"
+#include "common/tpt-minmax.h"
+#include "graphics/Renderer.h"
+#include "simulation/Air.h"
+#include "simulation/Simulation.h"
+#include "simulation/Snapshot.h"
+
+#include "gui/game/DecorationTool.h"
+#include "gui/interface/Engine.h"
+#include "gui/interface/Point.h"
+
 
 GameModel::GameModel():
 	clipboard(NULL),
@@ -28,6 +33,8 @@ GameModel::GameModel():
 	currentFile(NULL),
 	currentUser(0, ""),
 	toolStrength(1.0f),
+	redoHistory(NULL),
+	historyPosition(0),
 	activeColourPreset(0),
 	colourSelector(false),
 	colour(255, 0, 0, 255),
@@ -85,7 +92,7 @@ GameModel::GameModel():
 	Favorite::Ref().LoadFavoritesFromPrefs();
 
 	//Load last user
-	if(Client::Ref().GetAuthUser().ID)
+	if(Client::Ref().GetAuthUser().UserID)
 	{
 		currentUser = Client::Ref().GetAuthUser();
 	}
@@ -98,7 +105,7 @@ GameModel::GameModel():
 	brushList.push_back(new TriangleBrush(ui::Point(4, 4)));
 
 	//Load more from brushes folder
-	std::vector<string> brushFiles = Client::Ref().DirectorySearch(BRUSH_DIR, "", ".ptb");
+	std::vector<ByteString> brushFiles = Client::Ref().DirectorySearch(BRUSH_DIR, "", ".ptb");
 	for (size_t i = 0; i < brushFiles.size(); i++)
 	{
 		std::vector<unsigned char> brushData = Client::Ref().ReadFile(brushFiles[i]);
@@ -117,10 +124,10 @@ GameModel::GameModel():
 	}
 
 	//Set default decoration colour
-	unsigned char colourR = min(Client::Ref().GetPrefInteger("Decoration.Red", 200), 255);
-	unsigned char colourG = min(Client::Ref().GetPrefInteger("Decoration.Green", 100), 255);
-	unsigned char colourB = min(Client::Ref().GetPrefInteger("Decoration.Blue", 50), 255);
-	unsigned char colourA = min(Client::Ref().GetPrefInteger("Decoration.Alpha", 255), 255);
+	unsigned char colourR = std::min(Client::Ref().GetPrefInteger("Decoration.Red", 200), 255);
+	unsigned char colourG = std::min(Client::Ref().GetPrefInteger("Decoration.Green", 100), 255);
+	unsigned char colourB = std::min(Client::Ref().GetPrefInteger("Decoration.Blue", 50), 255);
+	unsigned char colourA = std::min(Client::Ref().GetPrefInteger("Decoration.Alpha", 255), 255);
 
 	SetColourSelectorColour(ui::Colour(colourR, colourG, colourB, colourA));
 
@@ -132,6 +139,11 @@ GameModel::GameModel():
 	colourPresets.push_back(ui::Colour(0, 255, 0));
 	colourPresets.push_back(ui::Colour(0, 0, 255));
 	colourPresets.push_back(ui::Colour(0, 0, 0));
+
+	undoHistoryLimit = Client::Ref().GetPrefInteger("Simulation.UndoHistoryLimit", 5);
+	// cap due to memory usage (this is about 3.4GB of RAM)
+	if (undoHistoryLimit > 200)
+		undoHistoryLimit = 200;
 }
 
 GameModel::~GameModel()
@@ -159,6 +171,8 @@ GameModel::~GameModel()
 	Client::Ref().SetPref("Decoration.Blue", (int)colour.Blue);
 	Client::Ref().SetPref("Decoration.Alpha", (int)colour.Alpha);
 
+	Client::Ref().SetPref("Simulation.UndoHistoryLimit", undoHistoryLimit);
+
 	Favorite::Ref().SaveFavoritesToPrefs();
 
 	for (size_t i = 0; i < menuList.size(); i++)
@@ -181,6 +195,7 @@ GameModel::~GameModel()
 	delete clipboard;
 	delete currentSave;
 	delete currentFile;
+	delete redoHistory;
 	//if(activeTools)
 	//	delete[] activeTools;
 }
@@ -191,7 +206,7 @@ void GameModel::UpdateQuickOptions()
 	{
 		QuickOption * option = *iter;
 		option->Update();
-	}	
+	}
 }
 
 void GameModel::BuildQuickOptionMenu(GameController * controller)
@@ -219,7 +234,7 @@ void GameModel::BuildMenus()
 	if(activeMenu != -1)
 		lastMenu = activeMenu;
 
-	std::string activeToolIdentifiers[4];
+	ByteString activeToolIdentifiers[4];
 	if(regularToolset[0])
 		activeToolIdentifiers[0] = regularToolset[0]->GetIdentifier();
 	if(regularToolset[1])
@@ -249,7 +264,7 @@ void GameModel::BuildMenus()
 	//Create menus
 	for (int i = 0; i < SC_TOTAL; i++)
 	{
-		menuList.push_back(new Menu((const char)sim->msections[i].icon[0], sim->msections[i].name, sim->msections[i].doshow));
+		menuList.push_back(new Menu(sim->msections[i].icon, sim->msections[i].name, sim->msections[i].doshow));
 	}
 
 	//Build menus from Simulation elements
@@ -290,18 +305,18 @@ void GameModel::BuildMenus()
 	//Build menu for GOL types
 	for(int i = 0; i < NGOL; i++)
 	{
-		Tool * tempTool = new ElementTool(PT_LIFE|(i<<8), sim->gmenu[i].name, std::string(sim->gmenu[i].description), PIXR(sim->gmenu[i].colour), PIXG(sim->gmenu[i].colour), PIXB(sim->gmenu[i].colour), "DEFAULT_PT_LIFE_"+std::string(sim->gmenu[i].name));
+		Tool * tempTool = new ElementTool(PT_LIFE|PMAPID(i), sim->gmenu[i].name, sim->gmenu[i].description, PIXR(sim->gmenu[i].colour), PIXG(sim->gmenu[i].colour), PIXB(sim->gmenu[i].colour), "DEFAULT_PT_LIFE_"+sim->gmenu[i].name);
 		menuList[SC_LIFE]->AddTool(tempTool);
 	}
 
 	//Build other menus from wall data
 	for(int i = 0; i < UI_WALLCOUNT; i++)
 	{
-		Tool * tempTool = new WallTool(i, "", std::string(sim->wtypes[i].descs), PIXR(sim->wtypes[i].colour), PIXG(sim->wtypes[i].colour), PIXB(sim->wtypes[i].colour), sim->wtypes[i].identifier, sim->wtypes[i].textureGen);
+		Tool * tempTool = new WallTool(i, "", sim->wtypes[i].descs, PIXR(sim->wtypes[i].colour), PIXG(sim->wtypes[i].colour), PIXB(sim->wtypes[i].colour), sim->wtypes[i].identifier, sim->wtypes[i].textureGen);
 		menuList[SC_WALL]->AddTool(tempTool);
 		//sim->wtypes[i]
 	}
-	
+
 	//Build menu for tools
 	for (size_t i = 0; i < sim->tools.size(); i++)
 	{
@@ -376,8 +391,8 @@ void GameModel::BuildMenus()
 void GameModel::BuildFavoritesMenu()
 {
 	menuList[SC_FAVORITES]->ClearTools();
-	
-	std::vector<std::string> favList = Favorite::Ref().GetFavoritesList();
+
+	std::vector<ByteString> favList = Favorite::Ref().GetFavoritesList();
 	for (size_t i = 0; i < favList.size(); i++)
 	{
 		Tool *tool = GetToolFromIdentifier(favList[i]);
@@ -394,7 +409,7 @@ void GameModel::BuildFavoritesMenu()
 	notifyLastToolChanged();
 }
 
-Tool * GameModel::GetToolFromIdentifier(std::string identifier)
+Tool * GameModel::GetToolFromIdentifier(ByteString identifier)
 {
 	for (std::vector<Menu*>::iterator iter = menuList.begin(), end = menuList.end(); iter != end; ++iter)
 	{
@@ -429,9 +444,40 @@ std::deque<Snapshot*> GameModel::GetHistory()
 {
 	return history;
 }
+
+unsigned int GameModel::GetHistoryPosition()
+{
+	return historyPosition;
+}
+
 void GameModel::SetHistory(std::deque<Snapshot*> newHistory)
 {
 	history = newHistory;
+}
+
+void GameModel::SetHistoryPosition(unsigned int newHistoryPosition)
+{
+	historyPosition = newHistoryPosition;
+}
+
+Snapshot * GameModel::GetRedoHistory()
+{
+	return redoHistory;
+}
+
+void GameModel::SetRedoHistory(Snapshot * redo)
+{
+	redoHistory = redo;
+}
+
+unsigned int GameModel::GetUndoHistoryLimit()
+{
+	return undoHistoryLimit;
+}
+
+void GameModel::SetUndoHistoryLimit(unsigned int undoHistoryLimit_)
+{
+	undoHistoryLimit = undoHistoryLimit_;
 }
 
 void GameModel::SetVote(int direction)
@@ -545,9 +591,6 @@ int GameModel::GetActiveMenu()
 //Get an element tool from an element ID
 Tool * GameModel::GetElementTool(int elementID)
 {
-#ifdef DEBUG
-	std::cout << elementID << std::endl;
-#endif
 	for(std::vector<Tool*>::iterator iter = elementTools.begin(), end = elementTools.end(); iter != end; ++iter)
 	{
 		if((*iter)->GetToolID() == elementID)
@@ -611,7 +654,28 @@ void GameModel::SetSave(SaveInfo * newSave)
 			sim->grav->stop_grav_async();
 		sim->clear_sim();
 		ren->ClearAccumulation();
-		sim->Load(saveData);
+		if (!sim->Load(saveData))
+		{
+			// This save was created before logging existed
+			// Add in the correct info
+			if (saveData->authors.size() == 0)
+			{
+				saveData->authors["type"] = "save";
+				saveData->authors["id"] = newSave->id;
+				saveData->authors["username"] = newSave->userName;
+				saveData->authors["title"] = newSave->name.ToUtf8();
+				saveData->authors["description"] = newSave->Description.ToUtf8();
+				saveData->authors["published"] = (int)newSave->Published;
+				saveData->authors["date"] = newSave->updatedDate;
+			}
+			// This save was probably just created, and we didn't know the ID when creating it
+			// Update with the proper ID
+			else if (saveData->authors.get("id", -1) == 0 || saveData->authors.get("id", -1) == -1)
+			{
+				saveData->authors["id"] = newSave->id;
+			}
+			Client::Ref().OverwriteAuthorInfo(saveData->authors);
+		}
 	}
 	notifySaveChanged();
 	UpdateQuickOptions();
@@ -655,9 +719,12 @@ void GameModel::SetSaveFile(SaveFile * newSave)
 		}
 		sim->clear_sim();
 		ren->ClearAccumulation();
-		sim->Load(saveData);
+		if (!sim->Load(saveData))
+		{
+			Client::Ref().OverwriteAuthorInfo(saveData->authors);
+		}
 	}
-	
+
 	notifySaveChanged();
 	UpdateQuickOptions();
 }
@@ -849,6 +916,15 @@ void GameModel::SetUser(User user)
 
 void GameModel::SetPaused(bool pauseState)
 {
+	if (!pauseState && sim->debug_currentParticle > 0)
+	{
+		String logmessage = String::Build("Updated particles from #", sim->debug_currentParticle, " to end due to unpause");
+		sim->UpdateParticles(sim->debug_currentParticle, NPART);
+		sim->AfterSim();
+		sim->debug_currentParticle = 0;
+		Log(logmessage, false);
+	}
+
 	sim->sys_pause = pauseState?1:0;
 	notifyPausedChanged();
 }
@@ -892,6 +968,26 @@ bool GameModel::GetAHeatEnable()
 	return sim->aheat_enable;
 }
 
+void GameModel::SetNewtonianGravity(bool newtonainGravity)
+{
+    if (newtonainGravity)
+    {
+        sim->grav->start_grav_async();
+        SetInfoTip("Newtonian Gravity: On");
+    }
+    else
+    {
+        sim->grav->stop_grav_async();
+        SetInfoTip("Newtonian Gravity: Off");
+    }
+    UpdateQuickOptions();
+}
+
+bool GameModel::GetNewtonianGrvity()
+{
+    return sim->grav->ngrav_enable;
+}
+
 void GameModel::ShowGravityGrid(bool showGrid)
 {
 	ren->gravityFieldEnabled = showGrid;
@@ -922,6 +1018,7 @@ void GameModel::ClearSimulation()
 
 	sim->clear_sim();
 	ren->ClearAccumulation();
+	Client::Ref().ClearAuthorInfo();
 
 	notifySaveChanged();
 	UpdateQuickOptions();
@@ -929,10 +1026,10 @@ void GameModel::ClearSimulation()
 
 void GameModel::SetPlaceSave(GameSave * save)
 {
-	if(save != placeSave)
+	if (save != placeSave)
 	{
 		delete placeSave;
-		if(save)
+		if (save)
 			placeSave = new GameSave(*save);
 		else
 			placeSave = NULL;
@@ -956,17 +1053,17 @@ GameSave * GameModel::GetPlaceSave()
 	return placeSave;
 }
 
-void GameModel::Log(string message, bool printToFile)
+void GameModel::Log(String message, bool printToFile)
 {
 	consoleLog.push_front(message);
 	if(consoleLog.size()>100)
 		consoleLog.pop_back();
 	notifyLogChanged(message);
 	if (printToFile)
-		std::cout << message << std::endl;
+		std::cout << message.ToUtf8() << std::endl;
 }
 
-deque<string> GameModel::GetLog()
+deque<String> GameModel::GetLog()
 {
 	return consoleLog;
 }
@@ -996,24 +1093,24 @@ void GameModel::RemoveNotification(Notification * notification)
 	notifyNotificationsChanged();
 }
 
-void GameModel::SetToolTip(std::string text)
+void GameModel::SetToolTip(String text)
 {
 	toolTip = text;
 	notifyToolTipChanged();
 }
 
-void GameModel::SetInfoTip(std::string text)
+void GameModel::SetInfoTip(String text)
 {
 	infoTip = text;
 	notifyInfoTipChanged();
 }
 
-std::string GameModel::GetToolTip()
+String GameModel::GetToolTip()
 {
 	return toolTip;
 }
 
-std::string GameModel::GetInfoTip()
+String GameModel::GetInfoTip()
 {
 	return infoTip;
 }
@@ -1154,7 +1251,7 @@ void GameModel::notifyPlaceSaveChanged()
 	}
 }
 
-void GameModel::notifyLogChanged(string entry)
+void GameModel::notifyLogChanged(String entry)
 {
 	for (size_t i = 0; i < observers.size(); i++)
 	{

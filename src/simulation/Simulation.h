@@ -60,12 +60,12 @@ public:
 	Element elements[PT_NUM];
 	//Element * elements;
 	std::vector<SimTool*> tools;
-	unsigned int * platent;
-	wall_type wtypes[UI_WALLCOUNT];
-	gol_menu gmenu[NGOL];
-	int goltype[NGOL];
-	int grule[NGOL+1][10];
-	menu_section msections[SC_TOTAL];
+	std::vector<unsigned int> platent;
+	std::vector<wall_type> wtypes;
+	std::vector<gol_menu> gmenu;
+	std::vector<int> goltype;
+	std::vector<std::array<int, 10> > grule;
+	std::vector<menu_section> msections;
 
 	int currentTick;
 	int replaceModeSelected;
@@ -120,7 +120,7 @@ public:
 	Particle parts[NPART];
 	int pmap[YRES][XRES];
 	int photons[YRES][XRES];
-	int pmap_count[YRES][XRES];
+	unsigned int pmap_count[YRES][XRES];
 	//Simulation Settings
 	int edgeMode;
 	int gravityMode;
@@ -132,12 +132,11 @@ public:
 	int pretty_powder;
 	int sandcolour;
 	int sandcolour_frame;
-	int DEFAULT_PT_NUM;
 
-	int Load(GameSave * save);
-	int Load(int x, int y, GameSave * save);
-	GameSave * Save();
-	GameSave * Save(int x1, int y1, int x2, int y2);
+	int Load(GameSave * save, bool includePressure = true);
+	int Load(int x, int y, GameSave * save, bool includePressure = true);
+	GameSave * Save(bool includePressure = true);
+	GameSave * Save(int x1, int y1, int x2, int y2, bool includePressure = true);
 	void SaveSimOptions(GameSave * gameSave);
 	SimulationSample GetSample(int x, int y);
 
@@ -147,8 +146,7 @@ public:
 	int is_blocking(int t, int x, int y);
 	int is_boundary(int pt, int x, int y);
 	int find_next_boundary(int pt, int *x, int *y, int dm, int *em);
-	int pn_junction_sprk(int x, int y, int pt);
-	int pn_junction_vspk(int x, int y, int pt);
+
 	void photoelectric_effect(int nx, int ny);
 	unsigned direction_to_map(float dx, float dy, int t);
 	int do_move(int i, int x, int y, float nxf, float nyf);
@@ -167,7 +165,7 @@ public:
 	int flood_water(int x, int y, int i, int originaly, int check);
 	int FloodINST(int x, int y, int fullc, int cm);
 	void detach(int i);
-	void part_change_type(int i, int x, int y, int t);
+	bool part_change_type(int i, int x, int y, int t);
 	//int InCurrentBrush(int i, int j, int rx, int ry);
 	//int get_brush_flags();
 	int create_part(int p, int x, int y, int t, int v = -1);
@@ -180,6 +178,7 @@ public:
 	void create_arc(int sx, int sy, int dx, int dy, int midpoints, int variance, int type, int flags);
 	void UpdateParticles(int start, int end);
 	void SimulateGoL();
+	void RecalcFreeParticles(bool do_life_dec);
 	void CheckStacking();
 	void BeforeSim();
 	void AfterSim();
@@ -199,11 +198,11 @@ public:
 	void ApplyDecorationFill(Renderer *ren, int x, int y, int colR, int colG, int colB, int colA, int replaceR, int replaceG, int replaceB);
 
 	//Drawing Tools like HEAT, AIR, and GRAV
-	int Tool(int x, int y, int tool, float strength = 1.0f);
+	int Tool(int x, int y, int tool, int brushX, int brushY, float strength = 1.0f);
 	int ToolBrush(int x, int y, int tool, Brush * cBrush, float strength = 1.0f);
 	void ToolLine(int x1, int y1, int x2, int y2, int tool, Brush * cBrush, float strength = 1.0f);
 	void ToolBox(int x1, int y1, int x2, int y2, int tool, float strength = 1.0f);
-	
+
 	//Drawing Walls
 	int CreateWalls(int x, int y, int rx, int ry, int wall, Brush * cBrush = NULL);
 	void CreateWallLine(int x1, int y1, int x2, int y2, int rx, int ry, int wall, Brush * cBrush = NULL);
@@ -219,10 +218,10 @@ public:
 	void CreateBox(int x1, int y1, int x2, int y2, int c, int flags = -1);
 	int FloodParts(int x, int y, int c, int cm, int flags = -1);
 
-	
+
 	void GetGravityField(int x, int y, float particleGrav, float newtonGrav, float & pGravX, float & pGravY);
 
-	int GetParticleType(std::string type);
+	int GetParticleType(ByteString type);
 
 	void orbitalparts_get(int block1, int block2, int resblock1[], int resblock2[]);
 	void orbitalparts_set(int *block1, int *block2, int resblock1[], int resblock2[]);
@@ -238,7 +237,7 @@ public:
 		return (x>=0 && y>=0 && x<XRES && y<YRES);
 	}
 
-	// these don't really belong anywhere at the moment, so go here for loop edge mode
+	// These don't really belong anywhere at the moment, so go here for loop edge mode
 	static int remainder_p(int x, int y)
 	{
 		return (x % y) + (x>=0 ? 0 : y);

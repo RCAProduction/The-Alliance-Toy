@@ -76,8 +76,8 @@ void LocalSaveActivity::Save()
 	class FileOverwriteConfirmation: public ConfirmDialogueCallback {
 	public:
 		LocalSaveActivity * a;
-		std::string filename;
-		FileOverwriteConfirmation(LocalSaveActivity * a, std::string finalFilename) : a(a), filename(finalFilename) {}
+		ByteString filename;
+		FileOverwriteConfirmation(LocalSaveActivity * a, ByteString finalFilename) : a(a), filename(finalFilename) {}
 		virtual void ConfirmCallback(ConfirmPrompt::DialogueResult result) {
 			if (result == ConfirmPrompt::ResultOkay)
 			{
@@ -89,12 +89,12 @@ void LocalSaveActivity::Save()
 
 	if(filenameField->GetText().length())
 	{
-		std::string finalFilename = std::string(LOCAL_SAVE_DIR) + std::string(PATH_SEP) + filenameField->GetText() + ".cps";
+		ByteString finalFilename = ByteString(LOCAL_SAVE_DIR) + ByteString(PATH_SEP) + filenameField->GetText().ToUtf8() + ".cps";
 		save.SetDisplayName(filenameField->GetText());
 		save.SetFileName(finalFilename);
 		if(Client::Ref().FileExists(finalFilename))
 		{
-			new ConfirmPrompt("Overwrite file", "Are you sure you wish to overwrite\n"+finalFilename, new FileOverwriteConfirmation(this, finalFilename));
+			new ConfirmPrompt("Overwrite file", "Are you sure you wish to overwrite\n"+finalFilename.FromUtf8(), new FileOverwriteConfirmation(this, finalFilename));
 		}
 		else
 		{
@@ -107,10 +107,21 @@ void LocalSaveActivity::Save()
 	}
 }
 
-void LocalSaveActivity::saveWrite(std::string finalFilename)
+void LocalSaveActivity::saveWrite(ByteString finalFilename)
 {
 	Client::Ref().MakeDirectory(LOCAL_SAVE_DIR);
-	if (Client::Ref().WriteFile(save.GetGameSave()->Serialise(), finalFilename))
+	GameSave *gameSave = save.GetGameSave();
+	Json::Value localSaveInfo;
+	localSaveInfo["type"] = "localsave";
+	localSaveInfo["username"] = Client::Ref().GetAuthUser().Username;
+	localSaveInfo["title"] = finalFilename;
+	localSaveInfo["date"] = (Json::Value::UInt64)time(NULL);
+	Client::Ref().SaveAuthorInfo(&localSaveInfo);
+	gameSave->authors = localSaveInfo;
+	std::vector<char> saveData = gameSave->Serialise();
+	if (saveData.size() == 0)
+		new ErrorMessage("Error", "Unable to serialize game data.");
+	else if (Client::Ref().WriteFile(saveData, finalFilename))
 		new ErrorMessage("Error", "Unable to write save file.");
 	else
 	{
@@ -121,7 +132,7 @@ void LocalSaveActivity::saveWrite(std::string finalFilename)
 
 void LocalSaveActivity::OnDraw()
 {
-	Graphics * g = ui::Engine::Ref().g;
+	Graphics * g = GetGraphics();
 	g->draw_rgba_image(save_to_disk_image, 0, 0, 0.7f);
 	g->clearrect(Position.X-2, Position.Y-2, Size.X+3, Size.Y+3);
 	g->drawrect(Position.X, Position.Y, Size.X, Size.Y, 255, 255, 255, 255);

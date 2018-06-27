@@ -23,6 +23,7 @@ Element_SNOW::Element_SNOW()
 	Explosive = 0;
 	Meltable = 0;
 	Hardness = 20;
+	PhotonReflectWavelengths = 0x03FFFFFF;
 
 	Weight = 50;
 
@@ -30,7 +31,7 @@ Element_SNOW::Element_SNOW()
 	HeatConduct = 46;
 	Description = "Light particles. Created when ICE breaks under pressure.";
 
-	Properties = TYPE_PART|PROP_LIFE_DEC|PROP_NEUTPASS;
+	Properties = TYPE_PART|PROP_NEUTPASS;
 
 	LowPressure = IPL;
 	LowPressureTransition = NT;
@@ -59,10 +60,10 @@ int Element_SNOW::update(UPDATE_FUNC_ARGS)
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				if (((r&0xFF)==PT_SALT || (r&0xFF)==PT_SLTW) && !(rand()%333))
+				if ((TYP(r)==PT_SALT || TYP(r)==PT_SLTW) && RNG::Ref().chance(1, 333))
 				{
 					sim->part_change_type(i,x,y,PT_SLTW);
-					sim->part_change_type(r>>8,x+rx,y+ry,PT_SLTW);
+					sim->part_change_type(ID(r),x+rx,y+ry,PT_SLTW);
 				}
 			}
 	return 0;

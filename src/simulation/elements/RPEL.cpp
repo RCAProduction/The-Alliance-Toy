@@ -50,18 +50,18 @@ int Element_RPEL::update(UPDATE_FUNC_ARGS)
 	int r, rx, ry, ri;
 	for(ri = 0; ri <= 10; ri++)
 	{
-		rx = (rand()%21)-10;
-		ry = (rand()%21)-10;
+		rx = RNG::Ref().between(-10, 10);
+		ry = RNG::Ref().between(-10, 10);
 		if (x+rx >= 0 && x+rx < XRES && y+ry >= 0 && y+ry < YRES && (rx || ry))
 		{
 			r = pmap[y+ry][x+rx];
 			if (!r)
 				r = sim->photons[y+ry][x+rx];
 
-			if (r && !(sim->elements[r&0xFF].Properties & TYPE_SOLID)) {
-				if (!parts[i].ctype || parts[i].ctype == parts[r>>8].type) {
-					parts[r>>8].vx += isign(rx)*((parts[i].temp-273.15)/10.0f);
-					parts[r>>8].vy += isign(ry)*((parts[i].temp-273.15)/10.0f);
+			if (r && !(sim->elements[TYP(r)].Properties & TYPE_SOLID)) {
+				if (!parts[i].ctype || parts[i].ctype == parts[ID(r)].type) {
+					parts[ID(r)].vx += isign(rx)*((parts[i].temp-273.15)/10.0f);
+					parts[ID(r)].vy += isign(ry)*((parts[i].temp-273.15)/10.0f);
 				}
 			}
 		}

@@ -2,6 +2,8 @@
 #define PREVIEWVIEW_H_
 
 #include <vector>
+#include <set>
+#include "common/String.h"
 #include "Comment.h"
 #include "gui/interface/Window.h"
 #include "gui/preview/PreviewController.h"
@@ -33,6 +35,7 @@ class PreviewView: public ui::Window {
 	ui::Button * reportButton;
 	ui::Button * submitCommentButton;
 	ui::Textbox * addCommentBox;
+	ui::Label * commentWarningLabel;
 	ui::Label * saveNameLabel;
 	ui::Label * authorDateLabel;
 	ui::AvatarButton * avatarButton;
@@ -47,9 +50,10 @@ class PreviewView: public ui::Window {
 	std::vector<ui::Component*> commentTextComponents;
 	int votesUp;
 	int votesDown;
+	bool userIsAuthor;
 	bool doOpen;
 	bool doError;
-	std::string doErrorMessage;
+	String doErrorMessage;
 	bool showAvatars;
 	bool prevPage;
 
@@ -58,10 +62,15 @@ class PreviewView: public ui::Window {
 	float commentBoxPositionY;
 	float commentBoxSizeX;
 	float commentBoxSizeY;
+	bool commentHelpText;
+
+	std::set<String> swearWords;
 
 	void displayComments();
 	void commentBoxAutoHeight();
 	void submitComment();
+	bool CheckSwearing(String text);
+	void CheckComment();
 public:
 	void AttachController(PreviewController * controller);
 	PreviewView();
@@ -69,14 +78,14 @@ public:
 	void NotifyCommentsChanged(PreviewModel * sender);
 	void NotifyCommentsPageChanged(PreviewModel * sender);
 	void NotifyCommentBoxEnabledChanged(PreviewModel * sender);
-	void SaveLoadingError(std::string errorMessage);
+	void SaveLoadingError(String errorMessage);
 	virtual void OnDraw();
 	virtual void DoDraw();
 	virtual void OnTick(float dt);
 	virtual void OnTryExit(ExitMethod method);
 	virtual void OnMouseWheel(int x, int y, int d);
 	virtual void OnMouseUp(int x, int y, unsigned int button);
-	virtual void OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt);
+	virtual void OnKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
 	virtual ~PreviewView();
 };
 

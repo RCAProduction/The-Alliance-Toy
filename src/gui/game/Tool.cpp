@@ -1,4 +1,4 @@
-#include <string>
+#include "common/String.h"
 #include "Tool.h"
 #include "gui/game/Brush.h"
 
@@ -6,13 +6,13 @@
 
 using namespace std;
 
-Tool::Tool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int)):
+Tool::Tool(int id, ByteString name, String description, int r, int g, int b, ByteString identifier, VideoBuffer * (*textureGen)(int, int, int)):
 	textureGen(textureGen),
 	toolID(id),
 	toolName(name),
 	toolDescription(description),
 	strength(1.0f),
-	resolution(1),
+	blocky(false),
 	identifier(identifier),
 	colRed(r),
 	colGreen(g),
@@ -32,9 +32,9 @@ void Tool::SetTextureGen(VideoBuffer * (*textureGen)(int, int, int))
 {
 	this->textureGen = textureGen;
 }
-std::string Tool::GetIdentifier() { return identifier; }
-string Tool::GetName() { return toolName; }
-string Tool::GetDescription() { return toolDescription; }
+ByteString Tool::GetIdentifier() { return identifier; }
+ByteString Tool::GetName() { return toolName; }
+String Tool::GetDescription() { return toolDescription; }
 Tool::~Tool() {}
 
 void Tool::Click(Simulation * sim, Brush * brush, ui::Point position) { }
@@ -50,7 +50,7 @@ void Tool::DrawRect(Simulation * sim, Brush * brush, ui::Point position1, ui::Po
 void Tool::DrawFill(Simulation * sim, Brush * brush, ui::Point position) {}
 
 
-ElementTool::ElementTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int)):
+ElementTool::ElementTool(int id, ByteString name, String description, int r, int g, int b, ByteString identifier, VideoBuffer * (*textureGen)(int, int, int)):
 	Tool(id, name, description, r, g, b, identifier, textureGen)
 {
 }
@@ -69,10 +69,10 @@ void ElementTool::DrawFill(Simulation * sim, Brush * brush, ui::Point position) 
 }
 
 
-WallTool::WallTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int)):
+WallTool::WallTool(int id, ByteString name, String description, int r, int g, int b, ByteString identifier, VideoBuffer * (*textureGen)(int, int, int)):
 Tool(id, name, description, r, g, b, identifier, textureGen)
 {
-	resolution = CELL;
+	blocky = true;
 }
 WallTool::~WallTool() {}
 void WallTool::Draw(Simulation * sim, Brush * brush, ui::Point position) {
@@ -130,7 +130,8 @@ LinkTool::LinkTool(int id, string name, string description, int r, int g, int b,
 {
 }
 
-WindTool::WindTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int)):
+WindTool::WindTool(int id, ByteString name, String description, int r, int g, int b, ByteString identifier, VideoBuffer * (*textureGen)(int, int, int)):
+
 	Tool(id, name, description, r, g, b, identifier, textureGen)
 {
 }
@@ -138,18 +139,18 @@ WindTool::WindTool(int id, string name, string description, int r, int g, int b,
 void WindTool::DrawLine(Simulation * sim, Brush * brush, ui::Point position1, ui::Point position2, bool dragging)
 {
 	int radiusX, radiusY, sizeX, sizeY;
-	
+
 	float strength = dragging?0.01f:0.002f;
 	strength *= this->strength;
 
 	radiusX = brush->GetRadius().X;
 	radiusY = brush->GetRadius().Y;
-	
+
 	sizeX = brush->GetSize().X;
 	sizeY = brush->GetSize().Y;
-	
+
 	unsigned char *bitmap = brush->GetBitmap();
-	
+
 	for(int y = 0; y < sizeY; y++)
 	{
 		for(int x = 0; x < sizeX; x++)
@@ -173,15 +174,15 @@ void Element_LIGH_Tool::DrawLine(Simulation * sim, Brush * brush, ui::Point posi
 
 void Element_TESC_Tool::DrawRect(Simulation * sim, Brush * brush, ui::Point position1, ui::Point position2) {
 	int radiusInfo = brush->GetRadius().X*4+brush->GetRadius().Y*4+7;
-	sim->CreateBox(position1.X, position1.Y, position2.X, position2.Y, toolID | (radiusInfo << 8));
+	sim->CreateBox(position1.X, position1.Y, position2.X, position2.Y, toolID | PMAPID(radiusInfo));
 }
 void Element_TESC_Tool::DrawFill(Simulation * sim, Brush * brush, ui::Point position) {
 	int radiusInfo = brush->GetRadius().X*4+brush->GetRadius().Y*4+7;
-	sim->FloodParts(position.X, position.Y, toolID | (radiusInfo << 8), -1);
+	sim->FloodParts(position.X, position.Y, toolID | PMAPID(radiusInfo), -1);
 }
 
 
 void PlopTool::Click(Simulation * sim, Brush * brush, ui::Point position)
 {
-	sim->create_part(-2, position.X, position.Y, toolID&0xFF, toolID>>8);
+	sim->create_part(-2, position.X, position.Y, TYP(toolID), ID(toolID));
 }

@@ -6,6 +6,7 @@
 //#include <powder.h>
 //#include <defines.h>
 #include "Gravity.h"
+#include "common/tpt-rand.h"
 
 /*float kernel[9];
 
@@ -240,7 +241,7 @@ void Air::update_air(void)
 				if ((dx*advDistanceMult>1.0f || dy*advDistanceMult>1.0f) && (tx>=2 && tx<XRES/CELL-2 && ty>=2 && ty<YRES/CELL-2))
 				{
 					// Trying to take velocity from far away, check whether there is an intervening wall. Step from current position to desired source location, looking for walls, with either the x or y step size being 1 cell
-					if (abs(dx)>abs(dy))
+					if (std::abs(dx)>std::abs(dy))
 					{
 						stepX = (dx<0.0f) ? 1 : -1;
 						stepY = -dy/fabsf(dx);
@@ -352,6 +353,36 @@ void Air::Invert()
 		}
 }
 
+// called when loading saves / stamps to ensure nothing "leaks" the first frame
+void Air::RecalculateBlockAirMaps()
+{
+	for (int i = 0; i <= sim.parts_lastActiveIndex; i++)
+	{
+		int type = sim.parts[i].type;
+		if (!type)
+			continue;
+		// Real TTAN would only block if there was enough TTAN
+		// but it would be more expensive and complicated to actually check that
+		// so just block for a frame, if it wasn't supposed to block it will continue allowing air next frame
+		if (type == PT_TTAN)
+		{
+			int x = ((int)(sim.parts[i].x+0.5f))/CELL, y = ((int)(sim.parts[i].y+0.5f))/CELL;
+			if (sim.InBounds(x, y))
+			{
+				bmap_blockair[y][x] = 1;
+				bmap_blockairh[y][x] = 0x8;
+			}
+		}
+		// mostly accurate insulator blocking, besides checking GEL
+		else if ((type == PT_HSWC && sim.parts[i].life != 10) || sim.elements[type].HeatConduct <= (random_gen()%250))
+		{
+			int x = ((int)(sim.parts[i].x+0.5f))/CELL, y = ((int)(sim.parts[i].y+0.5f))/CELL;
+			if (sim.InBounds(x, y) && !(bmap_blockairh[y][x]&0x8))
+				bmap_blockairh[y][x]++;
+		}
+	}
+}
+
 Air::Air(Simulation & simulation):
 	sim(simulation),
 	airMode(0),
@@ -359,8 +390,8 @@ Air::Air(Simulation & simulation):
 {
 	//Simulation should do this.
 	make_kernel();
-	std::fill(&bmap_blockair[0][0], &bmap_blockairh[0][0]+((XRES/CELL)*(YRES/CELL)), 0);
-	std::fill(&bmap_blockairh[0][0], &bmap_blockair[0][0]+((XRES/CELL)*(YRES/CELL)), 0);
+	std::fill(&bmap_blockair[0][0], &bmap_blockair[0][0]+((XRES/CELL)*(YRES/CELL)), 0);
+	std::fill(&bmap_blockairh[0][0], &bmap_blockairh[0][0]+((XRES/CELL)*(YRES/CELL)), 0);
 	std::fill(&vx[0][0], &vx[0][0]+((XRES/CELL)*(YRES/CELL)), 0.0f);
 	std::fill(&ovx[0][0], &ovx[0][0]+((XRES/CELL)*(YRES/CELL)), 0.0f);
 	std::fill(&vy[0][0], &vy[0][0]+((XRES/CELL)*(YRES/CELL)), 0.0f);

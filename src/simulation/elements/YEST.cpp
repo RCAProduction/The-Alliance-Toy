@@ -55,13 +55,13 @@ int Element_YEST::update(UPDATE_FUNC_ARGS)
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				if ((r&0xFF)==PT_DYST && !(rand()%6) && !sim->legacy_enable)
+				if (TYP(r)==PT_DYST && RNG::Ref().chance(1, 6) && !sim->legacy_enable)
 				{
 					sim->part_change_type(i,x,y,PT_DYST);
 				}
 			}
-	if (parts[i].temp>303&&parts[i].temp<317) {
-		sim->create_part(-1, x+rand()%3-1, y+rand()%3-1, PT_YEST);
+	if (parts[i].temp > 303 && parts[i].temp < 317) {
+		sim->create_part(-1, x + RNG::Ref().between(-1, 1), y + RNG::Ref().between(-1, 1), PT_YEST);
 	}
 	return 0;
 }

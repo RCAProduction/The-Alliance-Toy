@@ -1,6 +1,5 @@
 #include <stack>
 #include <iostream>
-#include <string>
 #include <deque>
 #include <cstring>
 #ifdef MACOSX
@@ -15,26 +14,16 @@ TPTScriptInterface::TPTScriptInterface(GameController * c, GameModel * m): Comma
 {
 }
 
-int TPTScriptInterface::Command(std::string command)
+int TPTScriptInterface::Command(String command)
 {
 	lastError = "";
-	std::deque<std::string> words;
+	std::deque<String> words;
 	std::deque<AnyType> commandWords;
-	int retCode;
+	int retCode = -1;
 
 	//Split command into words, put them on the stack
-	char * rawCommand;
-	rawCommand = (char*)calloc(command.length()+1, 1);
-	memcpy(rawCommand, (char*)command.c_str(), command.length());
-	char * currentWord = rawCommand;
-	char * currentCommand = rawCommand;
-	while((currentCommand = strchr(currentCommand, ' ')))
-	{
-		currentCommand[0] = 0;
-		words.push_back(std::string(currentWord));
-		currentWord = ++currentCommand;
-	}
-	words.push_back(std::string(currentWord));
+	for(String word : command.PartitionBy(' '))
+		words.push_back(word);
 	while(!words.empty())
 	{
 		try
@@ -48,7 +37,6 @@ int TPTScriptInterface::Command(std::string command)
 			break;
 		}
 	}
-	free(rawCommand);
 	if(commandWords.size())
 	{
 		retCode = 0;
@@ -59,10 +47,10 @@ int TPTScriptInterface::Command(std::string command)
 	return retCode;
 }
 
-ValueType TPTScriptInterface::testType(std::string word)
+ValueType TPTScriptInterface::testType(String word)
 {
 	size_t i = 0;
-	char * rawWord = (char *)word.c_str();
+	String::value_type const *rawWord = word.c_str();
 	//Function
 	if (word == "set")
 		return TypeFunction;
@@ -80,52 +68,58 @@ ValueType TPTScriptInterface::testType(std::string word)
 		return TypeFunction;
 	else if (word == "quit")
 		return TypeFunction;
+
 	//Basic type
-			for (i = 0; i < word.length(); i++)
-			{
-				if (!(rawWord[i] >= '0' && rawWord[i] <= '9') && !(rawWord[i] == '-' && !i))
-				{
-					if (rawWord[i] == '.' && rawWord[i+1])
-						goto parseFloat;
-					else if (rawWord[i] == ',' && rawWord[i+1] >= '0' && rawWord[i+1] <= '9')
-						goto parsePoint;
-					else if ((rawWord[i] == '#' || (i && rawWord[i-1] == '0' && rawWord[i] == 'x')) &&
-						((rawWord[i+1] >= '0' && rawWord[i+1] <= '9')
-						|| (rawWord[i+1] >= 'a' && rawWord[i+1] <= 'f')
-						|| (rawWord[i+1] >= 'A' && rawWord[i+1] <= 'F')))
-						goto parseNumberHex;
-					else
-						goto parseString;
-				}
-			}
-			return TypeNumber;
-	parseFloat:
-			for (i++; i < word.length(); i++)
-				if (!((rawWord[i] >= '0' && rawWord[i] <= '9') || (rawWord[i] >= 'a' && rawWord[i] <= 'f') || (rawWord[i] >= 'A' && rawWord[i] <= 'F')))
-				{
-					goto parseString;
-				}
-			return TypeFloat;
-	parseNumberHex:
-			for (i++; i < word.length(); i++)
-				if (!((rawWord[i] >= '0' && rawWord[i] <= '9') || (rawWord[i] >= 'a' && rawWord[i] <= 'f') || (rawWord[i] >= 'A' && rawWord[i] <= 'F')))
-				{
-					goto parseString;
-				}
-			return TypeNumber;
-	parsePoint:
-			for (i++; i < word.length(); i++)
-				if (!(rawWord[i] >= '0' && rawWord[i] <= '9'))
-				{
-					goto parseString;
-				}
-			return TypePoint;
-	parseString:
-			return TypeString;
+	for (i = 0; i < word.length(); i++)
+	{
+		if (!(rawWord[i] >= '0' && rawWord[i] <= '9') && !(rawWord[i] == '-' && !i))
+		{
+			if (rawWord[i] == '.' && rawWord[i+1])
+				goto parseFloat;
+			else if (rawWord[i] == ',' && rawWord[i+1] >= '0' && rawWord[i+1] <= '9')
+				goto parsePoint;
+			else if ((rawWord[i] == '#' || (i && rawWord[i-1] == '0' && rawWord[i] == 'x')) &&
+				((rawWord[i+1] >= '0' && rawWord[i+1] <= '9')
+				|| (rawWord[i+1] >= 'a' && rawWord[i+1] <= 'f')
+				|| (rawWord[i+1] >= 'A' && rawWord[i+1] <= 'F')))
+				goto parseNumberHex;
+			else
+				goto parseString;
+		}
+	}
+	return TypeNumber;
+
+parseFloat:
+	for (i++; i < word.length(); i++)
+		if (!((rawWord[i] >= '0' && rawWord[i] <= '9')))
+		{
+			goto parseString;
+		}
+	return TypeFloat;
+
+parseNumberHex:
+	for (i++; i < word.length(); i++)
+		if (!((rawWord[i] >= '0' && rawWord[i] <= '9') || (rawWord[i] >= 'a' && rawWord[i] <= 'f') || (rawWord[i] >= 'A' && rawWord[i] <= 'F')))
+		{
+			goto parseString;
+		}
+	return TypeNumber;
+
+parsePoint:
+	for (i++; i < word.length(); i++)
+		if (!(rawWord[i] >= '0' && rawWord[i] <= '9'))
+		{
+			goto parseString;
+		}
+	return TypePoint;
+
+parseString:
+	return TypeString;
 }
 
-int TPTScriptInterface::parseNumber(char * stringData)
+int TPTScriptInterface::parseNumber(String str)
 {
+	String::value_type const *stringData = str.c_str();
 	char cc;
 	int base = 10;
 	int currentNumber = 0;
@@ -156,17 +150,16 @@ int TPTScriptInterface::parseNumber(char * stringData)
 	}
 	else
 	{
-		return atoi(stringData);
+		return str.ToNumber<int>();
 	}
 	return currentNumber;
 }
 
-AnyType TPTScriptInterface::eval(std::deque<std::string> * words)
+AnyType TPTScriptInterface::eval(std::deque<String> * words)
 {
 	if(words->size() < 1)
 		return AnyType(TypeNull, ValueValue());
-	std::string word = words->front(); words->pop_front();
-	char * rawWord = (char *)word.c_str();
+	String word = words->front(); words->pop_front();
 	ValueType wordType = testType(word);
 	switch(wordType)
 	{
@@ -187,14 +180,17 @@ AnyType TPTScriptInterface::eval(std::deque<std::string> * words)
 			return tptS_quit(words);
 		break;
 	case TypeNumber:
-		return NumberType(parseNumber(rawWord));
+		return NumberType(parseNumber(word));
 	case TypeFloat:
-		return FloatType(atof(rawWord));
+		return FloatType(atof(word.ToUtf8().c_str()));
 	case TypePoint:
 	{
-		int pointX, pointY;
-		sscanf(rawWord, "%d,%d", &pointX, &pointY);
-		return PointType(pointX, pointY);
+		int x, y;
+		if(String::Split comma = word.SplitNumber(x))
+			if(comma.After().BeginsWith(","))
+				if(comma.After().Substr(1).SplitNumber(y))
+					return PointType(x, y);
+		return PointType(0, 0);
 	}
 	case TypeString:
 		return StringType(word);
@@ -204,26 +200,15 @@ AnyType TPTScriptInterface::eval(std::deque<std::string> * words)
 	return StringType(word);
 }
 
-std::string TPTScriptInterface::FormatCommand(std::string command)
+String TPTScriptInterface::FormatCommand(String command)
 {
-	std::deque<std::string> words;
+	std::deque<String> words;
 	std::deque<AnyType> commandWords;
-	std::string outputData;
+	String outputData;
 
 	//Split command into words, put them on the stack
-	char * rawCommand;
-	rawCommand = (char*)calloc(command.length()+1, 1);
-	memcpy(rawCommand, (char*)command.c_str(), command.length());
-	char * currentWord = rawCommand;
-	char * currentCommand = rawCommand;
-	while((currentCommand = strchr(currentCommand, ' ')))
-	{
-		currentCommand[0] = 0;
-		words.push_back(std::string(currentWord));
-		currentWord = ++currentCommand;
-	}
-	words.push_back(std::string(currentWord));
-	free(rawCommand);
+	for(String word : command.PartitionBy(' '))
+		words.push_back(word);
 	while(!words.empty())
 	{
 		ValueType cType = testType(words.front());
@@ -249,7 +234,7 @@ std::string TPTScriptInterface::FormatCommand(std::string command)
 	return outputData;
 }
 
-AnyType TPTScriptInterface::tptS_set(std::deque<std::string> * words)
+AnyType TPTScriptInterface::tptS_set(std::deque<String> * words)
 {
 	//Arguments from stack
 	StringType property = eval(words);
@@ -262,13 +247,13 @@ AnyType TPTScriptInterface::tptS_set(std::deque<std::string> * words)
 	int returnValue = 0;
 
 	FormatType propertyFormat;
-	int propertyOffset = GetPropertyOffset(property.Value(), propertyFormat);
+	int propertyOffset = GetPropertyOffset(property.Value().ToUtf8(), propertyFormat);
 	if (propertyOffset == -1)
 		throw GeneralException("Invalid property");
 
 	//Selector
-	int newValue;
-	float newValuef;
+	int newValue = 0;
+	float newValuef = 0.0f;
 	if (value.GetType() == TypeNumber)
 	{
 		newValuef = newValue = ((NumberType)value).Value();
@@ -281,21 +266,21 @@ AnyType TPTScriptInterface::tptS_set(std::deque<std::string> * words)
 	{
 		if (property.Value() == "temp")
 		{
-			std::string newString = ((StringType)value).Value();
+			String newString = ((StringType)value).Value();
 			if (newString.at(newString.length()-1) == 'C')
-				newValuef = atof(newString.substr(0, newString.length()-1).c_str())+273.15;
+				newValuef = atof(newString.SubstrFromEnd(1).ToUtf8().c_str())+273.15;
 			else if (newString.at(newString.length()-1) == 'F')
-				newValuef = (atof(newString.substr(0, newString.length()-1).c_str())-32.0f)*5/9+273.15f;
+				newValuef = (atof(newString.SubstrFromEnd(1).ToUtf8().c_str())-32.0f)*5/9+273.15f;
 			else
 				throw GeneralException("Invalid value for assignment");
 		}
 		else
 		{
-			newValue = GetParticleType(((StringType)value).Value());
+			newValue = m->GetSimulation()->GetParticleType(((StringType)value).Value().ToUtf8());
 			if (newValue < 0 || newValue >= PT_NUM)
 			{
 				// TODO: add element CAKE to invalidate this
-				if (!strcasecmp(((StringType)value).Value().c_str(),"cake"))
+				if (!strcasecmp(((StringType)value).Value().ToUtf8().c_str(),"cake"))
 					throw GeneralException("Cake is a lie, not an element");
 				throw GeneralException("Invalid element");
 			}
@@ -377,17 +362,16 @@ AnyType TPTScriptInterface::tptS_set(std::deque<std::string> * words)
 	}
 	else if(selector.GetType() == TypeString || selector.GetType() == TypeNumber)
 	{
-		int type;
+		int type = 0;
 		if (selector.GetType() == TypeNumber)
 			type = ((NumberType)selector).Value();
 		else if (selector.GetType() == TypeString)
-			type = GetParticleType(((StringType)selector).Value());
+			type = m->GetSimulation()->GetParticleType(((StringType)selector).Value().ToUtf8());
 
 		if (type<0 || type>=PT_NUM)
 			throw GeneralException("Invalid particle type");
 		if (type==0)
 			throw GeneralException("Cannot set properties of particles that do not exist");
-		std::cout << propertyOffset << std::endl;
 		switch(propertyFormat)
 		{
 		case FormatInt:
@@ -429,7 +413,7 @@ AnyType TPTScriptInterface::tptS_set(std::deque<std::string> * words)
 	return NumberType(returnValue);
 }
 
-AnyType TPTScriptInterface::tptS_create(std::deque<std::string> * words)
+AnyType TPTScriptInterface::tptS_create(std::deque<String> * words)
 {
 	//Arguments from stack
 	AnyType createType = eval(words);
@@ -441,7 +425,7 @@ AnyType TPTScriptInterface::tptS_create(std::deque<std::string> * words)
 	if(createType.GetType() == TypeNumber)
 		type = ((NumberType)createType).Value();
 	else if(createType.GetType() == TypeString)
-		type = GetParticleType(((StringType)createType).Value());
+		type = m->GetSimulation()->GetParticleType(((StringType)createType).Value().ToUtf8());
 	else
 		throw GeneralException("Invalid type");
 
@@ -453,17 +437,17 @@ AnyType TPTScriptInterface::tptS_create(std::deque<std::string> * words)
 				throw GeneralException("Invalid position");
 
 	int v = -1;
-	if (type>>8)
+	if (ID(type))
 	{
-		v = type>>8;
-		type = type&0xFF;
+		v = ID(type);
+		type = TYP(type);
 	}
 	int returnValue = sim->create_part(-1, tempPoint.X, tempPoint.Y, type, v);
 
 	return NumberType(returnValue);
 }
 
-AnyType TPTScriptInterface::tptS_delete(std::deque<std::string> * words)
+AnyType TPTScriptInterface::tptS_delete(std::deque<String> * words)
 {
 	//Arguments from stack
 	AnyType partRef = eval(words);
@@ -490,7 +474,7 @@ AnyType TPTScriptInterface::tptS_delete(std::deque<std::string> * words)
 	return NumberType(0);
 }
 
-AnyType TPTScriptInterface::tptS_load(std::deque<std::string> * words)
+AnyType TPTScriptInterface::tptS_load(std::deque<String> * words)
 {
 	//Arguments from stack
 	NumberType saveID = eval(words);
@@ -504,7 +488,7 @@ AnyType TPTScriptInterface::tptS_load(std::deque<std::string> * words)
 		throw GeneralException("Invalid save ID");
 }
 
-AnyType TPTScriptInterface::tptS_bubble(std::deque<std::string> * words)
+AnyType TPTScriptInterface::tptS_bubble(std::deque<String> * words)
 {
 	//Arguments from stack
 	PointType bubblePosA = eval(words);
@@ -539,11 +523,11 @@ AnyType TPTScriptInterface::tptS_bubble(std::deque<std::string> * words)
 	return NumberType(0);
 }
 
-AnyType TPTScriptInterface::tptS_reset(std::deque<std::string> * words)
+AnyType TPTScriptInterface::tptS_reset(std::deque<String> * words)
 {
 	//Arguments from stack
 	StringType reset = eval(words);
-	std::string resetStr = reset.Value();
+	String resetStr = reset.Value();
 
 	Simulation * sim = m->GetSimulation();
 
@@ -586,7 +570,7 @@ AnyType TPTScriptInterface::tptS_reset(std::deque<std::string> * words)
 	return NumberType(0);
 }
 
-AnyType TPTScriptInterface::tptS_quit(std::deque<std::string> * words)
+AnyType TPTScriptInterface::tptS_quit(std::deque<String> * words)
 {
 	ui::Engine::Ref().Exit();
 

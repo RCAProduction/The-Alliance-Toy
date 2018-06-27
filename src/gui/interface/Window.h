@@ -1,10 +1,12 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include "common/String.h"
 #include <vector>
+#include "common/tpt-compat.h"
 #include "gui/interface/Point.h"
-#include "Engine.h"
 
+class Graphics;
 namespace ui
 {
 
@@ -50,7 +52,7 @@ namespace ui
 		// Remove a component from window. NOTE: This WILL free component from memory.
 		void RemoveComponent(unsigned idx);
 
-		virtual void ToolTip(ui::Point senderPosition, std::string toolTip) {}
+		virtual void ToolTip(ui::Point senderPosition, String toolTip) {}
 
 		virtual void DoInitialized();
 		virtual void DoExit();
@@ -63,8 +65,9 @@ namespace ui
 		virtual void DoMouseDown(int x, int y, unsigned button);
 		virtual void DoMouseUp(int x, int y, unsigned button);
 		virtual void DoMouseWheel(int x, int y, int d);
-		virtual void DoKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt);
-		virtual void DoKeyRelease(int key, Uint16 character, bool shift, bool ctrl, bool alt);
+		virtual void DoKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
+		virtual void DoKeyRelease(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
+		virtual void DoTextInput(String text);
 
 		// Sets halt and destroy, this causes the Windows to stop sending events and remove itself.
 		void SelfDestruct();
@@ -78,6 +81,10 @@ namespace ui
 		enum OkayMethod { Enter, OkayButton };
 		enum ExitMethod { MouseOutside, Escape, ExitButton };
 
+		void MakeActiveWindow();
+		bool CloseActiveWindow();
+		Graphics * GetGraphics();
+
 	protected:
 		ui::Button * okayButton;
 		ui::Button * cancelButton;
@@ -89,15 +96,16 @@ namespace ui
 		virtual void OnFocus() {}
 		virtual void OnBlur() {}
 
-		virtual void OnTryExit(ExitMethod); 
+		virtual void OnTryExit(ExitMethod);
 		virtual void OnTryOkay(OkayMethod);
 
 		virtual void OnMouseMove(int x, int y, int dx, int dy) {}
 		virtual void OnMouseDown(int x, int y, unsigned button) {}
 		virtual void OnMouseUp(int x, int y, unsigned button) {}
 		virtual void OnMouseWheel(int x, int y, int d) {}
-		virtual void OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt) {}
-		virtual void OnKeyRelease(int key, Uint16 character, bool shift, bool ctrl, bool alt) {}
+		virtual void OnKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt) {}
+		virtual void OnKeyRelease(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt) {}
+		virtual void OnTextInput(String text) {}
 		std::vector<Component*> Components;
 		Component *focusedComponent_;
 		Component *hoverComponent;

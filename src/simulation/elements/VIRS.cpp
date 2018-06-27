@@ -50,7 +50,7 @@ int Element_VIRS::update(UPDATE_FUNC_ARGS)
 {
 	//pavg[0] measures how many frames until it is cured (0 if still actively spreading and not being cured)
 	//pavg[1] measures how many frames until it dies
-	int r, rx, ry, rndstore = rand();
+	int r, rx, ry, rndstore = RNG::Ref().gen();
 	if (parts[i].pavg[0])
 	{
 		parts[i].pavg[0] -= (rndstore & 0x1) ? 0:1;
@@ -86,56 +86,56 @@ int Element_VIRS::update(UPDATE_FUNC_ARGS)
 					continue;
 
 				//spread "being cured" state
-				if (parts[r>>8].pavg[0] && ((r&0xFF) == PT_VIRS || (r&0xFF) == PT_VRSS || (r&0xFF) == PT_VRSG))
+				if (parts[ID(r)].pavg[0] && (TYP(r) == PT_VIRS || TYP(r) == PT_VRSS || TYP(r) == PT_VRSG))
 				{
-					parts[i].pavg[0] = parts[r>>8].pavg[0] + ((rndstore & 0x3) ? 2:1);
+					parts[i].pavg[0] = parts[ID(r)].pavg[0] + ((rndstore & 0x3) ? 2:1);
 					return 0;
 				}
 				//soap cures virus
-				else if ((r&0xFF) == PT_SOAP)
+				else if (TYP(r) == PT_SOAP)
 				{
 					parts[i].pavg[0] += 10;
 					if (!(rndstore & 0x3))
-						sim->kill_part(r>>8);
+						sim->kill_part(ID(r));
 					return 0;
 				}
-				else if ((r&0xFF) == PT_PLSM)
+				else if (TYP(r) == PT_PLSM)
 				{
-					if (surround_space && 10 + (int)(sim->pv[(y+ry)/CELL][(x+rx)/CELL]) > (rand()%100))
+					if (surround_space && RNG::Ref().chance(10 + sim->pv[(y+ry)/CELL][(x+rx)/CELL], 100))
 					{
 						sim->create_part(i, x, y, PT_PLSM);
 						return 1;
 					}
 				}
 				//transforms things into virus here
-				else if ((r&0xFF) != PT_VIRS && (r&0xFF) != PT_VRSS && (r&0xFF) != PT_VRSG && (r&0xFF) != PT_DMND)
+				else if (TYP(r) != PT_VIRS && TYP(r) != PT_VRSS && TYP(r) != PT_VRSG && TYP(r) != PT_DMND)
 				{
 					if (!(rndstore & 0x7))
 					{
-						parts[r>>8].tmp2 = (r&0xFF);
-						parts[r>>8].pavg[0] = 0;
+						parts[ID(r)].tmp2 = TYP(r);
+						parts[ID(r)].pavg[0] = 0;
 						if (parts[i].pavg[1])
-							parts[r>>8].pavg[1] = parts[i].pavg[1] + 1;
+							parts[ID(r)].pavg[1] = parts[i].pavg[1] + 1;
 						else
-							parts[r>>8].pavg[1] = 0;
-						if (parts[r>>8].temp < 305.0f)
-							sim->part_change_type(r>>8, x+rx, y+ry, PT_VRSS);
-						else if (parts[r>>8].temp > 673.0f)
-							sim->part_change_type(r>>8, x+rx, y+ry, PT_VRSG);
+							parts[ID(r)].pavg[1] = 0;
+						if (parts[ID(r)].temp < 305.0f)
+							sim->part_change_type(ID(r), x+rx, y+ry, PT_VRSS);
+						else if (parts[ID(r)].temp > 673.0f)
+							sim->part_change_type(ID(r), x+rx, y+ry, PT_VRSG);
 						else
-							sim->part_change_type(r>>8, x+rx, y+ry, PT_VIRS);
+							sim->part_change_type(ID(r), x+rx, y+ry, PT_VIRS);
 					}
 					rndstore >>= 3;
 				}
 				//protons make VIRS last forever
-				else if ((sim->photons[y+ry][x+rx]&0xFF) == PT_PROT)
+				else if (TYP(sim->photons[y+ry][x+rx]) == PT_PROT)
 				{
 					parts[i].pavg[1] = 0;
 				}
 			}
 			//reset rndstore only once, halfway through
 			else if (!rx && !ry)
-				rndstore = rand();
+				rndstore = RNG::Ref().gen();
 		}
 	return 0;
 }

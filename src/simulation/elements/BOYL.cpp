@@ -68,16 +68,16 @@ int Element_BOYL::update(UPDATE_FUNC_ARGS)
 				r = pmap[y+ry][x+rx];
 				if (!r)
 					continue;
-				if ((r&0xFF)==PT_WATR)
+				if (TYP(r)==PT_WATR)
 				{
-					if (!(rand()%30))
-						sim->part_change_type(r>>8,x+rx,y+ry,PT_FOG);
+					if (RNG::Ref().chance(1, 30))
+						sim->part_change_type(ID(r),x+rx,y+ry,PT_FOG);
 				}
-				else if ((r&0xFF)==PT_O2)
+				else if (TYP(r)==PT_O2)
 				{
-					if (!(rand()%9))
+					if (RNG::Ref().chance(1, 9))
 					{
-						sim->kill_part(r>>8);
+						sim->kill_part(ID(r));
 						sim->part_change_type(i,x,y,PT_WATR);
 						sim->pv[y/CELL][x/CELL] += 4.0;
 					}

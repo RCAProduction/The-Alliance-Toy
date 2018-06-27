@@ -1,5 +1,4 @@
 #include "DebugLines.h"
-#include "gui/interface/Engine.h"
 #include "gui/game/GameView.h"
 #include "gui/game/GameController.h"
 
@@ -13,7 +12,7 @@ DebugLines::DebugLines(unsigned int id, GameView * view, GameController * contro
 
 void DebugLines::Draw()
 {
-	Graphics * g = ui::Engine::Ref().g;
+	Graphics * g = view->GetGraphics();
 
 	if (view->GetDrawingLine())
 	{
@@ -28,21 +27,18 @@ void DebugLines::Draw()
 		g->draw_line(0, drawPoint2.Y, XRES, drawPoint2.Y, 255, 255, 255, 120);
 		g->draw_line(drawPoint2.X, 0, drawPoint2.X, YRES, 255, 255, 255, 120);
 
-		std::stringstream info;
-		info << drawPoint2.X << " x " << drawPoint2.Y;
-		g->drawtext_outline(drawPoint2.X+(drawPoint2.X>drawPoint1.X?3:-g->textwidth(info.str().c_str())-3), drawPoint2.Y+(drawPoint2.Y<drawPoint1.Y?-10:3), info.str().c_str(), 255, 255, 255, 200);
+		String info;
+		info = String::Build(drawPoint2.X, " x ", drawPoint2.Y);
+		g->drawtext_outline(drawPoint2.X+(drawPoint2.X>drawPoint1.X?3:-g->textwidth(info)-3), drawPoint2.Y+(drawPoint2.Y<drawPoint1.Y?-10:3), info, 255, 255, 255, 200);
 
-		info.str("");
-		info << drawPoint1.X << " x " << drawPoint1.Y;
-		g->drawtext_outline(drawPoint1.X+(drawPoint2.X<drawPoint1.X?3:-g->textwidth(info.str().c_str())-2), drawPoint1.Y+(drawPoint2.Y>drawPoint1.Y?-10:3), info.str().c_str(), 255, 255, 255, 200);
+		info = String::Build(drawPoint1.X, " x ", drawPoint1.Y);
+		g->drawtext_outline(drawPoint1.X+(drawPoint2.X<drawPoint1.X?3:-g->textwidth(info)-2), drawPoint1.Y+(drawPoint2.Y>drawPoint1.Y?-10:3), info, 255, 255, 255, 200);
 
-		info.str("");
-		info << std::abs(drawPoint2.X-drawPoint1.X);
-		g->drawtext_outline((drawPoint1.X+drawPoint2.X)/2-g->textwidth(info.str().c_str())/2, drawPoint1.Y+(drawPoint2.Y>drawPoint1.Y?-10:3), info.str().c_str(), 255, 255, 255, 200);
+		info = String::Build(std::abs(drawPoint2.X-drawPoint1.X));
+		g->drawtext_outline((drawPoint1.X+drawPoint2.X)/2-g->textwidth(info)/2, drawPoint1.Y+(drawPoint2.Y>drawPoint1.Y?-10:3), info, 255, 255, 255, 200);
 
-		info.str("");
-		info << std::abs(drawPoint2.Y-drawPoint1.Y);
-		g->drawtext_outline(drawPoint1.X+(drawPoint2.X<drawPoint1.X?3:-g->textwidth(info.str().c_str())-2), (drawPoint1.Y+drawPoint2.Y)/2-3, info.str().c_str(), 255, 255, 255, 200);
+		info = String::Build(std::abs(drawPoint2.Y-drawPoint1.Y));
+		g->drawtext_outline(drawPoint1.X+(drawPoint2.X<drawPoint1.X?3:-g->textwidth(info)-2), (drawPoint1.Y+drawPoint2.Y)/2-3, info, 255, 255, 255, 200);
 	}
 }
 

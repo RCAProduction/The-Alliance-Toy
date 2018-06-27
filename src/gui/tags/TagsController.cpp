@@ -22,29 +22,28 @@ SaveInfo * TagsController::GetSave()
 	return tagsModel->GetSave();
 }
 
-void TagsController::RemoveTag(std::string tag)
+void TagsController::RemoveTag(ByteString tag)
 {
 	tagsModel->RemoveTag(tag);
 }
 
 
-void TagsController::AddTag(std::string tag)
+void TagsController::AddTag(ByteString tag)
 {
 	tagsModel->AddTag(tag);
 }
 
 void TagsController::Exit()
 {
-	if(ui::Engine::Ref().GetWindow() == tagsView)
-		ui::Engine::Ref().CloseWindow();
+	tagsView->CloseActiveWindow();
 	if(callback)
 		callback->ControllerExit();
 	HasDone = true;
 }
 
-TagsController::~TagsController() {
-	if(ui::Engine::Ref().GetWindow() == tagsView)
-		ui::Engine::Ref().CloseWindow();
+TagsController::~TagsController()
+{
+	tagsView->CloseActiveWindow();
 	delete tagsModel;
 	delete tagsView;
 	delete callback;

@@ -19,7 +19,7 @@ private:
 	ControllerCallback * callback;
 
 	double nextQueryTime;
-	std::string nextQuery;
+	String nextQuery;
 	bool nextQueryDone;
 	bool instantOpen;
 	bool doRefresh;
@@ -32,12 +32,11 @@ public:
 	~SearchController();
 	SearchView * GetView() { return searchView; }
 	void Exit();
-	void DoSearch(std::string query, bool now = false);
-	void DoSearch2(std::string query);
+	void DoSearch(String query, bool now = false);
+	void DoSearch2(String query);
 	void Refresh();
-	void NextPage();
-	void PrevPage();
 	void SetPage(int page);
+	void SetPageRelative(int offset);
 	void ChangeSort();
 	void ShowOwn(bool show);
 	void ShowFavourite(bool show);

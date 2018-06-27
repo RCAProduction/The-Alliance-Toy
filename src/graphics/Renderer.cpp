@@ -1,11 +1,17 @@
 #include <cmath>
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <cstdio>
 #include <cstdlib>
 #include "Config.h"
+#include "Misc.h"
 #include "Renderer.h"
 #include "Graphics.h"
+#include "common/tpt-compat.h"
+#include "common/tpt-minmax.h"
+#include "common/tpt-rand.h"
+#include "gui/game/RenderPreset.h"
 #include "simulation/Elements.h"
 #include "simulation/ElementGraphics.h"
 #include "simulation/Air.h"
@@ -14,13 +20,10 @@
 #include "lua/LuaScriptInterface.h"
 #include "lua/LuaScriptHelper.h"
 #endif
-extern "C"
-{
 #include "hmap.h"
 #ifdef OGLR
 #include "Shaders.h"
 #endif
-}
 
 #ifndef OGLI
 #define VIDXRES WINDOWW
@@ -96,7 +99,7 @@ void Renderer::RenderBegin()
 	{
 		std::copy(persistentVid, persistentVid+(VIDXRES*YRES), vid);
 	}
-	pixel * oldVid;
+	pixel * oldVid = NULL;
 	if(display_mode & DISPLAY_WARP)
 	{
 		oldVid = vid;
@@ -515,17 +518,16 @@ void Renderer::RenderZoom()
 	#endif
 }
 
-int Renderer_wtypesCount;
-wall_type * Renderer_wtypes = LoadWalls(Renderer_wtypesCount);
+std::vector<wall_type> Renderer_wtypes = LoadWalls();
 
 
 VideoBuffer * Renderer::WallIcon(int wallID, int width, int height)
 {
 	int i, j;
 	int wt = wallID;
-	if (wt<0 || wt>=Renderer_wtypesCount)
+	if (wt<0 || wt>=(int)Renderer_wtypes.size())
 		return 0;
-	wall_type *wtypes = Renderer_wtypes;
+	wall_type *wtypes = Renderer_wtypes.data();
 	pixel pc = wtypes[wt].colour;
 	pixel gc = wtypes[wt].eglow;
 	VideoBuffer * newTexture = new VideoBuffer(width, height);
@@ -567,7 +569,7 @@ VideoBuffer * Renderer::WallIcon(int wallID, int width, int height)
 			for (i=0; i<(width/4)+j; i++)
 			{
 				if (!(i&j&1))
-					newTexture->SetPixel(i, j, PIXR(pc), PIXG(pc), PIXB(pc), 255);	
+					newTexture->SetPixel(i, j, PIXR(pc), PIXG(pc), PIXB(pc), 255);
 			}
 			for (; i<width; i++)
 			{
@@ -587,7 +589,7 @@ VideoBuffer * Renderer::WallIcon(int wallID, int width, int height)
 					newTexture->SetPixel(i, j, 0x80, 0x80, 0x80, 255);
 			}
 	}
-	else if (wt==WL_EHOLE)
+	else if (wt==WL_EHOLE || wt==WL_STASIS)
 	{
 		for (j=0; j<height; j++)
 		{
@@ -599,7 +601,7 @@ VideoBuffer * Renderer::WallIcon(int wallID, int width, int height)
 			for (; i<width; i++)
 			{
 				if (!(i&j&1))
-					newTexture->SetPixel(i, j, PIXR(pc), PIXG(pc), PIXB(pc), 255);	
+					newTexture->SetPixel(i, j, PIXR(pc), PIXG(pc), PIXB(pc), 255);
 			}
 		}
 	}
@@ -673,7 +675,7 @@ VideoBuffer * Renderer::WallIcon(int wallID, int width, int height)
 				newTexture->SetPixel(i, j, PIXR(pc), PIXG(pc), PIXB(pc), 255);
 			}
 		}
-		newTexture->SetCharacter(4, 2, 0x8D, 255, 255, 255, 255);
+		newTexture->AddCharacter(4, 2, 0xE00D, 255, 255, 255, 255);
 		for (i=width/3; i<width; i++)
 		{
 			newTexture->SetPixel(i, 7+(int)(3.9f*cos(i*0.3f)), 255, 255, 255, 255);
@@ -744,9 +746,10 @@ void Renderer::DrawWalls()
 				switch (sim->wtypes[wt].drawstyle)
 				{
 				case 0:
-					if (wt == WL_EWALL)
+					if (wt == WL_EWALL || wt == WL_STASIS)
 					{
-						if (powered)
+						bool reverse = wt == WL_STASIS;
+						if ((powered>0) ^ reverse)
 						{
 							for (int j = 0; j < CELL; j++)
 								for (int i =0; i < CELL; i++)
@@ -800,7 +803,7 @@ void Renderer::DrawWalls()
 						// there is no velocity here, draw a streamline and continue
 						if (!xVel && !yVel)
 						{
-							drawtext(x*CELL, y*CELL-2, "\x8D", 255, 255, 255, 128);
+							drawtext(x*CELL, y*CELL-2, 0xE00D, 255, 255, 255, 128);
 							addpixel(oldX, oldY, 255, 255, 255, 255);
 							continue;
 						}
@@ -831,7 +834,7 @@ void Renderer::DrawWalls()
 							xf += xVel;
 							yf += yVel;
 						}
-						drawtext(x*CELL, y*CELL-2, "\x8D", 255, 255, 255, 128);
+						drawtext(x*CELL, y*CELL-2, 0xE00D, 255, 255, 255, 128);
 					}
 					break;
 				case 1:
@@ -980,9 +983,9 @@ void Renderer::DrawSigns()
 	for (size_t i = 0; i < signs.size(); i++)
 		if (signs[i].text.length())
 		{
-			char type = 0;
-			std::string text = signs[i].getText(sim);
-			sign::splitsign(signs[i].text.c_str(), &type);
+			String::value_type type = 0;
+			String text = signs[i].getText(sim);
+			sign::splitsign(signs[i].text, &type);
 			signs[i].pos(text, x, y, w, h);
 			clearrect(x, y, w+1, h);
 			drawrect(x, y, w+1, h, 192, 192, 192, 255);
@@ -992,7 +995,7 @@ void Renderer::DrawSigns()
 				drawtext(x+3, y+3, text, 211, 211, 40, 255);
 			else
 				drawtext(x+3, y+3, text, 0, 191, 255, 255);
-				
+
 			if (signs[i].ju != sign::None)
 			{
 				int x = signs[i].x;
@@ -1029,6 +1032,8 @@ void Renderer::render_gravlensing(pixel * source)
 	pixel t;
 	pixel *src = source;
 	pixel *dst = vid;
+	if (!dst)
+		return;
 	for(nx = 0; nx < XRES; nx++)
 	{
 		for(ny = 0; ny < YRES; ny++)
@@ -1040,7 +1045,7 @@ void Renderer::render_gravlensing(pixel * source)
 			gy = (int)(ny-sim->gravy[co]*0.875f+0.5f);
 			bx = (int)(nx-sim->gravx[co]+0.5f);
 			by = (int)(ny-sim->gravy[co]+0.5f);
-			if(rx > 0 && rx < XRES && ry > 0 && ry < YRES && gx > 0 && gx < XRES && gy > 0 && gy < YRES && bx > 0 && bx < XRES && by > 0 && by < YRES)
+			if(rx >= 0 && rx < XRES && ry >= 0 && ry < YRES && gx >= 0 && gx < XRES && gy >= 0 && gy < YRES && bx >= 0 && bx < XRES && by >= 0 && by < YRES)
 			{
 				t = dst[ny*(VIDXRES)+nx];
 				r = PIXR(src[ry*(VIDXRES)+rx]) + PIXR(t);
@@ -1228,6 +1233,7 @@ void Renderer::render_parts()
 			}
 	}
 #endif
+	foundElements = 0;
 	for(i = 0; i<=sim->parts_lastActiveIndex; i++) {
 		if (sim->parts[i].type && sim->parts[i].type >= 0 && sim->parts[i].type < PT_NUM) {
 			t = sim->parts[i].type;
@@ -1241,7 +1247,7 @@ void Renderer::render_parts()
 
 			if(nx >= XRES || nx < 0 || ny >= YRES || ny < 0)
 				continue;
-			if((sim->photons[ny][nx]&0xFF) && !(sim->elements[t].Properties & TYPE_ENERGY) && t!=PT_STKM && t!=PT_STKM2 && t!=PT_FIGH)
+			if(TYP(sim->photons[ny][nx]) && !(sim->elements[t].Properties & TYPE_ENERGY) && t!=PT_STKM && t!=PT_STKM2 && t!=PT_FIGH)
 				continue;
 
 			//Defaults
@@ -1288,7 +1294,19 @@ void Renderer::render_parts()
 #if !defined(RENDERER) && defined(LUACONSOLE)
 						if (lua_gr_func[t])
 						{
-							luacon_graphicsReplacement(this, &(sim->parts[i]), nx, ny, &pixel_mode, &cola, &colr, &colg, &colb, &firea, &firer, &fireg, &fireb, i);
+							if (luacon_graphicsReplacement(this, &(sim->parts[i]), nx, ny, &pixel_mode, &cola, &colr, &colg, &colb, &firea, &firer, &fireg, &fireb, i))
+							{
+								graphicscache[t].isready = 1;
+								graphicscache[t].pixel_mode = pixel_mode;
+								graphicscache[t].cola = cola;
+								graphicscache[t].colr = colr;
+								graphicscache[t].colg = colg;
+								graphicscache[t].colb = colb;
+								graphicscache[t].firea = firea;
+								graphicscache[t].firer = firer;
+								graphicscache[t].fireg = fireg;
+								graphicscache[t].fireb = fireb;
+							}
 						}
 						else if ((*(elements[t].Graphics))(this, &(sim->parts[i]), nx, ny, &pixel_mode, &cola, &colr, &colg, &colb, &firea, &firer, &fireg, &fireb)) //That's a lot of args, a struct might be better
 #else
@@ -1354,6 +1372,8 @@ void Renderer::render_parts()
 					cola = 255;
 					if(pixel_mode & (FIREMODE | PMODE_GLOW))
 						pixel_mode = (pixel_mode & ~(FIREMODE|PMODE_GLOW)) | PMODE_BLUR;
+					else if ((pixel_mode & (PMODE_BLEND | PMODE_ADD)) == (PMODE_BLEND | PMODE_ADD))
+						pixel_mode = (pixel_mode & ~(PMODE_BLEND|PMODE_ADD)) | PMODE_FLAT;
 					else if (!pixel_mode)
 						pixel_mode |= PMODE_FLAT;
 				}
@@ -1368,6 +1388,8 @@ void Renderer::render_parts()
 					cola = 255;
 					if(pixel_mode & (FIREMODE | PMODE_GLOW))
 						pixel_mode = (pixel_mode & ~(FIREMODE|PMODE_GLOW)) | PMODE_BLUR;
+					else if ((pixel_mode & (PMODE_BLEND | PMODE_ADD)) == (PMODE_BLEND | PMODE_ADD))
+						pixel_mode = (pixel_mode & ~(PMODE_BLEND|PMODE_ADD)) | PMODE_FLAT;
 					else if (!pixel_mode)
 						pixel_mode |= PMODE_FLAT;
 				}
@@ -1382,18 +1404,19 @@ void Renderer::render_parts()
 				//Apply decoration colour
 				if(!(colour_mode & ~COLOUR_GRAD) && decorations_enable && deca)
 				{
+					deca++;
 					if(!(pixel_mode & NO_DECO))
 					{
-						colr = (deca*decr + (255-deca)*colr) >> 8;
-						colg = (deca*decg + (255-deca)*colg) >> 8;
-						colb = (deca*decb + (255-deca)*colb) >> 8;
+						colr = (deca*decr + (256-deca)*colr) >> 8;
+						colg = (deca*decg + (256-deca)*colg) >> 8;
+						colb = (deca*decb + (256-deca)*colb) >> 8;
 					}
 
 					if(pixel_mode & DECO_FIRE)
 					{
-						firer = (deca*decr + (255-deca)*firer) >> 8;
-						fireg = (deca*decg + (255-deca)*fireg) >> 8;
-						fireb = (deca*decb + (255-deca)*fireb) >> 8;
+						firer = (deca*decr + (256-deca)*firer) >> 8;
+						fireg = (deca*decg + (256-deca)*fireg) >> 8;
+						fireb = (deca*decb + (256-deca)*fireb) >> 8;
 					}
 				}
 
@@ -1403,6 +1426,7 @@ void Renderer::render_parts()
 					{
 						colr = firer = 255;
 						colg = fireg = colb = fireb = 0;
+						foundElements++;
 					}
 					else
 					{
@@ -1470,9 +1494,8 @@ void Renderer::render_parts()
 
 					if (mousePos.X>(nx-3) && mousePos.X<(nx+3) && mousePos.Y<(ny+3) && mousePos.Y>(ny-3)) //If mouse is in the head
 					{
-						char buff[12];  //Buffer for HP
-						sprintf(buff, "%3d", sim->parts[i].life);  //Show HP
-						drawtext(mousePos.X-8-2*(sim->parts[i].life<100)-2*(sim->parts[i].life<10), mousePos.Y-12, buff, 255, 255, 255, 255);
+						String hp = String::Build(Format::Width(sim->parts[i].life, 3));
+						drawtext(mousePos.X-8-2*(sim->parts[i].life<100)-2*(sim->parts[i].life<10), mousePos.Y-12, hp, 255, 255, 255, 255);
 					}
 
 					if (findingElement == t)
@@ -1482,20 +1505,17 @@ void Renderer::render_parts()
 					}
 					else if (colour_mode != COLOUR_HEAT)
 					{
-						if (cplayer->elem<PT_NUM && cplayer->elem > 0)
+						if (cplayer->fan)
 						{
-							if (cplayer->elem == SPC_AIR)
-							{
-								colr = PIXR(0x8080FF);
-								colg = PIXG(0x8080FF);
-								colb = PIXB(0x8080FF);
-							}
-							else
-							{
-								colr = PIXR(elements[cplayer->elem].Colour);
-								colg = PIXG(elements[cplayer->elem].Colour);
-								colb = PIXB(elements[cplayer->elem].Colour);
-							}
+							colr = PIXR(0x8080FF);
+							colg = PIXG(0x8080FF);
+							colb = PIXB(0x8080FF);
+						}
+						else if (cplayer->elem < PT_NUM && cplayer->elem > 0)
+						{
+							colr = PIXR(elements[cplayer->elem].Colour);
+							colg = PIXG(elements[cplayer->elem].Colour);
+							colb = PIXB(elements[cplayer->elem].Colour);
 						}
 						else
 						{
@@ -1752,7 +1772,7 @@ void Renderer::render_parts()
 				}
 				if(pixel_mode & PMODE_SPARK)
 				{
-					flicker = rand()%20;
+					flicker = random_gen()%20;
 #ifdef OGLR
 					//Oh god, this is awful
 					lineC[clineC++] = ((float)colr)/255.0f;
@@ -1816,7 +1836,7 @@ void Renderer::render_parts()
 				}
 				if(pixel_mode & PMODE_FLARE)
 				{
-					flicker = rand()%20;
+					flicker = random_gen()%20;
 #ifdef OGLR
 					//Oh god, this is awful
 					lineC[clineC++] = ((float)colr)/255.0f;
@@ -1889,7 +1909,7 @@ void Renderer::render_parts()
 				}
 				if(pixel_mode & PMODE_LFLARE)
 				{
-					flicker = rand()%20;
+					flicker = random_gen()%20;
 #ifdef OGLR
 					//Oh god, this is awful
 					lineC[clineC++] = ((float)colr)/255.0f;
@@ -1973,7 +1993,7 @@ void Renderer::render_parts()
 						drad = (M_PI * ((float)orbl[r]) / 180.0f)*1.41f;
 						nxo = (int)(ddist*cos(drad));
 						nyo = (int)(ddist*sin(drad));
-						if (ny+nyo>0 && ny+nyo<YRES && nx+nxo>0 && nx+nxo<XRES && (sim->pmap[ny+nyo][nx+nxo]&0xFF) != PT_PRTI)
+						if (ny+nyo>0 && ny+nyo<YRES && nx+nxo>0 && nx+nxo<XRES && TYP(sim->pmap[ny+nyo][nx+nxo]) != PT_PRTI)
 							addpixel(nx+nxo, ny+nyo, colr, colg, colb, 255-orbd[r]);
 					}
 				}
@@ -1990,21 +2010,21 @@ void Renderer::render_parts()
 						drad = (M_PI * ((float)orbl[r]) / 180.0f)*1.41f;
 						nxo = (int)(ddist*cos(drad));
 						nyo = (int)(ddist*sin(drad));
-						if (ny+nyo>0 && ny+nyo<YRES && nx+nxo>0 && nx+nxo<XRES && (sim->pmap[ny+nyo][nx+nxo]&0xFF) != PT_PRTO)
+						if (ny+nyo>0 && ny+nyo<YRES && nx+nxo>0 && nx+nxo<XRES && TYP(sim->pmap[ny+nyo][nx+nxo]) != PT_PRTO)
 							addpixel(nx+nxo, ny+nyo, colr, colg, colb, 255-orbd[r]);
 					}
 				}
 				if (pixel_mode & EFFECT_DBGLINES && !(display_mode&DISPLAY_PERS))
 				{
 					// draw lines connecting wifi/portal channels
-					if (mousePos.X == nx && mousePos.Y == ny && (i == sim->pmap[ny][nx]>>8) && debugLines)
+					if (mousePos.X == nx && mousePos.Y == ny && i == ID(sim->pmap[ny][nx]) && debugLines)
 					{
 						int type = parts[i].type, tmp = (int)((parts[i].temp-73.15f)/100+1), othertmp;
 						if (type == PT_PRTI)
 							type = PT_PRTO;
 						else if (type == PT_PRTO)
 							type = PT_PRTI;
-						for (int z = 0; z < sim->parts_lastActiveIndex; z++)
+						for (int z = 0; z <= sim->parts_lastActiveIndex; z++)
 						{
 							if (parts[z].type == type)
 							{
@@ -2397,7 +2417,7 @@ void Renderer::draw_air()
 	float (*hv)[XRES/CELL] = sim->air->hv;
 	float (*vx)[XRES/CELL] = sim->air->vx;
 	float (*vy)[XRES/CELL] = sim->air->vy;
-	pixel c;
+	pixel c = 0;
 	for (y=0; y<YRES/CELL; y++)
 		for (x=0; x<XRES/CELL; x++)
 		{
@@ -2564,7 +2584,7 @@ pixel Renderer::GetPixel(int x, int y)
 	if (x<0 || y<0 || x>=VIDXRES || y>=VIDYRES)
 		return 0;
 #ifdef OGLR
-	return 0;	
+	return 0;
 #else
 	return vid[(y*VIDXRES)+x];
 #endif
@@ -2583,6 +2603,7 @@ Renderer::Renderer(Graphics * g, Simulation * sim):
 	debugLines(false),
 	sampleColor(0xFFFFFFFF),
 	findingElement(0),
+    foundElements(0),
 	mousePos(0, 0),
 	zoomWindowPosition(0, 0),
 	zoomScopePosition(0, 0),
@@ -2820,12 +2841,12 @@ Renderer::Renderer(Graphics * g, Simulation * sim):
 	glEnable(GL_TEXTURE_2D);
 	glGenTextures(1, &textTexture);
 	glBindTexture(GL_TEXTURE_2D, textTexture);
-	
+
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_TEXTURE_2D);
 
@@ -2961,7 +2982,7 @@ unsigned int Renderer::GetColourMode()
 VideoBuffer Renderer::DumpFrame()
 {
 #ifdef OGLR
-#elif defined(OGLI) 
+#elif defined(OGLI)
 	VideoBuffer newBuffer(XRES, YRES);
 	std::copy(vid, vid+(XRES*YRES), newBuffer.Buffer);
 	return newBuffer;
@@ -3000,4 +3021,3 @@ Renderer::~Renderer()
 #endif
 
 #undef PIXELMETHODS_CLASS
-

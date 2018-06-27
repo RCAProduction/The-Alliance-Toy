@@ -1,9 +1,10 @@
-#include <string>
+#include "common/String.h"
 #include <iostream>
 #include <stdexcept>
 #include "Config.h"
 #include "Platform.h"
 #include "Format.h"
+#include "graphics/Graphics.h"
 #include "gui/interface/Point.h"
 #include "gui/interface/Textbox.h"
 #include "gui/interface/Keys.h"
@@ -12,11 +13,11 @@
 
 using namespace ui;
 
-Textbox::Textbox(Point position, Point size, std::string textboxText, std::string textboxPlaceholder):
+Textbox::Textbox(Point position, Point size, String textboxText, String textboxPlaceholder):
 	Label(position, size, ""),
 	ReadOnly(false),
 	inputType(All),
-	limit(std::string::npos),
+	limit(String::npos),
 	keyDown(0),
 	characterDown(0),
 	mouseDown(false),
@@ -52,19 +53,19 @@ void Textbox::SetHidden(bool hidden)
 	masked = hidden;
 }
 
-void Textbox::SetPlaceholder(std::string text)
+void Textbox::SetPlaceholder(String text)
 {
 	placeHolder = text;
 }
 
-void Textbox::SetText(std::string newText)
+void Textbox::SetText(String newText)
 {
 	backingText = newText;
 
 	if(masked)
 	{
-		std::string maskedText = std::string(newText);
-		std::fill(maskedText.begin(), maskedText.end(), '\x8D');
+		String maskedText = newText;
+		std::fill(maskedText.begin(), maskedText.end(), 0xE00D);
 		Label::SetText(maskedText);
 	}
 	else
@@ -74,7 +75,7 @@ void Textbox::SetText(std::string newText)
 
 	if(cursor)
 	{
-		Graphics::PositionAtCharIndex(multiline?((char*)textLines.c_str()):((char*)text.c_str()), cursor, cursorPositionX, cursorPositionY);
+		Graphics::PositionAtCharIndex(multiline?textLines:text, cursor, cursorPositionX, cursorPositionY);
 	}
 	else
 	{
@@ -102,7 +103,7 @@ size_t Textbox::GetLimit()
 	return limit;
 }
 
-std::string Textbox::GetText()
+String Textbox::GetText()
 {
 	return backingText;
 }
@@ -125,7 +126,7 @@ void Textbox::OnContextMenuAction(int item)
 
 void Textbox::resetCursorPosition()
 {
-	Graphics::PositionAtCharIndex(multiline?((char*)textLines.c_str()):((char*)text.c_str()), cursor, cursorPositionX, cursorPositionY);
+	Graphics::PositionAtCharIndex(multiline?textLines:text, cursor, cursorPositionX, cursorPositionY);
 }
 
 void Textbox::TabFocus()
@@ -140,16 +141,16 @@ void Textbox::cutSelection()
 	{
 		if (getLowerSelectionBound() < 0 || getHigherSelectionBound() > (int)backingText.length())
 			return;
-		std::string toCopy = backingText.substr(getLowerSelectionBound(), getHigherSelectionBound()-getLowerSelectionBound());
-		ClipboardPush(format::CleanString(toCopy, false, true, false));
+		String toCopy = backingText.Between(getLowerSelectionBound(), getHigherSelectionBound());
+		ClipboardPush(format::CleanString(toCopy, false, true, false).ToUtf8());
 		backingText.erase(backingText.begin()+getLowerSelectionBound(), backingText.begin()+getHigherSelectionBound());
-		cursor = getLowerSelectionBound(); 
+		cursor = getLowerSelectionBound();
 	}
 	else
 	{
 		if (!backingText.length())
 			return;
-		ClipboardPush(format::CleanString(backingText, false, true, false));
+		ClipboardPush(format::CleanString(backingText, false, true, false).ToUtf8());
 		backingText.clear();
 		cursor = 0;
 	}
@@ -157,8 +158,8 @@ void Textbox::cutSelection()
 
 	if(masked)
 	{
-		std::string maskedText = std::string(backingText);
-		std::fill(maskedText.begin(), maskedText.end(), '\x8D');
+		String maskedText = backingText;
+		std::fill(maskedText.begin(), maskedText.end(), 0xE00D);
 		Label::SetText(maskedText);
 	}
 	else
@@ -173,7 +174,7 @@ void Textbox::cutSelection()
 
 	if(cursor)
 	{
-		Graphics::PositionAtCharIndex(multiline?((char*)textLines.c_str()):((char*)text.c_str()), cursor, cursorPositionX, cursorPositionY);
+		Graphics::PositionAtCharIndex(multiline?textLines:text, cursor, cursorPositionX, cursorPositionY);
 	}
 	else
 	{
@@ -185,12 +186,12 @@ void Textbox::cutSelection()
 
 void Textbox::pasteIntoSelection()
 {
-	std::string newText = format::CleanString(ClipboardPull(), true, true, inputType != Multiline, inputType == Number || inputType == Numeric);
+	String newText = format::CleanString(ClipboardPull().FromUtf8(), true, true, inputType != Multiline, inputType == Number || inputType == Numeric);
 	if (HasSelection())
 	{
 		if (getLowerSelectionBound() < 0 || getHigherSelectionBound() > (int)backingText.length())
 			return;
-		backingText.erase(backingText.begin()+getLowerSelectionBound(), backingText.begin()+getHigherSelectionBound());
+		backingText.EraseBetween(getLowerSelectionBound(), getHigherSelectionBound());
 		cursor = getLowerSelectionBound();
 	}
 
@@ -200,32 +201,29 @@ void Textbox::pasteIntoSelection()
 	regionWidth -= Appearance.Margin.Left;
 	regionWidth -= Appearance.Margin.Right;
 
-	if (limit != std::string::npos)
+	if (limit != String::npos)
 	{
-		if(limit-backingText.length() >= 0)
-			newText = newText.substr(0, limit-backingText.length());
-		else
-			newText = "";
+		newText = newText.Substr(0, limit-backingText.length());
 	}
-	if (!multiline && Graphics::textwidth((char*)std::string(backingText+newText).c_str()) > regionWidth)
+	if (!multiline && Graphics::textwidth(backingText + newText) > regionWidth)
 	{
-		int pLimit = regionWidth - Graphics::textwidth((char*)backingText.c_str());
-		int cIndex = Graphics::CharIndexAtPosition((char *)newText.c_str(), pLimit, 0);
+		int pLimit = regionWidth - Graphics::textwidth(backingText);
+		int cIndex = Graphics::CharIndexAtPosition(newText, pLimit, 0);
 
 		if (cIndex > 0)
-			newText = newText.substr(0, cIndex);
+			newText = newText.Substr(0, cIndex);
 		else
 			newText = "";
 	}
 
-	backingText.insert(cursor, newText);
+	backingText.Insert(cursor, newText);
 	cursor = cursor+newText.length();
 	ClearSelection();
 
 	if(masked)
 	{
-		std::string maskedText = std::string(backingText);
-		std::fill(maskedText.begin(), maskedText.end(), '\x8D');
+		String maskedText = backingText;
+		std::fill(maskedText.begin(), maskedText.end(), 0xE00D);
 		Label::SetText(maskedText);
 	}
 	else
@@ -243,7 +241,7 @@ void Textbox::pasteIntoSelection()
 
 	if(cursor)
 	{
-		Graphics::PositionAtCharIndex(multiline?((char*)textLines.c_str()):((char*)text.c_str()), cursor, cursorPositionX, cursorPositionY);
+		Graphics::PositionAtCharIndex(multiline?textLines:text, cursor, cursorPositionX, cursorPositionY);
 	}
 	else
 	{
@@ -253,7 +251,7 @@ void Textbox::pasteIntoSelection()
 		actionCallback->TextChangedCallback(this);
 }
 
-bool Textbox::CharacterValid(Uint16 character)
+bool Textbox::CharacterValid(int character)
 {
 	switch(inputType)
 	{
@@ -272,6 +270,15 @@ bool Textbox::CharacterValid(Uint16 character)
 	return false;
 }
 
+// TODO: proper unicode validation
+bool Textbox::StringValid(String text)
+{
+	for (String::value_type c : text)
+		if (!CharacterValid(c))
+			return false;
+	return true;
+}
+
 void Textbox::Tick(float dt)
 {
 	Label::Tick(dt);
@@ -280,31 +287,32 @@ void Textbox::Tick(float dt)
 		keyDown = 0;
 		characterDown = 0;
 	}
-	if ((keyDown || characterDown) && repeatTime <= Platform::GetTime())
+	unsigned long time_pls = Platform::GetTime();
+	if ((keyDown || characterDown) && repeatTime <= time_pls)
 	{
-		OnVKeyPress(keyDown, characterDown, false, false, false);
+		//OnVKeyPress(keyDown, characterDown, false, false, false);
 		repeatTime = Platform::GetTime()+30;
 	}
 }
 
-void Textbox::OnKeyRelease(int key, Uint16 character, bool shift, bool ctrl, bool alt)
+void Textbox::OnKeyRelease(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt)
 {
 	keyDown = 0;
 	characterDown = 0;
 }
 
-void Textbox::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt)
+void Textbox::OnKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt)
 {
-	characterDown = character;
+	characterDown = scan;
 	keyDown = key;
 	repeatTime = Platform::GetTime()+300;
-	OnVKeyPress(key, character, shift, ctrl, alt);
+	OnVKeyPress(key, scan, repeat, shift, ctrl, alt);
 }
 
-void Textbox::OnVKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt)
+void Textbox::OnVKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt)
 {
 	bool changed = false;
-	if(ctrl && key == 'c' && !masked)
+	if(ctrl && key == 'c' && !masked && !repeat)
 	{
 		copySelection();
 		return;
@@ -314,7 +322,7 @@ void Textbox::OnVKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		pasteIntoSelection();
 		return;
 	}
-	if(ctrl && key == 'x' && !masked && !ReadOnly)
+	if(ctrl && key == 'x' && !masked && !repeat && !ReadOnly)
 	{
 		cutSelection();
 		return;
@@ -354,14 +362,19 @@ void Textbox::OnVKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 			{
 				if (getLowerSelectionBound() < 0 || getHigherSelectionBound() > (int)backingText.length())
 					return;
-				backingText.erase(backingText.begin()+getLowerSelectionBound(), backingText.begin()+getHigherSelectionBound());
+				backingText.Erase(getLowerSelectionBound(), getHigherSelectionBound());
 				cursor = getLowerSelectionBound();
 				changed = true;
 			}
 			else if (backingText.length() && cursor < (int)backingText.length())
 			{
 				if (ctrl)
-					backingText.erase(cursor, backingText.length()-cursor);
+				{
+					size_t stopChar;
+					stopChar = backingText.SplitByNot(" .,!?\n", cursor).PositionBefore();
+					stopChar = backingText.SplitByAny(" .,!?\n", stopChar).PositionBefore();
+					backingText.EraseBetween(cursor, stopChar);
+				}
 				else
 					backingText.erase(cursor, 1);
 				changed = true;
@@ -383,8 +396,14 @@ void Textbox::OnVKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 			{
 				if (ctrl)
 				{
-					backingText.erase(0, cursor);
-					cursor = 0;
+					size_t stopChar;
+					stopChar = backingText.SplitFromEndByNot(" .,!?\n", cursor).PositionBefore();
+					if (stopChar == backingText.npos)
+						stopChar = -1;
+					else
+						stopChar = backingText.SplitFromEndByAny(" .,!?\n", stopChar).PositionBefore();
+					backingText.EraseBetween(stopChar+1, cursor);
+					cursor = stopChar+1;
 				}
 				else
 				{
@@ -396,38 +415,7 @@ void Textbox::OnVKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 			ClearSelection();
 			break;
 		case SDLK_RETURN:
-			character = '\n';
-		default:
-			if (CharacterValid(character) && !ReadOnly)
-			{
-				if (HasSelection())
-				{
-					if (getLowerSelectionBound() < 0 || getHigherSelectionBound() > (int)backingText.length())
-						return;
-					backingText.erase(backingText.begin()+getLowerSelectionBound(), backingText.begin()+getHigherSelectionBound());
-					cursor = getLowerSelectionBound();
-				}
-
-				int regionWidth = Size.X;
-				if (Appearance.icon)
-					regionWidth -= 13;
-				regionWidth -= Appearance.Margin.Left;
-				regionWidth -= Appearance.Margin.Right;
-				if ((limit==std::string::npos || backingText.length() < limit) && (Graphics::textwidth((char*)std::string(backingText+char(character)).c_str()) <= regionWidth || multiline))
-				{
-					if (cursor == (int)backingText.length())
-					{
-						backingText += character;
-					}
-					else
-					{
-						backingText.insert(cursor, 1, (char)character);
-					}
-					cursor++;
-				}
-				changed = true;
-				ClearSelection();
-			}
+			OnTextInput("\n");
 			break;
 		}
 	}
@@ -436,20 +424,27 @@ void Textbox::OnVKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		cursor = 0;
 		backingText = "";
 	}
-	if (inputType == Number)
-	{
-		//Remove extra preceding 0's
-		while(backingText[0] == '0' && backingText.length()>1)
-			backingText.erase(backingText.begin());
-	}
+	AfterTextChange(changed);
+}
+
+void Textbox::AfterTextChange(bool changed)
+{
 	if (cursor > (int)backingText.length())
 		cursor = backingText.length();
+
 	if (changed)
 	{
+		if (inputType == Number)
+		{
+			//Remove extra preceding 0's
+			while(backingText[0] == '0' && backingText.length()>1)
+				backingText.erase(backingText.begin());
+		}
+
 		if (masked)
 		{
-			std::string maskedText = std::string(backingText);
-			std::fill(maskedText.begin(), maskedText.end(), '\x8D');
+			String maskedText = backingText;
+			std::fill(maskedText.begin(), maskedText.end(), 0xE00D);
 			Label::SetText(maskedText);
 		}
 		else
@@ -458,17 +453,17 @@ void Textbox::OnVKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		}
 	}
 
-	if(multiline)
+	if (multiline)
 		updateMultiline();
 	updateSelection();
-	if(multiline)
+	if (multiline)
 		TextPosition(textLines);
 	else
 		TextPosition(text);
 
 	if(cursor)
 	{
-		Graphics::PositionAtCharIndex(multiline?((char*)textLines.c_str()):((char*)text.c_str()), cursor, cursorPositionX, cursorPositionY);
+		Graphics::PositionAtCharIndex(multiline?textLines:text, cursor, cursorPositionX, cursorPositionY);
 	}
 	else
 	{
@@ -478,16 +473,50 @@ void Textbox::OnVKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool
 		actionCallback->TextChangedCallback(this);
 }
 
+void Textbox::OnTextInput(String text)
+{
+	if (StringValid(text) && !ReadOnly)
+	{
+		if (HasSelection())
+		{
+			if (getLowerSelectionBound() < 0 || getHigherSelectionBound() > (int)backingText.length())
+				return;
+			backingText.erase(backingText.begin()+getLowerSelectionBound(), backingText.begin()+getHigherSelectionBound());
+			cursor = getLowerSelectionBound();
+		}
+
+		int regionWidth = Size.X;
+		if (Appearance.icon)
+			regionWidth -= 13;
+		regionWidth -= Appearance.Margin.Left;
+		regionWidth -= Appearance.Margin.Right;
+		if ((limit==String::npos || backingText.length() < limit) && (Graphics::textwidth(backingText + text) <= regionWidth || multiline))
+		{
+			if (cursor == (int)backingText.length())
+			{
+				backingText += text;
+			}
+			else
+			{
+				backingText.Insert(cursor, text);
+			}
+			cursor++;
+		}
+		ClearSelection();
+		AfterTextChange(true);
+	}
+}
+
 void Textbox::OnMouseClick(int x, int y, unsigned button)
 {
 
 	if (button != SDL_BUTTON_RIGHT)
 	{
 		mouseDown = true;
-		cursor = Graphics::CharIndexAtPosition(multiline?((char*)textLines.c_str()):((char*)text.c_str()), x-textPosition.X, y-textPosition.Y);
+		cursor = Graphics::CharIndexAtPosition(multiline?textLines:text, x-textPosition.X, y-textPosition.Y);
 		if(cursor)
 		{
-			Graphics::PositionAtCharIndex(multiline?((char*)textLines.c_str()):((char*)text.c_str()), cursor, cursorPositionX, cursorPositionY);
+			Graphics::PositionAtCharIndex(multiline?textLines:text, cursor, cursorPositionX, cursorPositionY);
 		}
 		else
 		{
@@ -507,10 +536,10 @@ void Textbox::OnMouseMoved(int localx, int localy, int dx, int dy)
 {
 	if(mouseDown)
 	{
-		cursor = Graphics::CharIndexAtPosition(multiline?((char*)textLines.c_str()):((char*)text.c_str()), localx-textPosition.X, localy-textPosition.Y);
+		cursor = Graphics::CharIndexAtPosition(multiline?textLines:text, localx-textPosition.X, localy-textPosition.Y);
 		if(cursor)
 		{
-			Graphics::PositionAtCharIndex(multiline?((char*)textLines.c_str()):((char*)text.c_str()), cursor, cursorPositionX, cursorPositionY);
+			Graphics::PositionAtCharIndex(multiline?textLines:text, cursor, cursorPositionX, cursorPositionY);
 		}
 		else
 		{
@@ -524,7 +553,7 @@ void Textbox::Draw(const Point& screenPos)
 {
 	Label::Draw(screenPos);
 
-	Graphics * g = Engine::Ref().g;
+	Graphics * g = GetGraphics();
 	if(IsFocused())
 	{
 		if(border) g->drawrect(screenPos.X, screenPos.Y, Size.X, Size.Y, 255, 255, 255, 255);
@@ -541,162 +570,3 @@ void Textbox::Draw(const Point& screenPos)
 	if(Appearance.icon)
 		g->draw_icon(screenPos.X+iconPosition.X, screenPos.Y+iconPosition.Y, Appearance.icon);
 }
-
-/*
-Textbox::Textbox(Point position, Point size, std::string textboxText):
-	Component(position, size),
-	text(textboxText),
-	actionCallback(NULL),
-	masked(false),
-	border(true)
-{
-	SetText(textboxText);
-	cursor = text.length();
-}
-
-Textbox::~Textbox()
-{
-	delete actionCallback;
-}
-
-void Textbox::TextPosition()
-{
-	if(cursor)
-	{
-		cursorPosition = Graphics::textnwidth((char *)displayText.c_str(), cursor);
-	}
-	else
-	{
-		cursorPosition = 0;
-	}
-	Component::TextPosition(displayText);
-}
-
-void Textbox::SetText(std::string text)
-{
-	cursor = text.length();
-	this->text = text;
-	this->displayText = text;
-	TextPosition();
-}
-
-
-void Textbox::SetDisplayText(std::string text)
-{
-	displayText = text;
-	TextPosition();
-}
-
-std::string Textbox::GetText()
-{
-	return text;
-}
-
-void Textbox::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt)
-{
-	bool changed = false;
-	try
-	{
-		switch(key)
-		{
-		case KEY_HOME:
-			cursor = 0;
-			break;
-		case KEY_END:
-			cursor = text.length();
-			break;
-		case KEY_LEFT:
-			if(cursor > 0)
-				cursor--;
-			break;
-		case KEY_RIGHT:
-			if(cursor < text.length())
-				cursor++;
-			break;
-		case KEY_DELETE:
-			if(text.length() && cursor < text.length())
-			{
-				if(ctrl)
-					text.erase(cursor, text.length()-cursor);
-				else
-					text.erase(cursor, 1);
-				changed = true;
-			}
-			break;
-		case KEY_BACKSPACE:
-			if(text.length() && cursor > 0)
-			{
-				if(ctrl)
-				{
-					text.erase(0, cursor);
-					cursor = 0;
-				}
-				else
-				{
-					text.erase(cursor-1, 1);
-					cursor--;
-				}
-				changed = true;
-			}
-			break;
-		}
-		if(character >= ' ' && character < 127)
-		{
-			if(cursor == text.length())
-			{
-				text += character;
-			}
-			else
-			{
-				text.insert(cursor, 1, (char)character);
-			}
-			cursor++;
-			changed = true;
-		}
-	}
-	catch(std::out_of_range &e)
-	{
-		cursor = 0;
-		text = "";
-	}
-	if(changed)
-	{
-		if(masked)
-		{
-			char * tempText = new char[text.length()+1];
-			std::fill(tempText, tempText+text.length(), 0x8d);
-			tempText[text.length()] = 0;
-			displayText = std::string(tempText);
-			delete tempText;
-		}
-		else
-		{
-			displayText = text;
-		}
-		if(actionCallback)
-			actionCallback->TextChangedCallback(this);
-	}
-	TextPosition();
-}
-
-void Textbox::Draw(const Point& screenPos)
-{
-	if(!drawn)
-	{
-		TextPosition();
-		drawn = true;
-	}
-	Graphics * g = Engine::Ref().g;
-	if(IsFocused())
-	{
-		if(border) g->drawrect(screenPos.X, screenPos.Y, Size.X, Size.Y, 255, 255, 255, 255);
-		g->draw_line(screenPos.X+textPosition.X+cursorPosition, screenPos.Y+3, screenPos.X+textPosition.X+cursorPosition, screenPos.Y+12, 255, 255, 255, WINDOWW);
-	}
-	else
-	{
-		if(border) g->drawrect(screenPos.X, screenPos.Y, Size.X, Size.Y, 160, 160, 160, 255);
-	}
-	g->drawtext(screenPos.X+textPosition.X, screenPos.Y+textPosition.Y, displayText, 255, 255, 255, 255);
-	if(Appearance.icon)
-		g->draw_icon(screenPos.X+iconPosition.X, screenPos.Y+iconPosition.Y, Appearance.icon);
-}*/

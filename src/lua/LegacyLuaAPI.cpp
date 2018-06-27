@@ -1,5 +1,4 @@
 #ifdef LUACONSOLE
-#include <string>
 #include <iomanip>
 #include <vector>
 #include <algorithm>
@@ -21,12 +20,54 @@
 #include "simulation/Simulation.h"
 
 
+std::map<ByteString, StructProperty> legacyPropNames;
+std::map<ByteString, StructProperty> legacyTransitionNames;
+void initLegacyProps()
+{
+	std::vector<StructProperty> properties = Element::GetProperties();
+	for (auto prop : properties)
+	{
+		if (prop.Name == "MenuVisible")
+			legacyPropNames.insert(std::pair<ByteString, StructProperty>("menu", prop));
+		else if (prop.Name == "PhotonReflectWavelengths")
+			continue;
+		else if (prop.Name == "Temperature")
+			legacyPropNames.insert(std::pair<ByteString, StructProperty>("heat", prop));
+		else if (prop.Name == "HeatConduct")
+			legacyPropNames.insert(std::pair<ByteString, StructProperty>("hconduct", prop));
+
+		// Put all transition stuff into separate map
+		else if (prop.Name == "LowPressure")
+			legacyTransitionNames.insert(std::pair<ByteString, StructProperty>("presLowValue", prop));
+		else if (prop.Name == "LowPressureTransition")
+			legacyTransitionNames.insert(std::pair<ByteString, StructProperty>("presLowType", prop));
+		else if (prop.Name == "HighPressure")
+			legacyTransitionNames.insert(std::pair<ByteString, StructProperty>("presHighValue", prop));
+		else if (prop.Name == "HighressureTransition")
+			legacyTransitionNames.insert(std::pair<ByteString, StructProperty>("presHighType", prop));
+		else if (prop.Name == "LowTemperature")
+			legacyTransitionNames.insert(std::pair<ByteString, StructProperty>("tempLowValue", prop));
+		else if (prop.Name == "LowTemperatureTransition")
+			legacyTransitionNames.insert(std::pair<ByteString, StructProperty>("tempLowType", prop));
+		else if (prop.Name == "HighTemperature")
+			legacyTransitionNames.insert(std::pair<ByteString, StructProperty>("tempHighValue", prop));
+		else if (prop.Name == "HighTemperatureTransition")
+			legacyTransitionNames.insert(std::pair<ByteString, StructProperty>("tempHighType", prop));
+
+		else
+		{
+			legacyPropNames.insert(std::pair<ByteString, StructProperty>(prop.Name.ToLower(), prop));
+		}
+	}
+}
+
+
 #ifndef FFI
 int luacon_partread(lua_State* l)
 {
 	int tempinteger, i = cIndex;
 	float tempfloat;
-	std::string key = luaL_optstring(l, 2, "");
+	ByteString key = luaL_optstring(l, 2, "");
 	CommandInterface::FormatType format;
 	int offset = luacon_ci->GetPropertyOffset(key, format);
 
@@ -62,12 +103,14 @@ int luacon_partread(lua_State* l)
 int luacon_partwrite(lua_State* l)
 {
 	int i = cIndex;
-	std::string key = luaL_optstring(l, 2, "");
+	ByteString key = luaL_optstring(l, 2, "");
 	CommandInterface::FormatType format;
 	int offset = luacon_ci->GetPropertyOffset(key, format);
 
 	if (i < 0 || i >= NPART)
 		return luaL_error(l, "Out of range");
+	if (!luacon_sim->parts[i].type)
+		return luaL_error(l, "Dead particle");
 	if (offset == -1)
 		return luaL_error(l, "Invalid property");
 
@@ -90,11 +133,8 @@ int luacon_partwrite(lua_State* l)
 int luacon_partsread(lua_State* l)
 {
 	int i = luaL_optinteger(l, 2, 0);
-
-	if (i<0 || i>=NPART)
-	{
+	if (i < 0 || i >= NPART)
 		return luaL_error(l, "array index out of bounds");
-	}
 
 	lua_rawgeti(l, LUA_REGISTRYINDEX, tptPart);
 	cIndex = i;
@@ -107,340 +147,106 @@ int luacon_partswrite(lua_State* l)
 }
 #endif
 
-int luacon_transition_getproperty(const char * key, int * format)
-{
-	int offset;
-	if (!strcmp(key, "presHighValue")) {
-		offset = offsetof(Element, HighPressure);
-		*format = 1;
-	} else if (!strcmp(key, "presHighType")) {
-		offset = offsetof(Element, HighPressureTransition);
-		*format = 0;
-	} else if (!strcmp(key, "presLowValue")) {
-		offset = offsetof(Element, LowPressure);
-		*format = 1;
-	} else if (!strcmp(key, "presLowType")) {
-		offset = offsetof(Element, LowPressureTransition);
-		*format = 0;
-	} else if (!strcmp(key, "tempHighValue")) {
-		offset = offsetof(Element, HighTemperature);
-		*format = 1;
-	} else if (!strcmp(key, "tempHighType")) {
-		offset = offsetof(Element, HighTemperatureTransition);
-		*format = 0;
-	} else if (!strcmp(key, "tempLowValue")) {
-		offset = offsetof(Element, LowTemperature);
-		*format = 1;
-	} else if (!strcmp(key, "tempLowType")) {
-		offset = offsetof(Element, LowTemperatureTransition);
-		*format = 0;
-	} else {
-		offset = -1;
-	}
-	return offset;
-}
-
 int luacon_transitionread(lua_State* l)
 {
-	int format, offset;
-	int tempinteger;
-	float tempfloat;
-	int i;
-	const char * key = luaL_optstring(l, 2, "");
-	offset = luacon_transition_getproperty(key, &format);
+	ByteString key = luaL_optstring(l, 2, "");
+	if (legacyTransitionNames.find(key) == legacyTransitionNames.end())
+		return luaL_error(l, "Invalid property");
+	StructProperty prop = legacyTransitionNames[key];
 
 	//Get Raw Index value for element
 	lua_pushstring(l, "value");
 	lua_rawget(l, 1);
-
-	i = lua_tointeger(l, lua_gettop(l));
-
+	int i = lua_tointeger (l, lua_gettop(l));
 	lua_pop(l, 1);
+	if (i < 0 || i >= PT_NUM)
+	{
+		return luaL_error(l, "Invalid index");
+	}
 
-	if (i < 0 || i >= PT_NUM || offset==-1)
-	{
-		return luaL_error(l, "Invalid property");
-	}
-	switch(format)
-	{
-	case 0:
-		tempinteger = *((int*)(((unsigned char*)&luacon_sim->elements[i])+offset));
-		lua_pushnumber(l, tempinteger);
-		break;
-	case 1:
-		tempfloat = *((float*)(((unsigned char*)&luacon_sim->elements[i])+offset));
-		lua_pushnumber(l, tempfloat);
-		break;
-	}
+	intptr_t propertyAddress = (intptr_t)(((unsigned char*)&luacon_sim->elements[i]) + prop.Offset);
+	LuaScriptInterface::LuaGetProperty(l, prop, propertyAddress);
+
 	return 1;
 }
 
 int luacon_transitionwrite(lua_State* l)
 {
-	int format, offset;
-	int i;
-	const char * key = luaL_optstring(l, 2, "");
-	offset = luacon_transition_getproperty(key, &format);
-
-	//Get Raw Index value for element
-	lua_pushstring(l, "value");
-	lua_rawget(l, 1);
-
-	i = lua_tointeger(l, lua_gettop(l));
-
-	lua_pop(l, 1);
-
-	if (i < 0 || i >= PT_NUM || offset==-1)
-	{
+	ByteString key = luaL_optstring(l, 2, "");
+	if (legacyTransitionNames.find(key) == legacyTransitionNames.end())
 		return luaL_error(l, "Invalid property");
-	}
-	switch(format)
-	{
-	case 0:
-		*((int*)(((unsigned char*)&luacon_sim->elements[i])+offset)) = luaL_optinteger(l, 3, 0);
-		break;
-	case 1:
-		*((float*)(((unsigned char*)&luacon_sim->elements[i])+offset)) = luaL_optnumber(l, 3, 0);
-		break;
-	}
-	return 0;
-}
-
-int luacon_element_getproperty(const char * key, int * format, unsigned int * modified_stuff)
-{
-	int offset;
-	if (!strcmp(key, "name")) {
-		offset = offsetof(Element, Name);
-		*format = 2;
-		if(modified_stuff)
-			*modified_stuff |= LUACON_EL_MODIFIED_MENUS;
-	}
-	else if (!strcmp(key, "color")) {
-		offset = offsetof(Element, Colour);
-		*format = 0;
-		if (modified_stuff)
-			*modified_stuff |= LUACON_EL_MODIFIED_GRAPHICS | LUACON_EL_MODIFIED_MENUS;
-	}
-	else if (!strcmp(key, "colour")) {
-		offset = offsetof(Element, Colour);
-		*format = 0;
-		if (modified_stuff)
-			*modified_stuff |= LUACON_EL_MODIFIED_GRAPHICS;
-	}
-	else if (!strcmp(key, "advection")) {
-		offset = offsetof(Element, Advection);
-		*format = 1;
-	}
-	else if (!strcmp(key, "airdrag")) {
-		offset = offsetof(Element, AirDrag);
-		*format = 1;
-	}
-	else if (!strcmp(key, "airloss")) {
-		offset = offsetof(Element, AirLoss);
-		*format = 1;
-	}
-	else if (!strcmp(key, "loss")) {
-		offset = offsetof(Element, Loss);
-		*format = 1;
-	}
-	else if (!strcmp(key, "collision")) {
-		offset = offsetof(Element, Collision);
-		*format = 1;
-	}
-	else if (!strcmp(key, "gravity")) {
-		offset = offsetof(Element, Gravity);
-		*format = 1;
-	}
-	else if (!strcmp(key, "diffusion")) {
-		offset = offsetof(Element, Diffusion);
-		*format = 1;
-	}
-	else if (!strcmp(key, "hotair")) {
-		offset = offsetof(Element, HotAir);
-		*format = 1;
-	}
-	else if (!strcmp(key, "falldown")) {
-		offset = offsetof(Element, Falldown);
-		*format = 0;
-	}
-	else if (!strcmp(key, "flammable")) {
-		offset = offsetof(Element, Flammable);
-		*format = 0;
-	}
-	else if (!strcmp(key, "explosive")) {
-		offset = offsetof(Element, Explosive);
-		*format = 0;
-	}
-	else if (!strcmp(key, "meltable")) {
-		offset = offsetof(Element, Meltable);
-		*format = 0;
-	}
-	else if (!strcmp(key, "hardness")) {
-		offset = offsetof(Element, Hardness);
-		*format = 0;
-	}
-	else if (!strcmp(key, "menu")) {
-		offset = offsetof(Element, MenuVisible);
-		*format = 0;
-		if (modified_stuff)
-			*modified_stuff |= LUACON_EL_MODIFIED_MENUS;
-	}
-	else if (!strcmp(key, "enabled")) {
-		offset = offsetof(Element, Enabled);
-		*format = 0;
-	}
-	else if (!strcmp(key, "weight")) {
-		offset = offsetof(Element, Weight);
-		*format = 0;
-		if (modified_stuff)
-			*modified_stuff |= LUACON_EL_MODIFIED_CANMOVE;
-	}
-	else if (!strcmp(key, "menusection")) {
-		offset = offsetof(Element, MenuSection);
-		*format = 0;
-		if (modified_stuff)
-			*modified_stuff |= LUACON_EL_MODIFIED_MENUS;
-	}
-	else if (!strcmp(key, "heat")) {
-		offset = offsetof(Element, Temperature);
-		*format = 1;
-	}
-	else if (!strcmp(key, "hconduct")) {
-		offset = offsetof(Element, HeatConduct);
-		*format = 3;
-	}
-	else if (!strcmp(key, "state")) {
-		offset = 0;
-		*format = -1;
-	}
-	else if (!strcmp(key, "properties")) {
-		offset = offsetof(Element, Properties);
-		*format = 0;
-		if (modified_stuff)
-			*modified_stuff |= LUACON_EL_MODIFIED_GRAPHICS | LUACON_EL_MODIFIED_CANMOVE;
-	}
-	else if (!strcmp(key, "description")) {
-		offset = offsetof(Element, Description);
-		*format = 2;
-		if(modified_stuff)
-			*modified_stuff |= LUACON_EL_MODIFIED_MENUS;
-	}
-	else {
-		return -1;
-	}
-	return offset;
-}
-
-int luacon_elementread(lua_State* l)
-{
-	int format, offset;
-	char * tempstring;
-	int tempinteger;
-	float tempfloat;
-	int i;
-	const char * key = luaL_optstring(l, 2, "");
-	offset = luacon_element_getproperty(key, &format, NULL);
+	StructProperty prop = legacyTransitionNames[key];
 
 	//Get Raw Index value for element
 	lua_pushstring(l, "id");
 	lua_rawget(l, 1);
-
-	i = lua_tointeger (l, lua_gettop(l));
-
+	int i = lua_tointeger (l, lua_gettop(l));
 	lua_pop(l, 1);
+	if (i < 0 || i >= PT_NUM)
+	{
+		return luaL_error(l, "Invalid index");
+	}
 
-	if (i < 0 || i >= PT_NUM || offset==-1)
-	{
+	intptr_t propertyAddress = (intptr_t)(((unsigned char*)&luacon_sim->elements[i]) + prop.Offset);
+	LuaScriptInterface::LuaSetProperty(l, prop, propertyAddress, 3);
+
+	return 0;
+}
+
+int luacon_elementread(lua_State* l)
+{
+	ByteString key = luaL_optstring(l, 2, "");
+	if (legacyPropNames.find(key) == legacyPropNames.end())
 		return luaL_error(l, "Invalid property");
-	}
-	switch(format)
+	StructProperty prop = legacyPropNames[key];
+
+	//Get Raw Index value for element
+	lua_pushstring(l, "id");
+	lua_rawget(l, 1);
+	int i = lua_tointeger (l, lua_gettop(l));
+	lua_pop(l, 1);
+	if (i < 0 || i >= PT_NUM)
 	{
-	case 0:
-		tempinteger = *((int*)(((unsigned char*)&luacon_sim->elements[i])+offset));
-		lua_pushnumber(l, tempinteger);
-		break;
-	case 1:
-		tempfloat = *((float*)(((unsigned char*)&luacon_sim->elements[i])+offset));
-		lua_pushnumber(l, tempfloat);
-		break;
-	case 2:
-		tempstring = *((char**)(((unsigned char*)&luacon_sim->elements[i])+offset));
-		lua_pushstring(l, tempstring);
-		break;
-	case 3:
-		tempinteger = *((unsigned char*)(((unsigned char*)&luacon_sim->elements[i])+offset));
-		lua_pushnumber(l, tempinteger);
-		break;
-	default:
-		lua_pushnumber(l, 0);
+		return luaL_error(l, "Invalid index");
 	}
+
+	intptr_t propertyAddress = (intptr_t)(((unsigned char*)&luacon_sim->elements[i]) + prop.Offset);
+	LuaScriptInterface::LuaGetProperty(l, prop, propertyAddress);
+
 	return 1;
 }
 
 int luacon_elementwrite(lua_State* l)
 {
-	int format, offset;
-	char * tempstring;
-	int i;
-	unsigned int modified_stuff = 0;
-	const char * key = luaL_optstring(l, 2, "");
-	offset = luacon_element_getproperty(key, &format, &modified_stuff);
+	ByteString key = luaL_optstring(l, 2, "");
+	if (legacyPropNames.find(key) == legacyPropNames.end())
+		return luaL_error(l, "Invalid property");
+	StructProperty prop = legacyPropNames[key];
 
 	//Get Raw Index value for element
 	lua_pushstring(l, "id");
 	lua_rawget(l, 1);
-
-	i = lua_tointeger (l, lua_gettop(l));
-
+	int i = lua_tointeger (l, lua_gettop(l));
 	lua_pop(l, 1);
+	if (i < 0 || i >= PT_NUM)
+	{
+		return luaL_error(l, "Invalid index");
+	}
 
-	if (i < 0 || i >= PT_NUM || offset==-1)
-	{
-		return luaL_error(l, "Invalid property");
-	}
-	switch(format)
-	{
-	case 0:
-		*((int*)(((unsigned char*)&luacon_sim->elements[i])+offset)) = luaL_optinteger(l, 3, 0);
-		break;
-	case 1:
-		*((float*)(((unsigned char*)&luacon_sim->elements[i])+offset)) = luaL_optnumber(l, 3, 0);
-		break;
-	case 2:
-		tempstring = mystrdup((char*)luaL_optstring(l, 3, ""));
-		if (!strcmp(key, "name"))
-		{
-			//Convert to upper case
-			for (size_t j = 0; j < strlen(tempstring); j++)
-				tempstring[j] = toupper(tempstring[j]);
-			if(luacon_ci->GetParticleType(tempstring) != -1)
-			{
-				free(tempstring);
-				return luaL_error(l, "Name in use");
-			}
-		}
-		*((char**)(((unsigned char*)&luacon_sim->elements[i])+offset)) = tempstring;
-		//Need some way of cleaning up previous values
-		break;
-	case 3:
-		*((unsigned char*)(((unsigned char*)&luacon_sim->elements[i])+offset)) = luaL_optinteger(l, 3, 0);
-		break;
-	}
-	if (modified_stuff)
-	{
-		if (modified_stuff & LUACON_EL_MODIFIED_MENUS)
-			luacon_model->BuildMenus();
-		if (modified_stuff & LUACON_EL_MODIFIED_CANMOVE)
-			luacon_sim->init_can_move();
-		if (modified_stuff & LUACON_EL_MODIFIED_GRAPHICS)
-			memset(luacon_ren->graphicscache, 0, sizeof(gcache_item)*PT_NUM);
-	}
+	intptr_t propertyAddress = (intptr_t)(((unsigned char*)&luacon_sim->elements[i]) + prop.Offset);
+	LuaScriptInterface::LuaSetProperty(l, prop, propertyAddress, 3);
+
+	luacon_model->BuildMenus();
+	luacon_sim->init_can_move();
+	memset(luacon_ren->graphicscache, 0, sizeof(gcache_item)*PT_NUM);
+
 	return 0;
 }
 
 bool shortcuts = true;
-int luacon_keyevent(int key, Uint16 character, int modifier, int event)
+int luacon_keyevent(int key, int scan, int modifier, int event)
 {
+	ui::Engine::Ref().LastTick(Platform::GetTime());
 	int kycontinue = 1;
 	lua_State* l=luacon_ci->l;
 	lua_pushstring(l, "keyfunctions");
@@ -457,17 +263,17 @@ int luacon_keyevent(int key, Uint16 character, int modifier, int event)
 	for (int i = 1; i <= len && kycontinue; i++)
 	{
 		lua_rawgeti(l, -1, i);
-		if ((modifier & KMOD_CTRL) && (character < ' ' || character > '~') && key < 256)
+		if ((modifier & KMOD_CTRL) && (scan < ' ' || scan > '~') && key < 256)
 			lua_pushlstring(l, (const char*)&key, 1);
 		else
-			lua_pushlstring(l, (const char*)&character, 1);
+			lua_pushlstring(l, (const char*)&scan, 1);
 		lua_pushinteger(l, key);
 		lua_pushinteger(l, modifier);
 		lua_pushinteger(l, event);
 		int callret = lua_pcall(l, 4, 1, 0);
 		if (callret)
 		{
-			if (!strcmp(luacon_geterror(), "Error: Script not responding"))
+			if (luacon_geterror() == "Error: Script not responding")
 			{
 				ui::Engine::Ref().LastTick(Platform::GetTime());
 				for (int j = i; j <= len-1; j++)
@@ -496,6 +302,7 @@ int luacon_keyevent(int key, Uint16 character, int modifier, int event)
 
 int luacon_mouseevent(int mx, int my, int mb, int event, int mouse_wheel)
 {
+	ui::Engine::Ref().LastTick(Platform::GetTime());
 	int mpcontinue = 1;
 	lua_State* l=luacon_ci->l;
 	lua_pushstring(l, "mousefunctions");
@@ -520,7 +327,7 @@ int luacon_mouseevent(int mx, int my, int mb, int event, int mouse_wheel)
 		int callret = lua_pcall(l, 5, 1, 0);
 		if (callret)
 		{
-			if (!strcmp(luacon_geterror(), "Error: Script not responding"))
+			if (luacon_geterror() == "Error: Script not responding")
 			{
 				ui::Engine::Ref().LastTick(Platform::GetTime());
 				for (int j = i; j <= len-1; j++)
@@ -549,6 +356,7 @@ int luacon_mouseevent(int mx, int my, int mb, int event, int mouse_wheel)
 
 int luacon_step(int mx, int my)
 {
+	ui::Engine::Ref().LastTick(Platform::GetTime());
 	lua_State* l = luacon_ci->l;
 	lua_pushinteger(l, my);
 	lua_pushinteger(l, mx);
@@ -571,7 +379,7 @@ int luacon_step(int mx, int my)
 		int callret = lua_pcall(l, 0, 0, 0);
 		if (callret)
 		{
-			if (!strcmp(luacon_geterror(), "Error: Script not responding"))
+			if (luacon_geterror() == "Error: Script not responding")
 			{
 				ui::Engine::Ref().LastTick(Platform::GetTime());
 				for (int j = i; j <= len-1; j++)
@@ -633,10 +441,10 @@ int luaL_tostring (lua_State *L, int n)
 	return 1;
 }
 
-const char *luacon_geterror()
+String luacon_geterror()
 {
 	luaL_tostring(luacon_ci->l, -1);
-	const char* err = luaL_optstring(luacon_ci->l, -1, "failed to execute");
+	String err = ByteString(luaL_optstring(luacon_ci->l, -1, "failed to execute")).FromUtf8();
 	lua_pop(luacon_ci->l, 1);
 	return err;
 }
@@ -658,13 +466,13 @@ int luatpt_getelement(lua_State *l)
 		t = luaL_optint(l, 1, 1);
 		if (t<0 || t>=PT_NUM)
 			return luaL_error(l, "Unrecognised element number '%d'", t);
-		lua_pushstring(l, luacon_sim->elements[t].Name);
+		lua_pushstring(l, luacon_sim->elements[t].Name.c_str());
 	}
 	else
 	{
 		luaL_checktype(l, 1, LUA_TSTRING);
 		const char* name = luaL_optstring(l, 1, "");
-		if ((t = luacon_ci->GetParticleType(name))==-1)
+		if ((t = luacon_sim->GetParticleType(name))==-1)
 			return luaL_error(l, "Unrecognised element '%s'", name);
 		lua_pushinteger(l, t);
 	}
@@ -807,7 +615,7 @@ int luatpt_graphics_func(lua_State *l)
 
 int luatpt_error(lua_State* l)
 {
-	std::string errorMessage = std::string(luaL_optstring(l, 1, "Error text"));
+	String errorMessage = ByteString(luaL_optstring(l, 1, "Error text")).FromUtf8();
 	ErrorMessage::Blocking("Error", errorMessage);
 	return 0;
 }
@@ -834,7 +642,7 @@ int luatpt_drawtext(lua_State* l)
 	if (textalpha<0) textalpha = 0;
 	if (textalpha>255) textalpha = 255;
 
-	luacon_g->drawtext(textx, texty, string, textred, textgreen, textblue, textalpha);
+	luacon_g->drawtext(textx, texty, ByteString(string).FromUtf8(), textred, textgreen, textblue, textalpha);
 	return 0;
 }
 
@@ -852,7 +660,7 @@ int luatpt_create(lua_State* l)
 				return luaL_error(l, "Unrecognised element number '%d'", t);
 		} else {
 			const char* name = luaL_optstring(l, 3, "dust");
-			if ((t = luacon_ci->GetParticleType(std::string(name))) == -1)
+			if ((t = luacon_sim->GetParticleType(ByteString(name))) == -1)
 				return luaL_error(l,"Unrecognised element '%s'", name);
 		}
 		retid = luacon_sim->create_part(-1, x, y, t);
@@ -879,14 +687,14 @@ int luatpt_setpause(lua_State* l)
 int luatpt_togglepause(lua_State* l)
 {
 	luacon_model->SetPaused(!luacon_model->GetPaused());
-	lua_pushnumber(l, luacon_model->GetPaused()); 
+	lua_pushnumber(l, luacon_model->GetPaused());
 	return 1;
 }
 
 int luatpt_togglewater(lua_State* l)
 {
 	luacon_sim->water_equal_test=!luacon_sim->water_equal_test;
-	lua_pushnumber(l, luacon_sim->water_equal_test); 
+	lua_pushnumber(l, luacon_sim->water_equal_test);
 	return 1;
 }
 
@@ -907,14 +715,14 @@ int luatpt_setconsole(lua_State* l)
 int luatpt_log(lua_State* l)
 {
 	int args = lua_gettop(l);
-	std::string text = "";
+	String text = "";
 	for(int i = 1; i <= args; i++)
 	{
 		luaL_tostring(l, -1);
 		if(text.length())
-			text=std::string(luaL_optstring(l, -1, "")) + ", " + text;
+			text=ByteString(luaL_optstring(l, -1, "")).FromUtf8() + ", " + text;
 		else
-			text=std::string(luaL_optstring(l, -1, ""));
+			text=ByteString(luaL_optstring(l, -1, "")).FromUtf8();
 		lua_pop(l, 2);
 	}
 	if((*luacon_currentCommand))
@@ -1065,7 +873,7 @@ int luatpt_set_property(lua_State* l)
 		if(!lua_isnumber(l, acount) && lua_isstring(l, acount))
 		{
 			name = luaL_optstring(l, acount, "none");
-			if ((partsel = luacon_ci->GetParticleType(std::string(name))) == -1)
+			if ((partsel = luacon_sim->GetParticleType(ByteString(name))) == -1)
 				return luaL_error(l, "Unrecognised element '%s'", name);
 		}
 	}
@@ -1082,7 +890,7 @@ int luatpt_set_property(lua_State* l)
 	else
 	{
 		name = luaL_checklstring(l, 2, NULL);
-		if ((t = luacon_ci->GetParticleType(std::string(name)))==-1)
+		if ((t = luacon_sim->GetParticleType(ByteString(name)))==-1)
 			return luaL_error(l, "Unrecognised element '%s'", name);
 	}
 	if (!lua_isnumber(l, 3) || acount >= 6)
@@ -1138,11 +946,11 @@ int luatpt_set_property(lua_State* l)
 			if (i>=XRES || y>=YRES)
 				return luaL_error(l, "Coordinates out of range (%d,%d)", i, y);
 			r = luacon_sim->pmap[y][i];
-			if (!r || (partsel && partsel != (r&0xFF)))
+			if (!r || (partsel && partsel != TYP(r)))
 				r = luacon_sim->photons[y][i];
-			if (!r || (partsel && partsel != (r&0xFF)))
+			if (!r || (partsel && partsel != TYP(r)))
 				return 0;
-			i = r>>8;
+			i = ID(r);
 		}
 		if (i < 0 || i >= NPART)
 			return luaL_error(l, "Invalid particle ID '%d'", i);
@@ -1268,7 +1076,7 @@ int luatpt_get_elecmap(lua_State* l)
 
 int luatpt_get_property(lua_State* l)
 {
-	std::string prop = luaL_optstring(l, 1, "");
+	ByteString prop = luaL_optstring(l, 1, "");
 	int i = luaL_optint(l, 2, 0); //x coord or particle index, depending on arguments
 	int y = luaL_optint(l, 3, -1);
 	if (y!=-1 && y<YRES && y>=0 && i < XRES && i>=0)
@@ -1287,7 +1095,7 @@ int luatpt_get_property(lua_State* l)
 				return luaL_error(l, "Particle does not exist");
 			}
 		}
-		i = r>>8;
+		i = ID(r);
 	}
 	else if (y != -1)
 		return luaL_error(l, "Coordinates out of range (%d,%d)", i, y);
@@ -1448,14 +1256,14 @@ int luatpt_textwidth(lua_State* l)
 {
 	int strwidth = 0;
 	const char* string = luaL_optstring(l, 1, "");
-	strwidth = Graphics::textwidth(string);
+	strwidth = Graphics::textwidth(ByteString(string).FromUtf8());
 	lua_pushinteger(l, strwidth);
 	return 1;
 }
 
 int luatpt_get_name(lua_State* l)
 {
-	if (luacon_model->GetUser().ID)
+	if (luacon_model->GetUser().UserID)
 	{
 		lua_pushstring(l, luacon_model->GetUser().Username.c_str());
 		return 1;
@@ -1663,22 +1471,22 @@ int luatpt_unregister_mouseclick(lua_State* l)
 
 int luatpt_input(lua_State* l)
 {
-	std::string prompt, title, result, shadow, text;
-	title = std::string(luaL_optstring(l, 1, "Title"));
-	prompt = std::string(luaL_optstring(l, 2, "Enter some text:"));
-	text = std::string(luaL_optstring(l, 3, ""));
-	shadow = std::string(luaL_optstring(l, 4, ""));
+	String prompt, title, result, shadow, text;
+	title = ByteString(luaL_optstring(l, 1, "Title")).FromUtf8();
+	prompt = ByteString(luaL_optstring(l, 2, "Enter some text:")).FromUtf8();
+	text = ByteString(luaL_optstring(l, 3, "")).FromUtf8();
+	shadow = ByteString(luaL_optstring(l, 4, "")).FromUtf8();
 
 	result = TextPrompt::Blocking(title, prompt, text, shadow, false);
-	
-	lua_pushstring(l, result.c_str());
+
+	lua_pushstring(l, result.ToUtf8().c_str());
 	return 1;
 }
 
 int luatpt_message_box(lua_State* l)
 {
-	std::string title = std::string(luaL_optstring(l, 1, "Title"));
-	std::string message = std::string(luaL_optstring(l, 2, "Message"));
+	String title = ByteString(luaL_optstring(l, 1, "Title")).FromUtf8();
+	String message = ByteString(luaL_optstring(l, 2, "Message")).FromUtf8();
 	int large = lua_toboolean(l, 3);
 	new InformationMessage(title, message, large);
 	return 0;
@@ -1686,9 +1494,9 @@ int luatpt_message_box(lua_State* l)
 
 int luatpt_confirm(lua_State *l)
 {
-	std::string title = std::string(luaL_optstring(l, 1, "Title"));
-	std::string message = std::string(luaL_optstring(l, 2, "Message"));
-	std::string buttonText = std::string(luaL_optstring(l, 3, "Confirm"));
+	String title = ByteString(luaL_optstring(l, 1, "Title")).FromUtf8();
+	String message = ByteString(luaL_optstring(l, 2, "Message")).FromUtf8();
+	String buttonText = ByteString(luaL_optstring(l, 3, "Confirm")).FromUtf8();
 	bool ret = ConfirmPrompt::Blocking(title, message, buttonText);
 	lua_pushboolean(l, ret ? 1 : 0);
 	return 1;
@@ -1703,7 +1511,7 @@ int luatpt_get_numOfParts(lua_State* l)
 int luatpt_start_getPartIndex(lua_State* l)
 {
 	getPartIndex_curIdx = -1;
-	return 1;
+	return 0;
 }
 
 int luatpt_next_getPartIndex(lua_State* l)
@@ -1907,13 +1715,12 @@ int luatpt_getscript(lua_State* l)
 	int runScript = luaL_optint(l, 3, 0);
 	int confirmPrompt = luaL_optint(l, 4, 1);
 
-	std::stringstream url;
-	url << "http://starcatcher.us/scripts/main.lua?get=" << scriptID;
-	if (confirmPrompt && !ConfirmPrompt::Blocking("Do you want to install script?", url.str(), "Install"))
+	ByteString url = ByteString::Build("http://starcatcher.us/scripts/main.lua?get=", scriptID);
+	if (confirmPrompt && !ConfirmPrompt::Blocking("Do you want to install script?", url.FromUtf8(), "Install"))
 		return 0;
 
 	int ret, len;
-	char *scriptData = http_simple_get(url.str().c_str(), &ret, &len);
+	char *scriptData = http_simple_get(url.c_str(), &ret, &len);
 	if (len <= 0 || !filename)
 	{
 		free(scriptData);
@@ -1936,7 +1743,7 @@ int luatpt_getscript(lua_State* l)
 	{
 		fclose(outputfile);
 		outputfile = NULL;
-		if (!confirmPrompt || ConfirmPrompt::Blocking("File already exists, overwrite?", filename, "Overwrite"))
+		if (!confirmPrompt || ConfirmPrompt::Blocking("File already exists, overwrite?", ByteString(filename).FromUtf8(), "Overwrite"))
 		{
 			outputfile = fopen(filename, "wb");
 		}
@@ -1961,9 +1768,7 @@ int luatpt_getscript(lua_State* l)
 	outputfile = NULL;
 	if (runScript)
 	{
-		std::stringstream luaCommand;
-		luaCommand << "dofile('" << filename << "')";
-		luaL_dostring(l, luaCommand.str().c_str());
+		luaL_dostring(l, ByteString::Build("dofile('", filename, "')").c_str());
 	}
 
 	return 0;
@@ -1973,7 +1778,9 @@ int luatpt_setwindowsize(lua_State* l)
 {
 	int scale = luaL_optint(l,1,1);
 	int kiosk = luaL_optint(l,2,0);
-	if (scale!=2) scale = 1;
+	// TODO: handle this the same way as it's handled in PowderToySDL.cpp
+	//   > maybe bind the maximum allowed scale to screen size somehow
+	if (scale < 1 || scale > 10) scale = 1;
 	if (kiosk!=1) kiosk = 0;
 	ui::Engine::Ref().SetScale(scale);
 	ui::Engine::Ref().SetFullscreen(kiosk);
@@ -2009,18 +1816,26 @@ int luatpt_screenshot(lua_State* l)
 			data = format::VideoBufferToPNG(screenshot);
 		}
 	}
-	std::stringstream filename;
-	filename << "screenshot_";
-	filename << std::setfill('0') << std::setw(6) << (screenshotIndex++);
+	ByteString filename = ByteString::Build("screenshot_", Format::Width(screenshotIndex++, 6));
 	if(fileType == 1) {
-		filename << ".bmp";
+		filename += ".bmp";
 	} else if(fileType == 2) {
-		filename << ".ppm";
+		filename += ".ppm";
 	} else {
-		filename << ".png";
+		filename += ".png";
 	}
-	Client::Ref().WriteFile(data, filename.str());
-	lua_pushstring(l, filename.str().c_str());
+	Client::Ref().WriteFile(data, filename);
+	lua_pushstring(l, filename.c_str());
+	return 1;
+}
+
+int luatpt_record(lua_State* l)
+{
+	if (!lua_isboolean(l, -1))
+		return luaL_typerror(l, 1, lua_typename(l, LUA_TBOOLEAN));
+	bool record = lua_toboolean(l, -1);
+	int recordingFolder = luacon_controller->Record(record);
+	lua_pushinteger(l, recordingFolder);
 	return 1;
 }
 

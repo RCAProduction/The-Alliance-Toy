@@ -1,7 +1,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <cassert>
 #ifdef WIN
+#define NOMINMAX
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <windows.h>
@@ -19,8 +21,9 @@
 namespace Platform
 {
 
-char *ExecutableName(void)
+ByteString ExecutableName()
 {
+	ByteString ret;
 #if defined(WIN)
 	char *name = (char *)malloc(64);
 	DWORD max = 64, res;
@@ -31,14 +34,16 @@ char *ExecutableName(void)
 	uint32_t max = 64, res;
 	if (_NSGetExecutablePath(fn, &max) != 0)
 	{
-		fn = (char*)realloc(fn, max);
+		char *realloced_fn = (char*)realloc(fn, max);
+		assert(realloced_fn != NULL);
+		fn = realloced_fn;
 		_NSGetExecutablePath(fn, &max);
 	}
 	if (realpath(fn, name) == NULL)
 	{
 		free(fn);
 		free(name);
-		return NULL;
+		return "";
 	}
 	res = 1;
 #else
@@ -51,34 +56,37 @@ char *ExecutableName(void)
 #endif
 #ifndef MACOSX
 		max *= 2;
-		name = (char *)realloc(name, max);
+		char* realloced_name = (char *)realloc(name, max);
+		assert(realloced_name != NULL);
+		name = realloced_name;
 		memset(name, 0, max);
 	}
 #endif
 	if (res <= 0)
 	{
 		free(name);
-		return NULL;
+		return "";
 	}
-	return name;
+	ret = name;
+	free(name);
+	return ret;
 }
 
 void DoRestart()
 {
-	char *exename = ExecutableName();
-	if (exename)
+	ByteString exename = ExecutableName();
+	if (exename.length())
 	{
 #ifdef WIN
-		ShellExecute(NULL, "open", exename, NULL, NULL, SW_SHOWNORMAL);
+		ShellExecute(NULL, "open", exename.c_str(), NULL, NULL, SW_SHOWNORMAL);
 #elif defined(LIN) || defined(MACOSX)
-		execl(exename, "powder", NULL);
+		execl(exename.c_str(), "powder", NULL);
 #endif
-		free(exename);
 	}
 	exit(-1);
 }
 
-void OpenURI(std::string uri)
+void OpenURI(ByteString uri)
 {
 #if defined(WIN)
 	ShellExecute(0, "OPEN", uri.c_str(), NULL, NULL, 0);

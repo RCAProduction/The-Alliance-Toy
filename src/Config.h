@@ -12,15 +12,15 @@
 
 //VersionInfoStart
 #ifndef SAVE_VERSION
-#define SAVE_VERSION 91
+#define SAVE_VERSION 93
 #endif
 
 #ifndef MINOR_VERSION
-#define MINOR_VERSION 5
+#define MINOR_VERSION 3
 #endif
 
 #ifndef BUILD_NUM
-#define BUILD_NUM 330
+#define BUILD_NUM 340
 #endif
 
 #ifndef SNAPSHOT_ID
@@ -34,9 +34,9 @@
 #define MOD_ID 0
 #endif
 
-#ifdef SNAPSHOT
-#define FUTURE_SAVE_VERSION 92
-#define FUTURE_MINOR_VERSION 0
+#if defined(SNAPSHOT) || defined(DEBUG)
+#define FUTURE_SAVE_VERSION 93
+#define FUTURE_MINOR_VERSION 3
 #endif
 //VersionInfoEnd
 
@@ -103,9 +103,6 @@ std::string STATICSERVER = "static.powdertoy.co.uk"
 //Number of unique thumbnails to have in cache at one time
 #define THUMB_CACHE_SIZE 256
 
-#ifndef M_PI
-#define M_PI 3.14159265f
-#endif
 #ifndef M_GRAV
 #define M_GRAV 6.67300e-1
 #endif
@@ -127,8 +124,8 @@ std::string STATICSERVER = "static.powdertoy.co.uk"
 #define NPART XRES*YRES
 
 //306 and 192
-#define XCNTR   306
-#define YCNTR   192
+#define XCNTR   XRES/2
+#define YCNTR   YRES/2
 
 #define WINDOWW (XRES+BARSIZE)
 #define WINDOWH (YRES+MENUSIZE)
@@ -172,40 +169,7 @@ std::string STATICSERVER = "static.powdertoy.co.uk"
 #define GLASS_IOR		1.9
 #define GLASS_DISP		0.07
 
-//some compatibility stuff for non-standard compilers
-#if defined(WIN) && !defined(strcasecmp)
-#define strcasecmp stricmp
-#endif
-#if defined(_MSC_VER)
-#if _MSC_VER < 1800
-#define fmin min
-#define fminf min
-#define fmax max
-#define fmaxf max
-#else
-#include <algorithm>
-#endif
-#endif
-
-#if defined(_MSC_VER)
-#define TPT_INLINE _inline
-#elif defined(__llvm__)
-#define TPT_INLINE
-#else
-#define TPT_INLINE inline
-#endif
-
-// old Platform.h stuff, maybe we should have a file for these kinds of things
-typedef unsigned short Uint16;
-
-#ifndef NULL
-# define NULL 0
-#endif
-
-#include <climits>
-
 #define SDEUT
-//#define REALHEAT
 
 #endif /* CONFIG_H */
 

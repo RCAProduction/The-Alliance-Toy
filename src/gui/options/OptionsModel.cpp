@@ -90,17 +90,29 @@ void OptionsModel::SetGravityMode(int gravityMode)
 	notifySettingsChanged();
 }
 
-bool OptionsModel::GetScale()
+int OptionsModel::GetScale()
 {
-	return ui::Engine::Ref().GetScale()==2;
+	return ui::Engine::Ref().GetScale();
 }
-void OptionsModel::SetScale(bool doubleScale)
+
+void OptionsModel::SetScale(int scale)
 {
-	ui::Engine::Ref().SetScale(doubleScale?2:1);
-	Client::Ref().SetPref("Scale", int(doubleScale?2:1));
+	ui::Engine::Ref().SetScale(scale);
+	Client::Ref().SetPref("Scale", int(scale));
 	notifySettingsChanged();
 }
 
+bool OptionsModel::GetResizable()
+{
+	return ui::Engine::Ref().GetResizable();
+}
+
+void OptionsModel::SetResizable(bool resizable)
+{
+	ui::Engine::Ref().SetResizable(resizable);
+	Client::Ref().SetPref("Resizable", resizable);
+	notifySettingsChanged();
+}
 
 bool OptionsModel::GetFullscreen()
 {
@@ -109,7 +121,19 @@ bool OptionsModel::GetFullscreen()
 void OptionsModel::SetFullscreen(bool fullscreen)
 {
 	ui::Engine::Ref().SetFullscreen(fullscreen);
-	Client::Ref().SetPref("Fullscreen", bool(fullscreen));
+	Client::Ref().SetPref("Fullscreen", fullscreen);
+	notifySettingsChanged();
+}
+
+bool OptionsModel::GetAltFullscreen()
+{
+	return ui::Engine::Ref().GetAltFullscreen();
+}
+
+void OptionsModel::SetAltFullscreen(bool altFullscreen)
+{
+	ui::Engine::Ref().SetAltFullscreen(altFullscreen);
+	Client::Ref().SetPref("AltFullscreen", altFullscreen);
 	notifySettingsChanged();
 }
 

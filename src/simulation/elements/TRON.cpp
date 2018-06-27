@@ -102,7 +102,7 @@ int Element_TRON::update(UPDATE_FUNC_ARGS)
 		int originaldir = direction;
 
 		//random turn
-		int random = rand()%340;
+		int random = RNG::Ref().between(0, 339);
 		if ((random==1 || random==3) && !(parts[i].tmp & TRON_NORANDOM))
 		{
 			//randomly turn left(3) or right(1)
@@ -126,7 +126,7 @@ int Element_TRON::update(UPDATE_FUNC_ARGS)
 			}
 			else
 			{
-				seconddir = (direction + ((rand()%2)*2)+1)% 4;
+				seconddir = (direction + (RNG::Ref().between(0, 1)*2)+1)% 4;
 				lastdir = (seconddir + 2)%4;
 			}
 			seconddircheck = trymovetron(sim,x,y,seconddir,i,parts[i].tmp2);
@@ -258,9 +258,9 @@ int Element_TRON::trymovetron(Simulation * sim, int x, int y, int dir, int i, in
 //#TPT-Directive ElementHeader Element_TRON static bool canmovetron(Simulation * sim, int r, int len)
 bool Element_TRON::canmovetron(Simulation * sim, int r, int len)
 {
-	if (!r || ((r&0xFF) == PT_SWCH && sim->parts[r>>8].life >= 10) || ((r&0xFF) == PT_INVIS && sim->parts[r>>8].tmp == 1))
+	if (!r || (TYP(r) == PT_SWCH && sim->parts[ID(r)].life >= 10) || (TYP(r) == PT_INVIS && sim->parts[ID(r)].tmp2 == 1))
 		return true;
-	if ((((sim->elements[r&0xFF].Properties & PROP_LIFE_KILL_DEC) && sim->parts[r>>8].life > 0)|| ((sim->elements[r&0xFF].Properties & PROP_LIFE_KILL) && (sim->elements[r&0xFF].Properties & PROP_LIFE_DEC))) && sim->parts[r>>8].life < len)
+	if ((((sim->elements[TYP(r)].Properties & PROP_LIFE_KILL_DEC) && sim->parts[ID(r)].life > 0)|| ((sim->elements[TYP(r)].Properties & PROP_LIFE_KILL) && (sim->elements[TYP(r)].Properties & PROP_LIFE_DEC))) && sim->parts[ID(r)].life < len)
 		return true;
 	return false;
 }

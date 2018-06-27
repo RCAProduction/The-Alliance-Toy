@@ -365,7 +365,7 @@ void RenderView::NotifyColourChanged(RenderModel * sender)
 
 void RenderView::OnDraw()
 {
-	Graphics * g = ui::Engine::Ref().g;
+	Graphics * g = GetGraphics();
 	g->clearrect(-1, -1, WINDOWW+1, WINDOWH+1);
 	if(ren)
 	{
@@ -381,7 +381,7 @@ void RenderView::OnDraw()
 	g->draw_line(XRES, 0, XRES, WINDOWH, 255, 255, 255, 255);
 	if(toolTipPresence && toolTip.length())
 	{
-		g->drawtext(6, Size.Y-MENUSIZE-12, (char*)toolTip.c_str(), 255, 255, 255, toolTipPresence>51?255:toolTipPresence*5);
+		g->drawtext(6, Size.Y-MENUSIZE-12, toolTip, 255, 255, 255, toolTipPresence>51?255:toolTipPresence*5);
 	}
 }
 
@@ -405,8 +405,10 @@ void RenderView::OnTick(float dt)
 	}
 }
 
-void RenderView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt)
+void RenderView::OnKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt)
 {
+	if (repeat)
+		return;
 	if (shift && key == '1')
 		c->LoadRenderPreset(10);
 	else if(key >= '0' && key <= '9')
@@ -415,7 +417,7 @@ void RenderView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bo
 	}
 }
 
-void RenderView::ToolTip(ui::Point senderPosition, std::string toolTip)
+void RenderView::ToolTip(ui::Point senderPosition, String toolTip)
 {
 	this->toolTip = toolTip;
 	this->isToolTipFadingIn = true;

@@ -3,8 +3,7 @@
 
 #include <iostream>
 
-using namespace std;
-
+#include "common/String.h"
 #include "gui/interface/Point.h"
 #include "simulation/StructProperty.h"
 
@@ -17,20 +16,20 @@ class Tool
 protected:
 	VideoBuffer * (*textureGen)(int, int, int);
 	int toolID;
-	string toolName;
-	string toolDescription;
+	ByteString toolName;
+	String toolDescription;
 	float strength;
-	int resolution;
-	std::string identifier;
+	bool blocky;
+	ByteString identifier;
 public:
 	int colRed, colGreen, colBlue;
 
-	Tool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL);
+	Tool(int id, ByteString name, String description, int r, int g, int b, ByteString identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL);
 	int GetToolID() { return toolID; }
-	string GetName();
-	string GetDescription();
-	std::string GetIdentifier();
-	int GetResolution() { return resolution; }
+	ByteString GetName();
+	String GetDescription();
+	ByteString GetIdentifier();
+	int GetBlocky() { return blocky; }
 	void SetStrength(float value) { strength = value; }
 	float  GetStrength() { return strength; }
 	VideoBuffer * GetTexture(int width, int height);
@@ -106,7 +105,7 @@ public:
 class ElementTool: public Tool
 {
 public:
-	ElementTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL);
+	ElementTool(int id, ByteString name, String description, int r, int g, int b, ByteString identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL);
 	virtual ~ElementTool();
 	virtual void Draw(Simulation * sim, Brush * brush, ui::Point position);
 	virtual void DrawLine(Simulation * sim, Brush * brush, ui::Point position1, ui::Point position2, bool dragging = false);
@@ -117,7 +116,7 @@ public:
 class Element_LIGH_Tool: public ElementTool
 {
 public:
-	Element_LIGH_Tool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL):
+	Element_LIGH_Tool(int id, ByteString name, String description, int r, int g, int b, ByteString identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL):
 		ElementTool(id, name, description, r, g, b, identifier, textureGen)
 	{ }
 	virtual ~Element_LIGH_Tool() { }
@@ -130,7 +129,7 @@ public:
 class Element_TESC_Tool: public ElementTool
 {
 public:
-	Element_TESC_Tool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL):
+	Element_TESC_Tool(int id, ByteString name, String description, int r, int g, int b, ByteString identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL):
 		ElementTool(id, name, description, r, g, b, identifier, textureGen)
 	{ }
 	virtual ~Element_TESC_Tool() {}
@@ -141,7 +140,7 @@ public:
 class PlopTool: public ElementTool
 {
 public:
-	PlopTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL):
+	PlopTool(int id, ByteString name, String description, int r, int g, int b, ByteString identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL):
 		ElementTool(id, name, description, r, g, b, identifier, textureGen)
 	{ }
 	virtual ~PlopTool() { }
@@ -155,7 +154,7 @@ public:
 class WallTool: public Tool
 {
 public:
-	WallTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL);
+	WallTool(int id, ByteString name, String description, int r, int g, int b, ByteString identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL);
 	virtual ~WallTool();
 	virtual void Draw(Simulation * sim, Brush * brush, ui::Point position);
 	virtual void DrawLine(Simulation * sim, Brush * brush, ui::Point position1, ui::Point position2, bool dragging = false);
@@ -166,7 +165,7 @@ public:
 class WindTool: public Tool
 {
 public:
-	WindTool(int id, string name, string description, int r, int g, int b, std::string identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL);
+	WindTool(int id, ByteString name, String description, int r, int g, int b, ByteString identifier, VideoBuffer * (*textureGen)(int, int, int) = NULL);
 	virtual ~WindTool() { }
 	virtual void Draw(Simulation * sim, Brush * brush, ui::Point position) { }
 	virtual void DrawLine(Simulation * sim, Brush * brush, ui::Point position1, ui::Point position2, bool dragging = false);

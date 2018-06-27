@@ -28,7 +28,7 @@ Element_BRMT::Element_BRMT()
 
 	Temperature = R_TEMP+0.0f	+273.15f;
 	HeatConduct = 211;
-	Description = "Broken metal. Created when iron rusts or when when metals break from pressure.";
+	Description = "Broken metal. Created when iron rusts or when metals break from pressure.";
 
 	Properties = TYPE_PART|PROP_CONDUCTS|PROP_LIFE_DEC|PROP_HOT_GLOW;
 
@@ -60,16 +60,14 @@ int Element_BRMT::update(UPDATE_FUNC_ARGS)
 					r = pmap[y+ry][x+rx];
 					if (!r)
 						continue;
-					if ((r&0xFF)==PT_BREC && !(rand()%tempFactor))
+					if (TYP(r)==PT_BREC && RNG::Ref().chance(1, tempFactor))
 					{
-						if(rand()%2)
+						if (RNG::Ref().chance(1, 2))
 						{
-							sim->create_part(r>>8, x+rx, y+ry, PT_THRM);
+							sim->create_part(ID(r), x+rx, y+ry, PT_THRM);
 						}
 						else
 							sim->create_part(i, x, y, PT_THRM);
-						//part_change_type(r>>8,x+rx,y+ry,PT_BMTL);
-						//parts[r>>8].tmp=(parts[i].tmp<=7)?parts[i].tmp=1:parts[i].tmp-(rand()%5);//rand()/(RAND_MAX/300)+100;
 					}
 				}
 	}

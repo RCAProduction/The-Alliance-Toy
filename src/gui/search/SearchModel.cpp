@@ -26,7 +26,7 @@ void SearchModel::SetShowTags(bool show)
 
 bool SearchModel::GetShowTags()
 {
-	return showTags;	
+	return showTags;
 }
 
 TH_ENTRY_POINT void * SearchModel::updateSaveListTHelper(void * obj)
@@ -36,10 +36,10 @@ TH_ENTRY_POINT void * SearchModel::updateSaveListTHelper(void * obj)
 
 void * SearchModel::updateSaveListT()
 {
-	std::string category = "";
+	ByteString category = "";
 	if(showFavourite)
 		category = "Favourites";
-	if(showOwn && Client::Ref().GetAuthUser().ID)
+	if(showOwn && Client::Ref().GetAuthUser().UserID)
 		category = "by:"+Client::Ref().GetAuthUser().Username;
 	vector<SaveInfo*> * saveList = Client::Ref().SearchSaves((currentPage-1)*20, 20, lastQuery, currentSort=="new"?"date":"votes", category, thResultCount);
 
@@ -55,13 +55,13 @@ TH_ENTRY_POINT void * SearchModel::updateTagListTHelper(void * obj)
 void * SearchModel::updateTagListT()
 {
 	int tagResultCount;
-	std::vector<std::pair<std::string, int> > * tagList = Client::Ref().GetTags(0, 24, "", tagResultCount);
+	std::vector<std::pair<ByteString, int> > * tagList = Client::Ref().GetTags(0, 24, "", tagResultCount);
 
 	updateTagListFinished = true;
 	return tagList;
 }
 
-bool SearchModel::UpdateSaveList(int pageNumber, std::string query)
+bool SearchModel::UpdateSaveList(int pageNumber, String query)
 {
 	//Threading
 	if (!updateSaveListWorking)
@@ -90,7 +90,7 @@ bool SearchModel::UpdateSaveList(int pageNumber, std::string query)
 			updateTagListWorking = true;
 			pthread_create(&updateTagListThread, 0, &SearchModel::updateTagListTHelper, this);
 		}
-		
+
 		updateSaveListFinished = false;
 		updateSaveListWorking = true;
 		pthread_create(&updateSaveListThread, 0, &SearchModel::updateSaveListTHelper, this);
@@ -122,7 +122,7 @@ vector<SaveInfo*> SearchModel::GetSaveList()
 	return saveList;
 }
 
-vector<pair<string, int> > SearchModel::GetTagList()
+vector<pair<ByteString, int> > SearchModel::GetTagList()
 {
 	return tagList;
 }
@@ -152,7 +152,7 @@ void SearchModel::Update()
 				if (lastError == "Unspecified Error")
 					lastError = "";
 			}
-			
+
 			resultCount = thResultCount;
 			notifyPageChanged();
 			notifySaveListChanged();
@@ -164,7 +164,7 @@ void SearchModel::Update()
 		{
 			updateTagListWorking = false;
 
-			vector<pair<string, int> > * tempTagList;
+			vector<pair<ByteString, int> > * tempTagList;
 			pthread_join(updateTagListThread, (void**)&tempTagList);
 
 			if(tempTagList)

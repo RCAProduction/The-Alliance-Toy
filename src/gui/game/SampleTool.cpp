@@ -15,7 +15,7 @@ VideoBuffer * SampleTool::GetIcon(int toolID, int width, int height)
 			newTexture->SetPixel(x, y, PIXR(pc), PIXG(pc), PIXB(pc), 255);
 		}
 	}
-	newTexture->SetCharacter((width/2)-5, (height/2)-5, 0xE6, 255, 255, 255, 255);
+	newTexture->AddCharacter((width/2)-5, (height/2)-5, 0xE066, 255, 255, 255, 255);
 	newTexture->BlendPixel(10, 9, 100, 180, 255, 255);
 	newTexture->BlendPixel(11, 8, 100, 180, 255, 255);
 	newTexture->BlendPixel(12, 7, 100, 180, 255, 255);
@@ -35,13 +35,13 @@ void SampleTool::Draw(Simulation * sim, Brush * brush, ui::Point position)
 		int particleCtype = 0;
 		if (sim->photons[position.Y][position.X])
 		{
-			particleType = sim->parts[sim->photons[position.Y][position.X]>>8].type;
-			particleCtype = sim->parts[sim->pmap[position.Y][position.X]>>8].ctype;
+			particleType = sim->parts[ID(sim->photons[position.Y][position.X])].type;
+			particleCtype = sim->parts[ID(sim->pmap[position.Y][position.X])].ctype;
 		}
 		else if (sim->pmap[position.Y][position.X])
 		{
-			particleType = sim->parts[sim->pmap[position.Y][position.X]>>8].type;
-			particleCtype = sim->parts[sim->pmap[position.Y][position.X]>>8].ctype;
+			particleType = sim->parts[ID(sim->pmap[position.Y][position.X])].type;
+			particleCtype = sim->parts[ID(sim->pmap[position.Y][position.X])].ctype;
 		}
 
 		if(particleType)

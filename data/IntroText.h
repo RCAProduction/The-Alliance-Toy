@@ -1,9 +1,11 @@
+#pragma once
 static const char *introTextData =
 	"\blThe Galaxy Toy - Version 0.9.0 - RCAProductionmaster@gmail.com, irc.freenode.net #powder username RCAProduction\n"
 	"\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\n"
 	//"\baA\bbB\bcC\bdD\beE\bfF\bgG\bhH\biI\bjJ\bkK\blL\bmM\bnN\boO\bpP\bqQ\brR\bsS\btT\buU\bvV\bwW\bxX\byY\bzZ\n"
 	"\brPress 'ctrl+H' or 'F1' to access this message again.\n"
 	"\brPress 'shift+n' for news and help regarding this mod.\n"
+
 	"\bgControl+C/V/X are Copy, Paste and cut respectively.\n"
 	"\bgTo choose a material, hover over one of the icons on the right, it will show a selection of elements in that group.\n"
 	"\bgPick your material from the menu using mouse left/right buttons.\n"
@@ -31,6 +33,8 @@ static const char *introTextData =
 	"\bt" MTOS(SAVE_VERSION) "." MTOS(MINOR_VERSION) "." MTOS(BUILD_NUM) " " IDENT_PLATFORM " "
 #ifdef SNAPSHOT
 	"SNAPSHOT " MTOS(SNAPSHOT_ID) " "
+#elif MOD_ID > 0
+	"MODVER " MTOS(SNAPSHOT_ID) " "
 #endif
 #ifdef X86
 	"X86 "

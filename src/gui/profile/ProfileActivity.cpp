@@ -14,14 +14,14 @@
 #include "Format.h"
 #include "Platform.h"
 
-ProfileActivity::ProfileActivity(std::string username) :
+ProfileActivity::ProfileActivity(ByteString username) :
 	WindowActivity(ui::Point(-1, -1), ui::Point(236, 300)),
 	loading(false),
 	saving(false),
 	doError(false),
 	doErrorMessage("")
 {
-	editable = Client::Ref().GetAuthUser().ID && Client::Ref().GetAuthUser().Username == username;
+	editable = Client::Ref().GetAuthUser().UserID && Client::Ref().GetAuthUser().Username == username;
 
 
 	class CloseAction: public ui::ButtonAction
@@ -76,9 +76,7 @@ void ProfileActivity::setUserInfo(UserInfo newInfo)
 {
 	class EditAvatarAction: public ui::ButtonAction
 	{
-		ProfileActivity * a;
 	public:
-		EditAvatarAction(ProfileActivity * a) : a(a) {  }
 		void ActionCallback(ui::Button * sender_)
 		{
 			Platform::OpenURI(("http://"+ SERVER+ "/Profile/Avatar.html").c_str());
@@ -101,7 +99,7 @@ void ProfileActivity::setUserInfo(UserInfo newInfo)
 	int currentY = 5;
 
 	// username label
-	ui::Label * title = new ui::Label(ui::Point(4, currentY), ui::Point(Size.X-8-(40+8+75), 15), info.username);
+	ui::Label * title = new ui::Label(ui::Point(4, currentY), ui::Point(Size.X-8-(40+8+75), 15), info.username.FromUtf8());
 	title->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
 	scrollPanel->AddChild(title);
 
@@ -113,7 +111,7 @@ void ProfileActivity::setUserInfo(UserInfo newInfo)
 	if (editable)
 	{
 		ui::Button * editAvatar = new ui::Button(ui::Point(Size.X - (40 + 16 + 75), currentY), ui::Point(75, 15), "Edit Avatar");
-		editAvatar->SetActionCallback(new EditAvatarAction(this));
+		editAvatar->SetActionCallback(new EditAvatarAction());
 		scrollPanel->AddChild(editAvatar);
 	}
 	currentY += 23;
@@ -125,7 +123,7 @@ void ProfileActivity::setUserInfo(UserInfo newInfo)
 	scrollPanel->AddChild(ageTitle);
 
 	// can't figure out how to tell a null from a 0 in the json library we use
-	ui::Label *age = new ui::Label(ui::Point(8+ageTitle->Size.X, currentY), ui::Point(40, 15), info.age ? format::NumberToString<int>(info.age) : "\bgNot Provided");
+	ui::Label *age = new ui::Label(ui::Point(8+ageTitle->Size.X, currentY), ui::Point(40, 15), info.age ? String::Build(info.age) : "\bgNot Provided");
 	age->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
 	scrollPanel->AddChild(age);
 	currentY += 2+age->Size.Y;
@@ -150,7 +148,7 @@ void ProfileActivity::setUserInfo(UserInfo newInfo)
 	websiteTitle->SetTextColour(ui::Colour(180, 180, 180));
 	scrollPanel->AddChild(websiteTitle);
 
-	ui::Label *website = new ui::Label(ui::Point(8+websiteTitle->Size.X, currentY), ui::Point(Size.X-websiteTitle->Size.X-16, 15), info.website);
+	ui::Label *website = new ui::Label(ui::Point(8+websiteTitle->Size.X, currentY), ui::Point(Size.X-websiteTitle->Size.X-16, 15), info.website.FromUtf8());
 	website->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
 	scrollPanel->AddChild(website);
 	currentY += 2+website->Size.Y;
@@ -168,7 +166,7 @@ void ProfileActivity::setUserInfo(UserInfo newInfo)
 		saveCountTitle->SetTextColour(ui::Colour(180, 180, 180));
 		scrollPanel->AddChild(saveCountTitle);
 
-		ui::Label *savesCount = new ui::Label(ui::Point(12+saveCountTitle->Size.X, currentY), ui::Point(Size.X-saveCountTitle->Size.X-16, 15), format::NumberToString<int>(info.saveCount));
+		ui::Label *savesCount = new ui::Label(ui::Point(12+saveCountTitle->Size.X, currentY), ui::Point(Size.X-saveCountTitle->Size.X-16, 15), String::Build(info.saveCount));
 		savesCount->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
 		scrollPanel->AddChild(savesCount);
 		currentY += savesCount->Size.Y;
@@ -179,7 +177,7 @@ void ProfileActivity::setUserInfo(UserInfo newInfo)
 		averageScoreTitle->SetTextColour(ui::Colour(180, 180, 180));
 		scrollPanel->AddChild(averageScoreTitle);
 
-		ui::Label *averageScore = new ui::Label(ui::Point(12+averageScoreTitle->Size.X, currentY), ui::Point(Size.X-averageScoreTitle->Size.X-16, 15), format::NumberToString<float>(info.averageScore));
+		ui::Label *averageScore = new ui::Label(ui::Point(12+averageScoreTitle->Size.X, currentY), ui::Point(Size.X-averageScoreTitle->Size.X-16, 15), String::Build(info.averageScore));
 		averageScore->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
 		scrollPanel->AddChild(averageScore);
 		currentY += averageScore->Size.Y;
@@ -190,11 +188,11 @@ void ProfileActivity::setUserInfo(UserInfo newInfo)
 		highestScoreTitle->SetTextColour(ui::Colour(180, 180, 180));
 		scrollPanel->AddChild(highestScoreTitle);
 
-		ui::Label *highestScore = new ui::Label(ui::Point(12+highestScoreTitle->Size.X, currentY), ui::Point(Size.X-highestScoreTitle->Size.X-16, 15), format::NumberToString<int>(info.highestScore));
+		ui::Label *highestScore = new ui::Label(ui::Point(12+highestScoreTitle->Size.X, currentY), ui::Point(Size.X-highestScoreTitle->Size.X-16, 15), String::Build(info.highestScore));
 		highestScore->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
 		scrollPanel->AddChild(highestScore);
 		currentY += 2+highestScore->Size.Y;
-	
+
 	// biograhy
 	ui::Label * bioTitle = new ui::Label(ui::Point(4, currentY), ui::Point(50, 15), "Biography:");
 	bioTitle->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
@@ -266,7 +264,7 @@ void ProfileActivity::OnTick(float dt)
 
 void ProfileActivity::OnDraw()
 {
-	Graphics * g = ui::Engine::Ref().g;
+	Graphics * g = GetGraphics();
 	g->clearrect(Position.X-2, Position.Y-2, Size.X+3, Size.Y+3);
 	g->drawrect(Position.X, Position.Y, Size.X, Size.Y, 255, 255, 255, 255);
 }

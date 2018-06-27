@@ -60,22 +60,22 @@ int Element_TUNG::update(UPDATE_FUNC_ARGS)
 				if (BOUNDS_CHECK && (rx || ry))
 				{
 					r = pmap[y+ry][x+rx];
-					if((r&0xFF) == PT_O2)
+					if(TYP(r) == PT_O2)
 					{
 						splode = true;
 					}
 				}
 	}
-	if((parts[i].temp > MELTING_POINT && !(rand()%20)) || splode)
+	if((parts[i].temp > MELTING_POINT && RNG::Ref().chance(1, 20)) || splode)
 	{
-		if(!(rand()%50))
+		if (RNG::Ref().chance(1, 50))
 		{
 			sim->pv[y/CELL][x/CELL] += 50.0f;
 		}
-		else if(!(rand()%100))
+		else if (RNG::Ref().chance(1, 100))
 		{
 			sim->part_change_type(i, x, y, PT_FIRE);
-			parts[i].life = rand()%500;
+			parts[i].life = RNG::Ref().between(0, 499);
 			return 1;
 		}
 		else
@@ -86,10 +86,10 @@ int Element_TUNG::update(UPDATE_FUNC_ARGS)
 		}
 		if(splode)
 		{
-			parts[i].temp = restrict_flt(MELTING_POINT + (rand()%600) + 200, MIN_TEMP, MAX_TEMP);
+			parts[i].temp = restrict_flt(MELTING_POINT + RNG::Ref().between(200, 799), MIN_TEMP, MAX_TEMP);
 		}
-		parts[i].vx += (rand()%100)-50;
-		parts[i].vy += (rand()%100)-50;
+		parts[i].vx += RNG::Ref().between(-50, 50);
+		parts[i].vy += RNG::Ref().between(-50, 50);
 		return 1;
 	}
 	parts[i].pavg[0] = parts[i].pavg[1];

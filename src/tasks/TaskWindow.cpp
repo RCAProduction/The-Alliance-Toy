@@ -1,11 +1,12 @@
-#include <sstream>
+#include "common/tpt-minmax.h"
 #include "gui/interface/Label.h"
+#include "gui/interface/Engine.h"
 #include "TaskWindow.h"
 #include "gui/dialogues/ErrorMessage.h"
 #include "gui/Style.h"
 #include "Task.h"
 
-TaskWindow::TaskWindow(std::string title_, Task * task_, bool closeOnDone):
+TaskWindow::TaskWindow(String title_, Task * task_, bool closeOnDone):
 	ui::Window(ui::Point(-1, -1), ui::Point(240, 60)),
 	task(task_),
 	title(title_),
@@ -26,7 +27,7 @@ TaskWindow::TaskWindow(std::string title_, Task * task_, bool closeOnDone):
 	statusLabel->Appearance.VerticalAlign = ui::Appearance::AlignMiddle;
 	AddComponent(statusLabel);
 
-	ui::Engine::Ref().ShowWindow(this);
+	MakeActiveWindow();
 
 	task->AddTaskListener(this);
 	task->Start();
@@ -52,9 +53,8 @@ void TaskWindow::NotifyDone(Task * task)
 
 void TaskWindow::Exit()
 {
-	if(ui::Engine::Ref().GetWindow()==this)
+	if (CloseActiveWindow())
 	{
-		ui::Engine::Ref().CloseWindow();
 		SelfDestruct();
 	}
 }
@@ -62,16 +62,10 @@ void TaskWindow::Exit()
 void TaskWindow::NotifyProgress(Task * task)
 {
 	progress = task->GetProgress();
-	std::stringstream pStream;
 	if(progress>-1)
-	{
-		pStream << progress << "%";
-	}
+		progressStatus = String::Build(progress, "%");
 	else
-	{
-		pStream << "Please wait...";
-	}
-	progressStatus = pStream.str();
+		progressStatus = "Please wait...";
 }
 
 void TaskWindow::OnTick(float dt)
@@ -86,7 +80,7 @@ void TaskWindow::OnTick(float dt)
 
 void TaskWindow::OnDraw()
 {
-	Graphics * g = ui::Engine::Ref().g;
+	Graphics * g = GetGraphics();
 	g->clearrect(Position.X-2, Position.Y-2, Size.X+3, Size.Y+3);
 	g->drawrect(Position.X, Position.Y, Size.X, Size.Y, 255, 255, 255, 255);
 
@@ -119,9 +113,9 @@ void TaskWindow::OnDraw()
 		}
 	}
 	if(progress<50)
-		g->drawtext(Position.X + ((Size.X-Graphics::textwidth(progressStatus.c_str()))/2), Position.Y + Size.Y-13, progressStatus, 255, 255, 255, 255);
+		g->drawtext(Position.X + ((Size.X-Graphics::textwidth(progressStatus))/2), Position.Y + Size.Y-13, progressStatus, 255, 255, 255, 255);
 	else
-		g->drawtext(Position.X + ((Size.X-Graphics::textwidth(progressStatus.c_str()))/2), Position.Y + Size.Y-13, progressStatus, 0, 0, 0, 255);
+		g->drawtext(Position.X + ((Size.X-Graphics::textwidth(progressStatus))/2), Position.Y + Size.Y-13, progressStatus, 0, 0, 0, 255);
 }
 
 TaskWindow::~TaskWindow() {

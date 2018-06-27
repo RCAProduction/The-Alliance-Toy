@@ -1,5 +1,6 @@
 #include "LoginView.h"
 
+#include "graphics/Graphics.h"
 #include "gui/interface/Button.h"
 #include "gui/interface/Label.h"
 #include "gui/interface/Textbox.h"
@@ -13,7 +14,7 @@ public:
 	LoginAction(LoginView * _v) { v = _v; }
 	void ActionCallback(ui::Button * sender)
 	{
-		v->c->Login(v->usernameField->GetText(), v->passwordField->GetText());
+		v->c->Login(v->usernameField->GetText().ToUtf8(), v->passwordField->GetText().ToUtf8());
 	}
 };
 
@@ -34,19 +35,19 @@ LoginView::LoginView():
 	cancelButton(new ui::Button(ui::Point(0, 87-17), ui::Point(101, 17), "Sign Out")),
 	titleLabel(new ui::Label(ui::Point(4, 5), ui::Point(200-16, 16), "Server login")),
 	infoLabel(new ui::Label(ui::Point(8, 67), ui::Point(200-16, 16), "")),
-	usernameField(new ui::Textbox(ui::Point(8, 25), ui::Point(200-16, 17), Client::Ref().GetAuthUser().Username, "[username]")),
+	usernameField(new ui::Textbox(ui::Point(8, 25), ui::Point(200-16, 17), Client::Ref().GetAuthUser().Username.FromUtf8(), "[username]")),
 	passwordField(new ui::Textbox(ui::Point(8, 46), ui::Point(200-16, 17), "", "[password]")),
 	targetSize(0, 0)
 {
 	targetSize = Size;
 	FocusComponent(usernameField);
-	
+
 	infoLabel->Appearance.HorizontalAlign = ui::Appearance::AlignCentre;
 	infoLabel->Appearance.VerticalAlign = ui::Appearance::AlignTop;
 	infoLabel->SetMultiline(true);
 	infoLabel->Visible = false;
 	AddComponent(infoLabel);
-	
+
 	AddComponent(loginButton);
 	SetOkayButton(loginButton);
 	loginButton->Appearance.HorizontalAlign = ui::Appearance::AlignRight;
@@ -60,7 +61,7 @@ LoginView::LoginView():
 	AddComponent(titleLabel);
 	titleLabel->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
 	titleLabel->Appearance.VerticalAlign = ui::Appearance::AlignMiddle;
-	
+
 	AddComponent(usernameField);
 	usernameField->Appearance.icon = IconUsername;
 	usernameField->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
@@ -72,8 +73,10 @@ LoginView::LoginView():
 	passwordField->SetHidden(true);
 }
 
-void LoginView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt)
+void LoginView::OnKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt)
 {
+	if (repeat)
+		return;
 	switch(key)
 	{
 	case SDLK_TAB:
@@ -87,13 +90,13 @@ void LoginView::OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, boo
 
 void LoginView::OnTryExit(ExitMethod method)
 {
-	ui::Engine::Ref().CloseWindow();
+	CloseActiveWindow();
 }
 
 void LoginView::NotifyStatusChanged(LoginModel * sender)
 {
 	if (infoLabel->Visible)
-		targetSize.Y -= infoLabel->Size.Y+2;
+		targetSize.Y = 87;
 	infoLabel->SetText(sender->GetStatusText());
 	infoLabel->AutoHeight();
 	if (sender->GetStatusText().length())
@@ -126,7 +129,7 @@ void LoginView::OnTick(float dt)
 				ydiff = 1*isign(difference.Y);
 			Size.Y += ydiff;
 		}
-		
+
 		loginButton->Position.Y = Size.Y-17;
 		cancelButton->Position.Y = Size.Y-17;
 	}
@@ -134,7 +137,7 @@ void LoginView::OnTick(float dt)
 
 void LoginView::OnDraw()
 {
-	Graphics * g = ui::Engine::Ref().g;
+	Graphics * g = GetGraphics();
 	g->clearrect(Position.X-2, Position.Y-2, Size.X+3, Size.Y+3);
 	g->drawrect(Position.X, Position.Y, Size.X, Size.Y, 255, 255, 255, 255);
 }

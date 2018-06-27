@@ -35,7 +35,7 @@ private:
 	ui::Label * pageLabel;
 	ui::Label * pageCountLabel;
 	ui::Label * tagsLabel;
-	ui::RichLabel * motdLabel;
+	ui::RichLabel * motdLabel = nullptr;
 	ui::Button * sortButton;
 	ui::Button * ownButton;
 	ui::Spinner * loadingSpinner;
@@ -66,11 +66,11 @@ public:
     SearchView();
 	virtual ~SearchView();
 	void AttachController(SearchController * _c) { c = _c; }
-	virtual void Search(std::string);
+	virtual void Search(String);
 	virtual void OnTick(float dt);
 	virtual void OnMouseWheel(int x, int y, int d);
-	virtual void OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt);
-	virtual void OnKeyRelease(int key, Uint16 character, bool shift, bool ctrl, bool alt);
+	virtual void OnKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
+	virtual void OnKeyRelease(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
 
 };
 

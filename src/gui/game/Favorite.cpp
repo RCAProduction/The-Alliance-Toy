@@ -4,16 +4,16 @@
 #include <algorithm>
 
 Favorite::Favorite():
-    favoritesList(std::vector<std::string>())
+    favoritesList(std::vector<ByteString>())
 {}
 
 
-std::vector<std::string> Favorite::GetFavoritesList()
+std::vector<ByteString> Favorite::GetFavoritesList()
 {
 	return favoritesList;
 }
 
-bool Favorite::IsFavorite(std::string identifier)
+bool Favorite::IsFavorite(ByteString identifier)
 {
 	return std::find(favoritesList.begin(), favoritesList.end(), identifier) != favoritesList.end();
 }
@@ -23,12 +23,15 @@ bool Favorite::AnyFavorites()
 	return favoritesList.size() == 0;
 }
 
-void Favorite::AddFavorite(std::string identifier)
+void Favorite::AddFavorite(ByteString identifier)
 {
-	favoritesList.push_back(identifier);
+	if (!IsFavorite(identifier))
+	{
+		favoritesList.push_back(identifier);
+	}
 }
 
-void Favorite::RemoveFavorite(std::string identifier)
+void Favorite::RemoveFavorite(ByteString identifier)
 {
 	favoritesList.erase(std::remove(favoritesList.begin(), favoritesList.end(), identifier), favoritesList.end());
 }
@@ -40,5 +43,5 @@ void Favorite::SaveFavoritesToPrefs()
 
 void Favorite::LoadFavoritesFromPrefs()
 {
-	favoritesList = Client::Ref().GetPrefStringArray("Favorites");
+	favoritesList = Client::Ref().GetPrefByteStringArray("Favorites");
 }

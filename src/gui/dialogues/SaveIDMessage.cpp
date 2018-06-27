@@ -1,5 +1,6 @@
 #include "gui/Style.h"
 #include "SaveIDMessage.h"
+#include "graphics/Graphics.h"
 #include "gui/interface/Button.h"
 #include "gui/interface/CopyTextButton.h"
 #include "gui/interface/Label.h"
@@ -27,8 +28,8 @@ SaveIDMessage::SaveIDMessage(int id):
 	copyTextLabel->Appearance.HorizontalAlign = ui::Appearance::AlignCentre;
 	AddComponent(copyTextLabel);
 
-	textWidth = Graphics::textwidth(format::NumberToString<int>(id).c_str());
-	ui::CopyTextButton * copyTextButton = new ui::CopyTextButton(ui::Point((Size.X-textWidth-10)/2, 50), ui::Point(textWidth+10, 18), format::NumberToString<int>(id), copyTextLabel);
+	textWidth = Graphics::textwidth(String::Build(id));
+	ui::CopyTextButton * copyTextButton = new ui::CopyTextButton(ui::Point((Size.X-textWidth-10)/2, 50), ui::Point(textWidth+10, 18), String::Build(id), copyTextLabel);
 	AddComponent(copyTextButton);
 
 	class DismissAction: public ui::ButtonAction
@@ -38,7 +39,7 @@ SaveIDMessage::SaveIDMessage(int id):
 		DismissAction(SaveIDMessage * message_) { message = message_; }
 		void ActionCallback(ui::Button * sender)
 		{
-			ui::Engine::Ref().CloseWindow();
+			message->CloseActiveWindow();
 			message->SelfDestruct();
 		}
 	};
@@ -48,14 +49,16 @@ SaveIDMessage::SaveIDMessage(int id):
 	okayButton->Appearance.VerticalAlign = ui::Appearance::AlignMiddle;
 	okayButton->SetActionCallback(new DismissAction(this));
 	AddComponent(okayButton);
+	// This button has multiple personalities
+	SetOkayButton(okayButton);
 	SetCancelButton(okayButton);
-	
-	ui::Engine::Ref().ShowWindow(this);
+
+	MakeActiveWindow();
 }
 
 void SaveIDMessage::OnDraw()
 {
-	Graphics * g = ui::Engine::Ref().g;
+	Graphics * g = GetGraphics();
 
 	g->clearrect(Position.X-2, Position.Y-2, Size.X+3, Size.Y+3);
 	g->drawrect(Position.X, Position.Y, Size.X, Size.Y, 200, 200, 200, 255);
@@ -63,7 +66,7 @@ void SaveIDMessage::OnDraw()
 
 void SaveIDMessage::OnTryExit(ExitMethod method)
 {
-	ui::Engine::Ref().CloseWindow();
+	CloseActiveWindow();
 	SelfDestruct();
 }
 

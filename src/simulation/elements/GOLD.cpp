@@ -24,6 +24,7 @@ Element_GOLD::Element_GOLD()
 	Explosive = 0;
 	Meltable = 1;
 	Hardness = 0;
+	PhotonReflectWavelengths = 0x3C038100;
 
 	Weight = 100;
 
@@ -54,17 +55,17 @@ int Element_GOLD::update(UPDATE_FUNC_ARGS)
 	static int checkCoordsY[] = { 0, 0, -4, 4 };
 	//Find nearby rusted iron (BMTL with tmp 1+)
 	for(int j = 0; j < 8; j++){
-		rndstore = rand();
+		rndstore = RNG::Ref().gen();
 		rx = (rndstore % 9)-4;
 		rndstore >>= 4;
 		ry = (rndstore % 9)-4;
 		if ((!rx != !ry) && BOUNDS_CHECK) {
 			r = pmap[y+ry][x+rx];
 			if(!r) continue;
-			if((r&0xFF)==PT_BMTL && parts[r>>8].tmp)
+			if(TYP(r)==PT_BMTL && parts[ID(r)].tmp)
 			{
-				parts[r>>8].tmp = 0;
-				sim->part_change_type(r>>8, x+rx, y+ry, PT_IRON);
+				parts[ID(r)].tmp = 0;
+				sim->part_change_type(ID(r), x+rx, y+ry, PT_IRON);
 			}
 		}
 	}
@@ -77,7 +78,7 @@ int Element_GOLD::update(UPDATE_FUNC_ARGS)
 			if (BOUNDS_CHECK) {
 				r = pmap[y+ry][x+rx];
 				if(!r) continue;
-				if((r&0xFF)==PT_SPRK && parts[r>>8].life && parts[r>>8].life<4)
+				if(TYP(r)==PT_SPRK && parts[ID(r)].life && parts[ID(r)].life<4)
 				{
 					sim->part_change_type(i, x, y, PT_SPRK);
 					parts[i].life = 4;
@@ -86,11 +87,11 @@ int Element_GOLD::update(UPDATE_FUNC_ARGS)
 			}
 		}
 	}
-	if ((sim->photons[y][x]&0xFF) == PT_NEUT)
+	if (TYP(sim->photons[y][x]) == PT_NEUT)
 	{
-		if (!(rand()%7))
+		if (RNG::Ref().chance(1, 7))
 		{
-			sim->kill_part(sim->photons[y][x]>>8);
+			sim->kill_part(ID(sim->photons[y][x]));
 		}
 	}
 	return 0;
@@ -99,7 +100,7 @@ int Element_GOLD::update(UPDATE_FUNC_ARGS)
 //#TPT-Directive ElementHeader Element_GOLD static int graphics(GRAPHICS_FUNC_ARGS)
 int Element_GOLD::graphics(GRAPHICS_FUNC_ARGS)
 {
-	int rndstore = rand();
+	int rndstore = RNG::Ref().gen();
 	*colr += (rndstore % 10) - 5;
 	rndstore >>= 4;
 	*colg += (rndstore % 10)- 5;

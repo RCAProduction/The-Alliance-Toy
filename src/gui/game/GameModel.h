@@ -20,6 +20,7 @@ using namespace std;
 
 class GameView;
 class GameController;
+class SaveFile;
 class Simulation;
 class Renderer;
 
@@ -40,7 +41,7 @@ private:
 	//unsigned char * clipboardData;
 	GameSave * clipboard;
 	GameSave * placeSave;
-	deque<string> consoleLog;
+	deque<String> consoleLog;
 	vector<GameView*> observers;
 	vector<Tool*> toolList;
 
@@ -65,6 +66,9 @@ private:
 	User currentUser;
 	float toolStrength;
 	std::deque<Snapshot*> history;
+	Snapshot *redoHistory;
+	unsigned int historyPosition;
+	unsigned int undoHistoryLimit;
 
 	size_t activeColourPreset;
 	std::vector<ui::Colour> colourPresets;
@@ -73,8 +77,8 @@ private:
 
 	int edgeMode;
 
-	std::string infoTip;
-	std::string toolTip;
+	String infoTip;
+	String toolTip;
 	//bool zoomEnabled;
 	void notifyRendererChanged();
 	void notifySimulationChanged();
@@ -94,7 +98,7 @@ private:
 	void notifyColourPresetsChanged();
 	void notifyColourActivePresetChanged();
 	void notifyNotificationsChanged();
-	void notifyLogChanged(string entry);
+	void notifyLogChanged(String entry);
 	void notifyInfoTipChanged();
 	void notifyToolTipChanged();
 	void notifyQuickOptionsChanged();
@@ -119,17 +123,23 @@ public:
 	void SetColourSelectorColour(ui::Colour colour);
 	ui::Colour GetColourSelectorColour();
 
-	void SetToolTip(std::string text);
-	void SetInfoTip(std::string text);
-	std::string GetToolTip();
-	std::string GetInfoTip();
+	void SetToolTip(String text);
+	void SetInfoTip(String text);
+	String GetToolTip();
+	String GetInfoTip();
 
 	void BuildMenus();
 	void BuildFavoritesMenu();
 	void BuildQuickOptionMenu(GameController * controller);
 
 	std::deque<Snapshot*> GetHistory();
+	unsigned int GetHistoryPosition();
 	void SetHistory(std::deque<Snapshot*> newHistory);
+	void SetHistoryPosition(unsigned int newHistoryPosition);
+	Snapshot * GetRedoHistory();
+	void SetRedoHistory(Snapshot * redo);
+	unsigned int GetUndoHistoryLimit();
+	void SetUndoHistoryLimit(unsigned int undoHistoryLimit_);
 
 	void UpdateQuickOptions();
 
@@ -139,7 +149,7 @@ public:
 	float GetToolStrength();
 	Tool * GetLastTool();
 	void SetLastTool(Tool * newTool);
-	Tool * GetToolFromIdentifier(std::string identifier);
+	Tool * GetToolFromIdentifier(ByteString identifier);
 	Tool * GetElementTool(int elementID);
 	vector<Tool*> GetToolList();
 	vector<Tool*> GetUnlistedTools();
@@ -162,6 +172,8 @@ public:
 	void SetDecoration(bool decorationState);
 	bool GetAHeatEnable();
 	void SetAHeatEnable(bool aHeat);
+	bool GetNewtonianGrvity();
+	void SetNewtonianGravity(bool newtonainGravity);
 	bool GetGravityGrid();
 	void ShowGravityGrid(bool showGrid);
 	void ClearSimulation();
@@ -188,8 +200,8 @@ public:
 	ui::Point GetZoomWindowPosition();
 	void SetClipboard(GameSave * save);
 	void SetPlaceSave(GameSave * save);
-	void Log(string message, bool printToFile);
-	deque<string> GetLog();
+	void Log(String message, bool printToFile);
+	deque<String> GetLog();
 	GameSave * GetClipboard();
 	GameSave * GetPlaceSave();
 

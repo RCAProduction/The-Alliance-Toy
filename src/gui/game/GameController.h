@@ -1,4 +1,4 @@
- #ifndef GAMECONTROLLER_H
+#ifndef GAMECONTROLLER_H
 #define GAMECONTROLLER_H
 
 #include <queue>
@@ -31,7 +31,7 @@ class GameController: public ClientListener
 {
 private:
 	bool firstTick;
-	sign * foundSign;
+	int foundSignID;
 
 	PreviewController * activePreview;
 	GameView * gameView;
@@ -59,14 +59,15 @@ public:
 	GameController();
 	~GameController();
 	GameView * GetView();
-	sign * GetSignAt(int x, int y);
+	int GetSignAt(int x, int y);
+	String GetSignText(int signID);
 
 	bool MouseMove(int x, int y, int dx, int dy);
 	bool MouseDown(int x, int y, unsigned button);
 	bool MouseUp(int x, int y, unsigned button, char type);
 	bool MouseWheel(int x, int y, int d);
-	bool KeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt);
-	bool KeyRelease(int key, Uint16 character, bool shift, bool ctrl, bool alt);
+	bool KeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
+	bool KeyRelease(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
 	bool MouseTick();
 	void Tick();
 	void Exit();
@@ -77,6 +78,7 @@ public:
 
 	void HistoryRestore();
 	void HistorySnapshot();
+	void HistoryForward();
 
 	void AdjustGridSize(int direction);
 	void InvertAirSim();
@@ -91,9 +93,9 @@ public:
 	void DrawRect(int toolSelection, ui::Point point1, ui::Point point2);
 	void DrawLine(int toolSelection, ui::Point point1, ui::Point point2);
 	void DrawFill(int toolSelection, ui::Point point);
-	std::string StampRegion(ui::Point point1, ui::Point point2);
-	void CopyRegion(ui::Point point1, ui::Point point2);
-	void CutRegion(ui::Point point1, ui::Point point2);
+	ByteString StampRegion(ui::Point point1, ui::Point point2, bool includePressure);
+	void CopyRegion(ui::Point point1, ui::Point point2, bool includePressure);
+	void CutRegion(ui::Point point1, ui::Point point2, bool includePressure);
 	void Update();
 	void SetPaused(bool pauseState);
 	void SetPaused();
@@ -111,6 +113,7 @@ public:
 	void RebuildFavoritesMenu();
 	Tool * GetActiveTool(int selection);
 	void SetActiveTool(int toolSelection, Tool * tool);
+	void SetActiveTool(int toolSelection, ByteString identifier);
 	void SetLastTool(Tool * tool);
 	int GetReplaceModeFlags();
 	void SetReplaceModeFlags(int flags);
@@ -120,7 +123,7 @@ public:
 	void SetToolStrength(float value);
 	void LoadSaveFile(SaveFile * file);
 	void LoadSave(SaveInfo * save);
-	void OpenSearch(std::string searchText);
+	void OpenSearch(String searchText);
 	void OpenLogin();
 	void OpenProfile();
 	void OpenTags();
@@ -135,7 +138,7 @@ public:
 	void OpenStamps();
 	void OpenElementSearch();
 	void OpenColourPicker();
-	void PlaceSave(ui::Point position);
+	void PlaceSave(ui::Point position, bool includePressure);
 	void ClearSim();
 	void ReloadSim();
 	void Vote(int direction);
@@ -148,9 +151,10 @@ public:
 	bool MouseInZoom(ui::Point position);
 	ui::Point PointTranslate(ui::Point point);
 	ui::Point NormaliseBlockCoord(ui::Point point);
-	std::string ElementResolve(int type, int ctype);
+	ByteString ElementResolve(int type, int ctype);
 	bool IsValidElement(int type);
-	std::string WallName(int type);
+	String WallName(int type);
+	int Record(bool record);
 
 	void ResetAir();
 	void ResetSpark();
@@ -167,7 +171,7 @@ public:
 
 	virtual void NotifyUpdateAvailable(Client * sender);
 	virtual void NotifyAuthUserChanged(Client * sender);
-	virtual void NotifyNewNotification(Client * sender, std::pair<std::string, std::string> notification);
+	virtual void NotifyNewNotification(Client * sender, std::pair<String, ByteString> notification);
 	void RunUpdater();
 };
 

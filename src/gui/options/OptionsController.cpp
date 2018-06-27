@@ -1,12 +1,13 @@
 #include "OptionsController.h"
 #include "gui/dialogues/ErrorMessage.h"
+#include "gui/interface/Engine.h"
+#include "gui/game/GameModel.h"
 
 OptionsController::OptionsController(GameModel * gModel_, ControllerCallback * callback_):
 	gModel(gModel_),
 	callback(callback_),
 	HasExited(false)
 {
-	this->depth3d = ui::Engine::Ref().Get3dDepth();
 	view = new OptionsView();
 	model = new OptionsModel(gModel);
 	model->AddObserver(view);
@@ -54,36 +55,29 @@ void OptionsController::SetFullscreen(bool fullscreen)
 	model->SetFullscreen(fullscreen);
 }
 
+void OptionsController::SetAltFullscreen(bool altFullscreen)
+{
+	model->SetAltFullscreen(altFullscreen);
+}
+
 void OptionsController::SetShowAvatars(bool showAvatars)
 {
 	model->SetShowAvatars(showAvatars);
 }
 
-void OptionsController::SetScale(bool scale)
+void OptionsController::SetScale(int scale)
 {
-	if(scale)
-	{
-		if(ui::Engine::Ref().GetMaxWidth() >= ui::Engine::Ref().GetWidth() * 2 && ui::Engine::Ref().GetMaxHeight() >= ui::Engine::Ref().GetHeight() * 2)
-			model->SetScale(scale);
-		else
-		{
-			new ErrorMessage("Screen resolution error", "Your screen size is too small to use this scale mode.");
-			model->SetScale(false);
-		}
-	}
-	else
-		model->SetScale(scale);
+	model->SetScale(scale);
+}
 
+void OptionsController::SetResizable(bool resizable)
+{
+	model->SetResizable(resizable);
 }
 
 void OptionsController::SetFastQuit(bool fastquit)
 {
 	model->SetFastQuit(fastquit);
-}
-
-void OptionsController::Set3dDepth(int depth)
-{
-	depth3d = depth;
 }
 
 OptionsView * OptionsController::GetView()
@@ -93,23 +87,17 @@ OptionsView * OptionsController::GetView()
 
 void OptionsController::Exit()
 {
-	if (ui::Engine::Ref().GetWindow() == view)
-	{
-		ui::Engine::Ref().CloseWindow();
-	}
-	// only update on close, it would be hard to edit if the changes were live
-	ui::Engine::Ref().Set3dDepth(depth3d);
+	view->CloseActiveWindow();
+
 	if (callback)
 		callback->ControllerExit();
 	HasExited = true;
 }
 
 
-OptionsController::~OptionsController() {
-	if(ui::Engine::Ref().GetWindow() == view)
-	{
-		ui::Engine::Ref().CloseWindow();
-	}
+OptionsController::~OptionsController()
+{
+	view->CloseActiveWindow();
 	delete model;
 	delete view;
 	delete callback;

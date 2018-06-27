@@ -4,7 +4,7 @@
 #include <vector>
 #include <queue>
 #include <deque>
-#include <string>
+#include "common/String.h"
 #include "GameController.h"
 #include "GameModel.h"
 #include "gui/interface/Window.h"
@@ -54,20 +54,21 @@ private:
 	int lastMenu;
 
 	int toolTipPresence;
-	std::string toolTip;
+	String toolTip;
 	bool isToolTipFadingIn;
 	ui::Point toolTipPosition;
 	int infoTipPresence;
-	std::string infoTip;
+	String infoTip;
 	int buttonTipShow;
-	std::string buttonTip;
+	String buttonTip;
 	bool isButtonTipFadingIn;
 	int introText;
-	std::string introTextMessage;
+	String introTextMessage;
 
 	bool doScreenshot;
-	bool recording;
 	int screenshotIndex;
+	bool recording;
+	int recordingFolder;
 	int recordingIndex;
 
 	ui::Point currentPoint, lastPoint;
@@ -79,12 +80,13 @@ private:
 	vector<ui::Button*> menuButtons;
 	vector<ToolButton*> toolButtons;
 	vector<ui::Component*> notificationComponents;
-	deque<std::pair<std::string, int> > logEntries;
+	deque<std::pair<String, int> > logEntries;
 	ui::Button * scrollBar;
 	ui::Button * searchButton;
 	ui::Button * reloadButton;
 	ui::Button * saveSimulationButton;
 	bool saveSimulationButtonEnabled;
+	bool saveReuploadAllowed;
 	ui::Button * downVoteButton;
 	ui::Button * upVoteButton;
 	ui::Button * tagSimulationButton;
@@ -110,16 +112,15 @@ private:
 	ui::Point mousePosition;
 
 	VideoBuffer * placeSaveThumb;
+	ui::Point placeSaveOffset;
 
 	SimulationSample sample;
 
-	int lastOffset;
-	void setToolButtonOffset(int offset);
+	void updateToolButtonScroll();
 
 	void SetSaveButtonTooltips();
 
 	void screenshot();
-	void record();
 
 	void enableShiftBehaviour();
 	void disableShiftBehaviour();
@@ -148,6 +149,7 @@ public:
 	bool CtrlBehaviour(){ return ctrlBehaviour; }
 	bool ShiftBehaviour(){ return shiftBehaviour; }
 	bool AltBehaviour(){ return altBehaviour; }
+
 	bool pmessage;
 	bool newsPause;
 	bool SetMenu;
@@ -221,8 +223,12 @@ public:
 	bool localServer;
 
 	void ExitPrompt();
+
 	SelectMode GetSelectMode() { return selectMode; }
 	void BeginStampSelection();
+	ui::Point GetPlaceSaveOffset() { return placeSaveOffset; }
+	void SetPlaceSaveOffset(ui::Point offset) { placeSaveOffset = offset; }
+	int Record(bool record);
 
 	//all of these are only here for one debug lines
 	bool GetMouseDown() { return isMouseDown; }
@@ -250,21 +256,21 @@ public:
 	void NotifyColourActivePresetChanged(GameModel * sender);
 	void NotifyPlaceSaveChanged(GameModel * sender);
 	void NotifyNotificationsChanged(GameModel * sender);
-	void NotifyLogChanged(GameModel * sender, string entry);
+	void NotifyLogChanged(GameModel * sender, String entry);
 	void NotifyToolTipChanged(GameModel * sender);
 	void NotifyInfoTipChanged(GameModel * sender);
 	void NotifyQuickOptionsChanged(GameModel * sender);
 	void NotifyLastToolChanged(GameModel * sender);
 
 
-	virtual void ToolTip(ui::Point senderPosition, std::string toolTip);
+	virtual void ToolTip(ui::Point senderPosition, String toolTip);
 
 	virtual void OnMouseMove(int x, int y, int dx, int dy);
 	virtual void OnMouseDown(int x, int y, unsigned button);
 	virtual void OnMouseUp(int x, int y, unsigned button);
 	virtual void OnMouseWheel(int x, int y, int d);
-	virtual void OnKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt);
-	virtual void OnKeyRelease(int key, Uint16 character, bool shift, bool ctrl, bool alt);
+	virtual void OnKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
+	virtual void OnKeyRelease(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
 	virtual void OnTick(float dt);
 	virtual void OnDraw();
 	virtual void OnBlur();
@@ -276,8 +282,8 @@ public:
 	virtual void DoMouseDown(int x, int y, unsigned button);
 	virtual void DoMouseUp(int x, int y, unsigned button);
 	virtual void DoMouseWheel(int x, int y, int d);
-	virtual void DoKeyPress(int key, Uint16 character, bool shift, bool ctrl, bool alt);
-	virtual void DoKeyRelease(int key, Uint16 character, bool shift, bool ctrl, bool alt);
+	virtual void DoKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
+	virtual void DoKeyRelease(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt);
 
 	class MenuAction;
 	class ToolAction;

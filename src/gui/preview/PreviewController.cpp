@@ -1,4 +1,3 @@
-#include <sstream>
 #include "client/Client.h"
 #include "PreviewController.h"
 #include "PreviewView.h"
@@ -24,7 +23,7 @@ PreviewController::PreviewController(int saveID, int saveDate, bool instant, Con
 
 	previewModel->UpdateSave(saveID, saveDate);
 
-	if(Client::Ref().GetAuthUser().ID)
+	if(Client::Ref().GetAuthUser().UserID)
 	{
 		previewModel->SetCommentBoxEnabled(true);
 	}
@@ -32,6 +31,7 @@ PreviewController::PreviewController(int saveID, int saveDate, bool instant, Con
 	Client::Ref().AddListener(this);
 
 	this->callback = callback;
+	(void)saveDate; //pretend this is used
 }
 
 PreviewController::PreviewController(int saveID, bool instant, ControllerCallback * callback):
@@ -47,7 +47,7 @@ PreviewController::PreviewController(int saveID, bool instant, ControllerCallbac
 
 	previewModel->UpdateSave(saveID, 0);
 
-	if(Client::Ref().GetAuthUser().ID)
+	if(Client::Ref().GetAuthUser().UserID)
 	{
 		previewModel->SetCommentBoxEnabled(true);
 	}
@@ -55,6 +55,7 @@ PreviewController::PreviewController(int saveID, bool instant, ControllerCallbac
 	Client::Ref().AddListener(this);
 
 	this->callback = callback;
+	(void)saveDate; //pretend this is used
 }
 
 void PreviewController::Update()
@@ -71,7 +72,7 @@ void PreviewController::Update()
 	}
 }
 
-bool PreviewController::SubmitComment(std::string comment)
+bool PreviewController::SubmitComment(String comment)
 {
 	if(comment.length() < 4)
 	{
@@ -98,12 +99,12 @@ bool PreviewController::SubmitComment(std::string comment)
 void PreviewController::ShowLogin()
 {
 	loginWindow = new LoginController();
-	ui::Engine::Ref().ShowWindow(loginWindow->GetView());
+	loginWindow->GetView()->MakeActiveWindow();
 }
 
 void PreviewController::NotifyAuthUserChanged(Client * sender)
 {
-	previewModel->SetCommentBoxEnabled(sender->GetAuthUser().ID);
+	previewModel->SetCommentBoxEnabled(sender->GetAuthUser().UserID);
 }
 
 SaveInfo * PreviewController::GetSaveInfo()
@@ -121,7 +122,7 @@ void PreviewController::DoOpen()
 	previewModel->SetDoOpen(true);
 }
 
-void PreviewController::Report(std::string message)
+void PreviewController::Report(String message)
 {
 	if(Client::Ref().ReportSave(saveId, message) == RequestOkay)
 	{
@@ -134,7 +135,7 @@ void PreviewController::Report(std::string message)
 
 void PreviewController::FavouriteSave()
 {
-	if(previewModel->GetSaveInfo() && Client::Ref().GetAuthUser().ID)
+	if(previewModel->GetSaveInfo() && Client::Ref().GetAuthUser().UserID)
 	{
 		try
 		{
@@ -145,16 +146,15 @@ void PreviewController::FavouriteSave()
 		}
 		catch (PreviewModelException & e)
 		{
-			new ErrorMessage("Error", e.what());
+			new ErrorMessage("Error", ByteString(e.what()).FromUtf8());
 		}
 	}
 }
 
 void PreviewController::OpenInBrowser()
 {
-	std::stringstream uriStream;
-	uriStream << "http://" << SERVER << "/Browse/View.html?ID=" << saveId;
-	Platform::OpenURI(uriStream.str());
+	ByteString uri = ByteString::Build("http://", SERVER, "/Browse/View.html?ID=", saveId);
+	Platform::OpenURI(uri);
 }
 
 bool PreviewController::NextCommentPage()
@@ -179,20 +179,15 @@ bool PreviewController::PrevCommentPage()
 
 void PreviewController::Exit()
 {
-	if(ui::Engine::Ref().GetWindow() == previewView)
-	{
-		ui::Engine::Ref().CloseWindow();
-	}
+	previewView->CloseActiveWindow();
 	HasExited = true;
 	if(callback)
 		callback->ControllerExit();
 }
 
-PreviewController::~PreviewController() {
-	if(ui::Engine::Ref().GetWindow() == previewView)
-	{
-		ui::Engine::Ref().CloseWindow();
-	}
+PreviewController::~PreviewController()
+{
+	previewView->CloseActiveWindow();
 	Client::Ref().RemoveListener(this);
 	delete previewModel;
 	delete previewView;

@@ -7,7 +7,7 @@
 #include <SDL/SDL.h>
 
 #define CELLW	12
-#define CELLH	10
+#define CELLH	12
 
 #define XRES	800
 #define YRES	600
@@ -35,7 +35,7 @@ void blendpixel(unsigned *vid, int x, int y, int r, int g, int b, int a)
 	vid[y*XRES+x] = (r<<16)|(g<<8)|b;
 }
 
-int drawchar(unsigned *vid, int x, int y, int c, int r, int g, int b)
+int drawchar(unsigned *vid, int x, int y, unsigned char c, int r, int g, int b)
 {
 	int i, j;
 	if (color[c])
@@ -50,7 +50,7 @@ int drawchar(unsigned *vid, int x, int y, int c, int r, int g, int b)
 	return x + width[c];
 }
 
-int drawtext(unsigned *vid, int x, int y, char *s, int r, int g, int b)
+int drawtext(unsigned *vid, int x, int y, const char *s, int r, int g, int b)
 {
 	for (; *s; s++)
 		x = drawchar(vid, x, y, *s, r, g, b);
@@ -205,11 +205,11 @@ int sdl_poll()
  *                      MAIN PROGRAM                       *
  ***********************************************************/
 
-char *tag = "(c) 2008 Stanislaw Skowronek";
+const char *tag = "(c) 2008 Stanislaw Skowronek";
 
 int main(int argc, char *argv[])
 {
-	unsigned *vid_buf = calloc(XRES*YRES, sizeof(unsigned));
+	unsigned *vid_buf = (unsigned*)calloc(XRES*YRES, sizeof(unsigned));
 	int x, y, b = 0, lb, c = 0xA0, i, j, dc = 0;
 	int mode = 0;
 	char hex[18] = "";
@@ -374,7 +374,7 @@ int main(int argc, char *argv[])
 #endif
 
 		drawchar(vid_buf, 32, 192+32*CELLH, c, 255, 255, 255);
-		
+
 		sprintf(hex, "%02X", c);
 		drawtext(vid_buf, 32, 192+34*CELLH, hex, 255, 255, 255);
 #ifdef EXTENDED_FONT
@@ -397,6 +397,7 @@ int main(int argc, char *argv[])
 #endif
 	fwrite(font, CELLW*CELLH, 256, f);
 	fclose(f);
+	free(vid_buf);
 
 	return 0;
 }
