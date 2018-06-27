@@ -48,14 +48,12 @@ Element_ROCK::Element_ROCK()
 //#TPT-Directive ElementHeader Element_ROCK static int update(UPDATE_FUNC_ARGS)
 int Element_ROCK::update(UPDATE_FUNC_ARGS)
 {
-
-if (parts[i].tmp2<=0)
-{
-	parts[i].tmp2=(rand() % 5);
+	if (parts[i].tmp2<=0)
+	{
+		parts[i].tmp2=(rand() % 5);
+	}
+	return 0;
 }
-
-}
-
 
 //#TPT-Directive ElementHeader Element_ROCK static int graphics(GRAPHICS_FUNC_ARGS)
 int Element_ROCK::graphics(GRAPHICS_FUNC_ARGS)
